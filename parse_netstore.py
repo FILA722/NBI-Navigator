@@ -9,7 +9,7 @@ def get_all_clients_from_netstore1():
     options.add_argument("--headless")
     browser = webdriver.Firefox(options=options)
     # browser = webdriver.Firefox()
-    browser.get('https://netstore.nbi.com.ua/index.php')
+    browser.get(LoginData.netstore1_url)
 
     login = browser.find_element(*NetstoreLocators.NETSTORE1_LOGIN)
     login.send_keys(LoginData.netstore1_login)
