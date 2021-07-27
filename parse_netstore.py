@@ -32,7 +32,7 @@ def get_all_clients_from_netstore1():
     # client_name.click()
     browser.find_element(*NetstoreLocators.GET_INFO_ABOUT_THE_CLIENT).click()
 
-    time.sleep(30)
+    # time.sleep(30)
     browser.quit()
 
 get_all_clients_from_netstore1()
