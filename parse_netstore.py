@@ -1,40 +1,36 @@
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium import webdriver
-from confidential import NetstoreLocators
-from confidential import LoginData
+from locators import NetstoreLocators
+from confidential import NetstoreLoginData
 import time
 
-def get_all_clients_from_netstore1():
-    options = FirefoxOptions()
-    options.add_argument("--headless")
-    browser = webdriver.Firefox(options=options)
-    # browser = webdriver.Firefox()
-    browser.get(LoginData.netstore1_url)
+def get_all_clients_from_netstore(browser, login_, passw):
 
-    login = browser.find_element(*NetstoreLocators.NETSTORE1_LOGIN)
-    login.send_keys(LoginData.netstore1_login)
+    login = browser.find_element(*NetstoreLocators.LOGIN)
+    login.send_keys(login_)
 
-    passwd = browser.find_element(*NetstoreLocators.NETSTORE1_PASSWD)
-    passwd.send_keys(LoginData.netstore_passwd)
+    passwd = browser.find_element(*NetstoreLocators.PASSWD)
+    passwd.send_keys(passw)
 
-    browser.find_element(*NetstoreLocators.NETSTORE1_ENTER_BUTTON).click()
-    browser.find_element(*NetstoreLocators.GET_ALL_CLIENTS_PAGE).click()
+    enter_button = browser.find_element(*NetstoreLocators.ENTER_BUTTON)
+    enter_button.click()
 
-    active_clients_from_netstore1 = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
+    open_all_clients_button = browser.find_element(*NetstoreLocators.GET_ALL_CLIENTS_PAGE)
+    open_all_clients_button.click()
 
-    dict_of_active_clients_from_netstore1 = {}
-    for client in active_clients_from_netstore1:
-        name = client.find_element_by_css_selector('a')
-        dict_of_active_clients_from_netstore1[name.text] = name
+    dict_of_clients_from_netstore = {}
 
-    # client_name = dict_of_active_clients_from_netstore1['ПЛАНЕТА 2020 ТОВ']
-    # browser.execute_script("return arguments[0].scrollIntoView(true);", client_name)
-    # client_name.click()
-    browser.find_element(*NetstoreLocators.GET_INFO_ABOUT_THE_CLIENT).click()
+    active_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
+    for active_client in active_clients_from_netstore:
+        name = active_client.find_element_by_css_selector('a')
+        dict_of_clients_from_netstore[name.text] = name
 
-    # time.sleep(30)
-    browser.quit()
+    terminated_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
+    for terminated_client in terminated_clients_from_netstore:
+        name = terminated_client.find_element_by_css_selector('a')
+        dict_of_clients_from_netstore[name.text] = name
 
-get_all_clients_from_netstore1()
+    return dict_of_clients_from_netstore
+
 
 
