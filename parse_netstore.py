@@ -1,4 +1,4 @@
-import start_browser
+from start_browser import driver
 from locators import NetstoreLocators
 from confidential import NetstoreLoginData
 import json
@@ -31,15 +31,18 @@ def get_all_clients_from_netstore(browser, login_, passw):
 
     return dict_of_clients_from_netstore
 
+def get_client_netstore_info(url):
+    client_page = driver(url)
+
 def update_clients():
     try:
-        browser = start_browser.driver(NetstoreLoginData.netstore1_url)
+        browser = driver(NetstoreLoginData.netstore1_url)
         clients = get_all_clients_from_netstore(browser,
                                                 NetstoreLoginData.netstore1_login,
                                                 NetstoreLoginData.netstore_passwd,
                                                 )
 
-        browser = start_browser.driver(NetstoreLoginData.netstore2_url)
+        browser = driver(NetstoreLoginData.netstore2_url)
         clients.update(get_all_clients_from_netstore(browser,
                                                     NetstoreLoginData.netstore2_login,
                                                     NetstoreLoginData.netstore_passwd,
@@ -52,7 +55,6 @@ def update_clients():
 
     finally:
         browser.quit()
-        # print('ended')
 
 
 
