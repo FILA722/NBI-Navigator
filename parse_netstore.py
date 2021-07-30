@@ -12,8 +12,7 @@ def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
     switches = tuple(switch.strip('==') for switch in switches)
 
     mac_addresses = re.findall(r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w', note)
-    if not mac_addresses:
-        mac_addresses = re.findall(r'\w\w\w\w-\w\w\w\w-\w\w\w\w', note)
+    mac_addresses += re.findall(r'\w\w\w\w-\w\w\w\w-\w\w\w\w', note)
 
     if len(mac_addresses) > len(client_ip_addresses):
         connection_interfaces = []
@@ -50,7 +49,6 @@ def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
         except IndexError:
             client_mac_address = 'ff:ff:ff:ff:ff:ff'
         client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
-    print('---')
     return client_connection_data
 
 def collect_client_data(browser, clients):
