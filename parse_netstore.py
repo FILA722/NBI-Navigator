@@ -1,7 +1,7 @@
 from selenium.common.exceptions import NoSuchElementException
 from start_browser import driver
 from locators import NetstoreLocators, NetstoreClientPageLocators
-from confidential import NetstoreLoginData
+from confidential import NetstoreLoginData, UnprocessedNames
 import re
 import json
 
@@ -69,6 +69,9 @@ def collect_client_data(browser, clients):
     for client in clients_name_url:
         client_name = client[0]
         client_netstore_url = client[1]
+
+        if client_name in UnprocessedNames.not_processed_clients:
+            continue
 
         browser.get(client_netstore_url)
 
