@@ -10,7 +10,10 @@ def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
 
     switches = re.findall(r'==[A-Za-z0-9-_\/. #]+==', note)
     switches = tuple(switch.strip('==') for switch in switches)
+
     mac_addresses = re.findall(r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w', note)
+    if not mac_addresses:
+        mac_addresses = re.findall(r'\w\w\w\w-\w\w\w\w-\w\w\w\w', note)
 
     client_connection_data = {}
     for i in range(len(client_ip_addresses)):
@@ -88,8 +91,8 @@ def get_all_clients_from_netstore(browser, login_, passw):
 
     dict_of_clients_from_netstore = {}
 
-    # active_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
-    # dict_of_clients_from_netstore.update(collect_client_data(browser, active_clients_from_netstore))
+    active_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
+    dict_of_clients_from_netstore.update(collect_client_data(browser, active_clients_from_netstore))
 
     terminated_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
     dict_of_clients_from_netstore.update(collect_client_data(browser, terminated_clients_from_netstore))
