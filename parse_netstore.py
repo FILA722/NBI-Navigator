@@ -5,34 +5,35 @@ from confidential import NetstoreLoginData
 import re
 import json
 
-def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
+# def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
+def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
     client_ip_addresses = tuple(ip_address.text for ip_address in browser.find_elements(*NetstoreClientPageLocators.IP_ADDRESSES))
 
     switches = re.findall(r'==[A-Za-z0-9-_\/. #]+==', note)
     switches = tuple(switch.strip('==') for switch in switches)
 
-    mac_addresses = re.findall(r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w', note)
-    mac_addresses += re.findall(r'\w\w\w\w-\w\w\w\w-\w\w\w\w', note)
-
-    if len(mac_addresses) > len(client_ip_addresses):
-        connection_interfaces = []
-        for i in range(len(switches)-1):
-            connection_interface = []
-            for mac_address in mac_addresses:
-                if note.index(switches[i]) < note.index(mac_address) < note.index(switches[i+1]):
-                    connection_interface.append(mac_address)
-            connection_interfaces.append(connection_interface)
-
-        index = -1
-        connection_interface = []
-        for _ in range(len(mac_addresses)):
-            if not connection_interfaces:
-                connection_interfaces = [mac_addresses]
-            elif mac_addresses[index] not in connection_interfaces[-1]:
-                connection_interface.append(mac_addresses[index])
-                index -= 1
-        connection_interfaces.append(connection_interface)
-        mac_addresses = connection_interfaces
+    # mac_addresses = re.findall(r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w', note)
+    # mac_addresses += re.findall(r'\w\w\w\w-\w\w\w\w-\w\w\w\w', note)
+    #
+    # if len(mac_addresses) > len(client_ip_addresses):
+    #     connection_interfaces = []
+    #     for i in range(len(switches)-1):
+    #         connection_interface = []
+    #         for mac_address in mac_addresses:
+    #             if note.index(switches[i]) < note.index(mac_address) < note.index(switches[i+1]):
+    #                 connection_interface.append(mac_address)
+    #         connection_interfaces.append(connection_interface)
+    #
+    #     index = -1
+    #     connection_interface = []
+    #     for _ in range(len(mac_addresses)):
+    #         if not connection_interfaces:
+    #             connection_interfaces = [mac_addresses]
+    #         elif mac_addresses[index] not in connection_interfaces[-1]:
+    #             connection_interface.append(mac_addresses[index])
+    #             index -= 1
+    #     connection_interfaces.append(connection_interface)
+    #     mac_addresses = connection_interfaces
 
     client_connection_data = {}
     for i in range(len(client_ip_addresses)):
@@ -44,11 +45,13 @@ def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
             client_switch = switches[i][:switches[i].index('#')]
         except IndexError:
             client_switch = switches[0][:switches[0].index('#')]
-        try:
-            client_mac_address = mac_addresses[i]
-        except IndexError:
-            client_mac_address = 'ff:ff:ff:ff:ff:ff'
-        client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
+        # try:
+        #     client_mac_address = mac_addresses[i]
+        # except IndexError:
+        #     client_mac_address = 'ff:ff:ff:ff:ff:ff'
+        # client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
+        client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0])
+
     return client_connection_data
 
 def collect_client_data(browser, clients):
@@ -79,8 +82,8 @@ def collect_client_data(browser, clients):
         client_is_converter = browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked")
         client_speed = browser.find_element(*NetstoreClientPageLocators.SPEED).get_attribute("value")
         client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
-        client_connection_data = get_ipaddr_switch_name_port_macAddress_from_client_note(browser, client_notes)
-
+        # client_connection_data = get_ipaddr_switch_name_port_macAddress_from_client_note(browser, client_notes)
+        client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes)
         client_data[client_name] = (
                                   client_tel,
                                   client_email,
