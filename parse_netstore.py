@@ -25,8 +25,15 @@ def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
 
 # def collect_client_data(browser, clients):
 def collect_client_data(browser, clients):
-    client_data = {}
+    clients_name_url = []
     for client in clients:
+        client_object = client.find_element_by_tag_name('a')
+        client_name = client_object.text
+        client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
+        clients_name_url.append((client_name, client_netstore_url))
+
+    client_data = {}
+    for client in clients_name_url:
         client_name = client[0]
         client_netstore_url = client[1]
 
@@ -58,7 +65,6 @@ def collect_client_data(browser, clients):
                                   client_notes,
                                   client_connection_data,
                                   client_netstore_url)
-
     return client_data
 def get_all_clients_from_netstore(browser, login_, passw):
 
@@ -77,24 +83,13 @@ def get_all_clients_from_netstore(browser, login_, passw):
     dict_of_clients_from_netstore = {}
 
     active_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
-    list_of_active_clients = []
-    for active_client in active_clients_from_netstore:
-        client_object = active_client.find_element_by_tag_name('a')
-        client_name = client_object.text
-        client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
-        list_of_active_clients.append((client_name, client_netstore_url))
-    dict_of_clients_from_netstore.update(collect_client_data(browser, list_of_active_clients))
+    dict_of_clients_from_netstore.update(collect_client_data(browser, active_clients_from_netstore))
 
     terminated_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
-    list_of_terminated_clients = []
-    for terminated_client in terminated_clients_from_netstore:
-        client_object = terminated_client.find_element_by_tag_name('a')
-        client_name = client_object.text
-        client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
-        list_of_terminated_clients.append((client_name, client_netstore_url))
-    dict_of_clients_from_netstore.update(collect_client_data(browser, list_of_terminated_clients))
+    dict_of_clients_from_netstore.update(collect_client_data(browser, terminated_clients_from_netstore))
 
     return dict_of_clients_from_netstore
+
 def update_clients():
     try:
         clients = {}
