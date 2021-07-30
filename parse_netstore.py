@@ -15,6 +15,26 @@ def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
     if not mac_addresses:
         mac_addresses = re.findall(r'\w\w\w\w-\w\w\w\w-\w\w\w\w', note)
 
+    if len(mac_addresses) > len(client_ip_addresses):
+        connection_interfaces = []
+        for i in range(len(switches)-1):
+            connection_interface = []
+            for mac_address in mac_addresses:
+                if note.index(switches[i]) < note.index(mac_address) < note.index(switches[i+1]):
+                    connection_interface.append(mac_address)
+            connection_interfaces.append(connection_interface)
+
+        index = -1
+        connection_interface = []
+        for _ in range(len(mac_addresses)):
+            if not connection_interfaces:
+                connection_interfaces = [mac_addresses]
+            elif mac_addresses[index] not in connection_interfaces[-1]:
+                connection_interface.append(mac_addresses[index])
+                index -= 1
+        connection_interfaces.append(connection_interface)
+        mac_addresses = connection_interfaces
+
     client_connection_data = {}
     for i in range(len(client_ip_addresses)):
         try:
@@ -30,7 +50,7 @@ def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
         except IndexError:
             client_mac_address = 'ff:ff:ff:ff:ff:ff'
         client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
-
+    print('---')
     return client_connection_data
 
 def collect_client_data(browser, clients):
@@ -75,6 +95,7 @@ def collect_client_data(browser, clients):
                                   client_connection_data,
                                   client_netstore_url)
     return client_data
+
 def get_all_clients_from_netstore(browser, login_, passw):
 
     login = browser.find_element(*NetstoreLocators.LOGIN)
@@ -91,8 +112,8 @@ def get_all_clients_from_netstore(browser, login_, passw):
 
     dict_of_clients_from_netstore = {}
 
-    active_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
-    dict_of_clients_from_netstore.update(collect_client_data(browser, active_clients_from_netstore))
+    # active_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
+    # dict_of_clients_from_netstore.update(collect_client_data(browser, active_clients_from_netstore))
 
     terminated_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
     dict_of_clients_from_netstore.update(collect_client_data(browser, terminated_clients_from_netstore))
@@ -102,11 +123,11 @@ def get_all_clients_from_netstore(browser, login_, passw):
 def update_clients():
     try:
         clients = {}
-        browser = driver(NetstoreLoginData.netstore1_url)
-        clients.update(get_all_clients_from_netstore(browser,
-                                                NetstoreLoginData.netstore1_login,
-                                                NetstoreLoginData.netstore_passwd,
-                                                ))
+        # browser = driver(NetstoreLoginData.netstore1_url)
+        # clients.update(get_all_clients_from_netstore(browser,
+        #                                         NetstoreLoginData.netstore1_login,
+        #                                         NetstoreLoginData.netstore_passwd,
+        #                                         ))
 
         browser = driver(NetstoreLoginData.netstore2_url)
         clients.update(get_all_clients_from_netstore(browser,
