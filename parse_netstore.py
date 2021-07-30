@@ -1,6 +1,4 @@
-import time
 from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
 from start_browser import driver
 from locators import NetstoreLocators, NetstoreClientPageLocators
 from confidential import NetstoreLoginData
@@ -16,14 +14,22 @@ def get_ipaddr_switch_name_port_macAddress_from_client_note(browser, note):
 
     client_connection_data = {}
     for i in range(len(client_ip_addresses)):
-        client_port = re.findall(r'#\d+', switches[i])
-        client_switch = switches[i].strip(client_port[0])
-        client_mac_address = mac_addresses[i]
+        try:
+            client_port = re.findall(r'#\d+', switches[i])
+        except IndexError:
+            client_port = re.findall(r'#\d+', switches[0])
+        try:
+            client_switch = switches[i][:switches[i].index('#')]
+        except IndexError:
+            client_switch = switches[0][:switches[0].index('#')]
+        try:
+            client_mac_address = mac_addresses[i]
+        except IndexError:
+            client_mac_address = 'ff:ff:ff:ff:ff:ff'
         client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
 
     return client_connection_data
 
-# def collect_client_data(browser, clients):
 def collect_client_data(browser, clients):
     clients_name_url = []
     for client in clients:
@@ -82,8 +88,8 @@ def get_all_clients_from_netstore(browser, login_, passw):
 
     dict_of_clients_from_netstore = {}
 
-    active_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
-    dict_of_clients_from_netstore.update(collect_client_data(browser, active_clients_from_netstore))
+    # active_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
+    # dict_of_clients_from_netstore.update(collect_client_data(browser, active_clients_from_netstore))
 
     terminated_clients_from_netstore = browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
     dict_of_clients_from_netstore.update(collect_client_data(browser, terminated_clients_from_netstore))
