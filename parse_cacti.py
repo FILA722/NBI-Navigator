@@ -1,8 +1,8 @@
-import time
-
 from start_browser import driver
 from confidential import CactiLoginData
 from locators import CactiLocators
+import re
+import time
 
 def get_to_the_switches_page(browser):
     login = browser.find_element(*CactiLocators.LOGIN)
@@ -16,7 +16,7 @@ def get_to_the_switches_page(browser):
 
     graphs_button = browser.find_element(*CactiLocators.GRAPHS_BUTTON)
     graphs_button.click()
-
+    time.sleep(1)
     nbi_dropdown_button = browser.find_element(*CactiLocators.NBI_DROPDOWN_BUTTON)
     nbi_dropdown_button.click()
 
@@ -39,16 +39,21 @@ def get_to_the_switches_page(browser):
 
 def main():
     try:
-        browser = driver(CactiLoginData.cacti_url)
+        cacti_browser = driver(CactiLoginData.cacti_url)
 
-        get_to_the_switches_page(browser)
+        get_to_the_switches_page(cacti_browser)
 
-        switches = browser.find_elements(*CactiLocators.SWITCH_NAME_AND_IP)
-        print(tuple(switch.text for switch in switches))
-        print(len(switches))
-
-
+        switches = cacti_browser.find_elements(*CactiLocators.SWITCH_NAME_AND_IP)
+        switch_ip_name_dict = {}
+        for switch in switches:
+            switch = switch.text
+            if 'Host' in switch:
+                switch_ip = re.findall(r'\d+\.\d+\.\d+\.\d+', switch)
+                switch_name = switch[6:(switch.index(switch_ip[0]) - 2)]
+                switch_ip_name_dict[switch_name] = switch_ip[0]
     finally:
-        browser.quit()
+        cacti_browser.quit()
+    return switch_ip_name_dict
 
-main()
+
+
