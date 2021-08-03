@@ -59,7 +59,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
         #     client_mac_address = 'ff:ff:ff:ff:ff:ff'
         # client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
         try:
-            client_connection_data[client_ip_addresses[i]] = (client_switch_name, client_switch_ip,client_port[0])
+            client_connection_data[client_ip_addresses[i]] = (client_switch_name, client_switch_ip, client_port[0])
         except IndexError:
             client_connection_data = {'Ошибка в данных подключения, проверьте Нетсторе'}
 
@@ -76,7 +76,7 @@ def collect_client_data(browser, clients):
 
     client_data = {}
     for client in clients_name_url:
-        client_name = client[0]
+        client_name = client[0].lower()
         client_netstore_url = client[1]
 
         if client_name in UnprocessedNames.not_processed_clients:
@@ -139,7 +139,7 @@ def get_all_clients_from_netstore(url, login_, passw):
 
 def update_clients():
     clients = {}
-    # clients.update(get_all_clients_from_netstore(browser,
+    # clients.update(get_all_clients_from_netstore(NetstoreLoginData.netstore1_url,
     #                                         NetstoreLoginData.netstore1_login,
     #                                         NetstoreLoginData.netstore_passwd,
     #                                         ))
@@ -147,7 +147,6 @@ def update_clients():
                                                 NetstoreLoginData.netstore2_login,
                                                 NetstoreLoginData.netstore_passwd,
                                                 ))
-
     return clients
 
 
