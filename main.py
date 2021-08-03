@@ -20,6 +20,7 @@ def main():
         print('==========================================')
         client = input('Введите имя клиента:').lower()
         clients_name = search_engine.search(client)
+
         if str(clients_name.__class__) == "<class 'tuple'>":
             break
         for client_name in clients_name:
