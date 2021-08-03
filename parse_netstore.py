@@ -3,7 +3,6 @@ from start_browser import driver
 from locators import NetstoreLocators, NetstoreClientPageLocators
 from confidential import NetstoreLoginData, UnprocessedNames
 import re
-import json
 
 def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
     client_ip_addresses = tuple(ip_address.text for ip_address in browser.find_elements(*NetstoreClientPageLocators.IP_ADDRESSES))
@@ -146,11 +145,7 @@ def update_clients():
                                                     NetstoreLoginData.netstore_passwd,
                                                     ))
 
-        json_clients_dict = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
-        with open('clients.json', 'w') as dict_with_clients:
-            dict_with_clients.write(json_clients_dict)
-
-        return 'Обновление списка клиентов успешно завершено'
+        return clients
 
     finally:
         browser.quit()

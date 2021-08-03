@@ -19,3 +19,16 @@ class NetstoreClientPageLocators():
     SPEED = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(14) > td:nth-child(2) > input:nth-child(1)')
     NOTES = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(10) > td:nth-child(2) > textarea:nth-child(1)')
     IP_ADDRESSES = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(2) > tr > td:nth-child(2)')
+
+class CactiLocators():
+    LOGIN = (By.CSS_SELECTOR, '#user_row > td:nth-child(2) > input:nth-child(1)')
+    PASSWD = (By.CSS_SELECTOR, '#password_row > td:nth-child(2) > input:nth-child(1)')
+    ENTER_BUTTON = (By.CSS_SELECTOR, '#login > tbody:nth-child(1) > tr:nth-child(8) > td:nth-child(1) > input:nth-child(1)')
+    GRAPHS_BUTTON = (By.CSS_SELECTOR, '#tabs > a:nth-child(2) > img:nth-child(1)')
+    NBI_DROPDOWN_BUTTON = (By.CSS_SELECTOR, 'i.jstree-icon:nth-child(2)')
+    NBI_DROPDOWN_Routers_BUTTON = (By.CSS_SELECTOR, '#node2_8 > i:nth-child(2)')
+    NBI_DROPDOWN_Switch_BC_BUTTON = (By.CSS_SELECTOR, '#node2_68 > i:nth-child(2)')
+    NBI_DROPDOWN_Dsl_concentrators_BUTTON = (By.XPATH, '/html/body/table/tbody/tr[3]/td[1]/div/ul/li/ul/li[6]/i')
+    NBI_DROPDOWN_BC_BUTTON = (By.CSS_SELECTOR, '#node2_19 > i:nth-child(2)')
+    NBI_DROPDOWN_BG_BUTTON = (By.CSS_SELECTOR, '#node2_179 > i:nth-child(2)')
+    SWITCH_NAME_AND_IP = (By.TAG_NAME, 'a')

@@ -8,7 +8,11 @@ def main():
     client = input('Введите имя клиента:')
     start = time.time()
     if os.path.isfile('clients.json'):
-        parse_netstore.update_clients()
+        clients = parse_netstore.update_clients()
+        json_clients_dict = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
+        with open('clients.json', 'w') as dict_with_clients:
+            dict_with_clients.write(json_clients_dict)
+
     middle = time.time()
     with open('clients.json', 'r') as dict_with_clients:
         clients = json.loads(dict_with_clients.read())
@@ -21,6 +25,4 @@ def main():
     except KeyError:
         print(f"Client doesn't found")
 
-# test()
 main()
-# parse_netstore.update_clients()
