@@ -1,13 +1,25 @@
-from start_browser import driver
 from netmiko import ConnectHandler
+from confidential import SwitchLoginData
 import time
 
 def get_connection_data_from_switch(switch_ip_address, switch_port):
-    try:
-        browser = driver(f'http://{switch_ip_address}/')
-    finally:
-        time.sleep(15)
-        browser.quit()
+    zyxel = {
+        'device_type': 'huawei',
+        # 'device_type': 'zte_zxros',
+        'host': switch_ip_address,
+        'username': SwitchLoginData.sw_login,
+        'password': SwitchLoginData.sw_passwd,
+    }
+    print(switch_port[1:])
+
+    zyxel_connect = ConnectHandler(**zyxel)
+    zyxel_connect.enable()
+    # result = zyxel_connect.send_command_timing(f'show mac address-table port {switch_port[1:]}', delay_factor=10)
+    result1 = zyxel_connect.send_command_timing('su', delay_factor=10)
+    # result2 = zyxel_connect.send_command_timing(SwitchLoginData.sw_passwd, delay_factor=10)
+    # result3 = zyxel_connect.send_command_timing('display interface brief', delay_factor=10)
+
+    print(result1)
 
 def main(connection_data):
     for connect_interface in connection_data:
@@ -21,13 +33,13 @@ def main(connection_data):
 main({
       "80.78.39.165": [
         "Magnit 1 Asva sw1",
-        "10.10.26.23",
+        "10.10.18.5",
         "#6"
-      ],
-      "80.78.51.28": [
-        "Magnit 1 Popov sw1",
-        "10.10.26.14",
-        "#3"
-      ]
-    },)
+      ]})
+      # "80.78.51.28": [
+      #   "Magnit 1 Popov sw1",
+      #   "10.10.26.14",
+      #   "#3"
+      # ]
+    # },)
 
