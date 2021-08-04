@@ -1,5 +1,5 @@
 import parse_netstore
-from client_description import Client
+import parse_switch
 import search_engine
 import json
 import os
@@ -15,33 +15,37 @@ def main():
     if not os.path.isfile('clients.json'):
         update_database()
 
-    clients_name = []
-    while len(clients_name) != 1:
+    while True:
         print('==========================================')
         client = input('Введите имя клиента:').lower()
-        clients_name = search_engine.search(client)
+        search_result = search_engine.search(client)
 
-        if str(clients_name.__class__) == "<class 'tuple'>":
+        if str(search_result.__class__) == "<class 'tuple'>":
+            client_name = search_result[0]
+            client_data = search_result[1]
             break
-        for client_name in clients_name:
+
+        print('Выберите клиента:')
+        for client_name in search_result:
             print(client_name)
-
-    for field in clients_name:
-        print(field)
-        print('-------------------------------------------')
-        # for client_name in clients_name
-
-    # with open('clients.json', 'r') as dict_with_clients:
-    #     clients = json.loads(dict_with_clients.read())
-    #     clients_names = clients.keys()
-    #     client = ''
-    #     while client not in clients_names:
-    #         client = input('Введите имя клиента:').lower()
-    #
-    #         for client_name in clients_names:
-    #             if client in client_name:
-    #                 print(client_name)
-
-        # print(client, clients[client], end='\n')
-
+    print(client_name)
+    # print(client_data[-2])
+    client_switch_data = parse_switch.main(client_data[-2])
+    print(client_switch_data)
+    # client_data = (
+    #     f'Клиент : {coincidence_names[0]}',
+    #     f'Контактный телефон : {client_object[0]}',
+    #     f'Email : {client_object[1].lower()}',
+    #     f'Бизнесс центр : {client_object[2]}',
+    #     f'Заметки бизнесс центра: {client_object[3]}',
+    #     f'Состояние клиента : {client_object[4]}',
+    #     f'Наличие конвертора : {client_object[5]}',
+    #     f'Скорость : {client_object[6]} Kb/sec',
+    #     f'Заметки : {client_object[7]}',
+    #     f'Параметры подключения : {client_object[8]}',
+    #     f'Ссылка на клиента в Нетсторе : {client_object[9]}')
+    # connection_data = parse_switch.main(client_info[-2])
+    # for field in connection_data:
+    #     print(field)
+    #     print('-------------------------------------------')
 main()
