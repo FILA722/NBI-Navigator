@@ -29,9 +29,9 @@ def main():
         for client_name in search_result:
             print(client_name)
     print(client_name)
-    # print(client_data[-2])
-    client_switch_data = parse_switch.main(client_data[-2])
-    print(client_switch_data)
+    print(client_data)
+    # client_switch_data = parse_switch.main(client_data[-2])
+    # print(client_switch_data)
     # client_data = (
     #     f'Клиент : {coincidence_names[0]}',
     #     f'Контактный телефон : {client_object[0]}',
