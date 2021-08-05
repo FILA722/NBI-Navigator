@@ -1,3 +1,5 @@
+import re
+
 from confidential import ZonesLoginData
 import paramiko
 
@@ -21,7 +23,23 @@ def get_zone_data():
 def parse_zone_data():
     with open('zones.txt') as zones:
         zones = list(zones)
-
+        len_zones = len(zones)
+        str_num = 0
+        while str_num < len_zones:
+            gateway_pattern = r'; .+ \d+\.\d+\.\d+\.\d+\/\d+'
+            client_pattern = r'\d+-\d+-\d+-\d+.+IN.+A.+\d\.\d.+; [\w.]+'
+            string = zones[str_num]
+            gateway = re.match(gateway_pattern, string)
+            client = re.match(client_pattern, string)
+            if gateway:
+                print('gateway=', zones[str_num+1])
+                str_num += 2
+                continue
+            elif client:
+                print('client=', client.string)
+                str_num += 1
+                continue
+            str_num += 1
 
 def main():
     # get_zone_data()
