@@ -30,16 +30,16 @@ def main(connection_data):
 
         get_connection_data_from_switch(switch_ip_address, switch_port)
 
-main({
-      "80.78.39.165": [
-        "Magnit 1 Asva sw1",
-        "10.10.18.5",
-        "#6"
-      ]})
-      # "80.78.51.28": [
-      #   "Magnit 1 Popov sw1",
-      #   "10.10.26.14",
-      #   "#3"
-      # ]
-    # },)
+# main({
+#       "80.78.39.165": [
+#         "Magnit 1 Asva sw1",
+#         "10.10.18.5",
+#         "#6"
+#       ]})
+#       # "80.78.51.28": [
+#       #   "Magnit 1 Popov sw1",
+#       #   "10.10.26.14",
+#       #   "#3"
+#       # ]
+#     # },)
 
