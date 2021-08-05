@@ -30,15 +30,21 @@ def parse_zone_data():
             string = zones[str_num]
             gateway = re.match(gateway_pattern, string)
             client = re.match(client_pattern, string)
+            clients_ip_addresses = []
+            client_dict = {}
             if gateway:
-                print('gateway=', zones[str_num+1])
+                gateway_ip = re.findall('\d+\.\d+\.\d+\.\d+', zones[str_num+1])
+                print('gateway=', gateway_ip[0])
                 str_num += 2
                 continue
             elif client:
-                print('client=', client.string)
+                client_ip = re.findall('\d+\.\d+\.\d+\.\d+', zones[str_num])
+                clients_ip_addresses.append(client_ip)
+                print('client=', client_ip[0])
                 str_num += 1
                 continue
             str_num += 1
+        print(client_dict)
 
 def main():
     # get_zone_data()
