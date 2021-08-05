@@ -1,5 +1,4 @@
 import re
-
 from confidential import ZonesLoginData
 import paramiko
 
@@ -13,7 +12,7 @@ def get_zone_data():
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(**login_data)
-    stdin, stdout, stderr = client.exec_command('less /etc/namedb/primary/nbi.com.ua')
+    stdin, stdout, stderr = client.exec_command(ZonesLoginData.zones_get_command)
 
     with open('zones.txt', 'a') as zones:
         for string in stdout:
