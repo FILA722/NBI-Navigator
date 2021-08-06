@@ -1,5 +1,4 @@
-import parse_netstore
-import parse_switch
+from parsers import parse_netstore
 import search_engine
 import json
 import os
@@ -13,8 +12,11 @@ def update_database():
         dict_with_clients.write(json_clients_dict)
 
 def main():
-    if not os.path.isfile('clients.json'):
+    start = time.time()
+    if os.path.isfile('clients.json'):
         update_database()
+    end = time.time()
+    print(end - start)
 
     while True:
         print('==========================================')

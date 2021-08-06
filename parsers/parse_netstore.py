@@ -2,8 +2,8 @@ from selenium.common.exceptions import NoSuchElementException
 from start_browser import driver
 from locators import NetstoreLocators, NetstoreClientPageLocators
 from confidential import NetstoreLoginData, UnprocessedNames
-import parse_cacti
-import zones_parser
+from parsers import parse_cacti
+from parsers.parse_zones import parse_zone
 import re
 
 def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
@@ -78,7 +78,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
 def collect_client_data(browser, clients):
     clients_name_url = []
     switch_name_ip_dict = parse_cacti.main()
-    ip_mask_dictionary = zones_parser.main()
+    ip_mask_dictionary = parse_zone()
 
     for client in clients:
         client_object = client.find_element_by_tag_name('a')

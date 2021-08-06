@@ -58,7 +58,7 @@ def parse_zone_data():
             str_num += 1
         return ip_gateway_dict
 
-def main():
+def parse_zone():
     get_zone_data()
     return parse_zone_data()
 
