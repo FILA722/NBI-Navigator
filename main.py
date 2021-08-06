@@ -6,6 +6,7 @@ import os
 import time
 
 def update_database():
+
     clients = parse_netstore.update_clients()
     json_clients_dict = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
     with open('clients.json', 'w') as dict_with_clients:

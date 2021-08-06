@@ -3,7 +3,17 @@ from start_browser import driver
 from locators import NetstoreLocators, NetstoreClientPageLocators
 from confidential import NetstoreLoginData, UnprocessedNames
 import parse_cacti
+import zones_parser
 import re
+
+def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
+    client_connection_preferences = {}
+    for ip_addr in ip_addresses:
+        for ip_zone in ip_mask_dictionary.keys():
+            if ip_addr in ip_zone:
+                client_connection_preferences[ip_addr] = ip_mask_dictionary[ip_zone]
+
+    return  client_connection_preferences
 
 def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_name_ip_dict):
     client_ip_addresses = tuple(ip_address.text for ip_address in browser.find_elements(*NetstoreClientPageLocators.IP_ADDRESSES))
@@ -68,6 +78,8 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
 def collect_client_data(browser, clients):
     clients_name_url = []
     switch_name_ip_dict = parse_cacti.main()
+    ip_mask_dictionary = zones_parser.main()
+
     for client in clients:
         client_object = client.find_element_by_tag_name('a')
         client_name = client_object.text
@@ -99,6 +111,7 @@ def collect_client_data(browser, clients):
         client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
         # client_connection_data = get_ipaddr_switch_name_port_macAddress_from_client_note(browser, client_notes)
         client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes, switch_name_ip_dict)
+        client_connection_preferences = get_client_connection_preferences(client_connection_data.keys(), ip_mask_dictionary)
         client_data[client_name] = (
                                   client_tel,
                                   client_email,
@@ -109,6 +122,7 @@ def collect_client_data(browser, clients):
                                   client_speed,
                                   client_notes,
                                   client_connection_data,
+                                  client_connection_preferences,
                                   client_netstore_url)
     return client_data
 
