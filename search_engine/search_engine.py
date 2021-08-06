@@ -1,8 +1,8 @@
-from transliterations import Transliterations
+from search_engine.transliterations import Transliterations
 import json
 import re
 
-with open('clients.json', 'r') as dict_with_clients:
+with open('search_engine/clients.json', 'r') as dict_with_clients:
     clients = json.loads(dict_with_clients.read())
     clients_names = clients.keys()
 

@@ -1,6 +1,6 @@
 from start_browser import driver
-from confidential import CactiLoginData
-from locators import CactiLocators
+from parsers.confidential import CactiLoginData
+from parsers.locators import CactiLocators
 import re
 import time
 
@@ -54,6 +54,8 @@ def main():
     finally:
         cacti_browser.quit()
     return switch_ip_name_dict
+
+
 
 
 

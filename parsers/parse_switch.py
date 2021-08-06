@@ -1,6 +1,5 @@
-from netmiko import ConnectHandler
-from confidential import SwitchLoginData
-import time
+from parsers.confidential import SwitchLoginData
+
 
 def get_connection_data_from_switch(switch_ip_address, switch_port):
     zyxel = {

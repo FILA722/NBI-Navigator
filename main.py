@@ -1,20 +1,12 @@
-from parsers import parse_netstore
-import search_engine
-import json
+from parsers import update_clients_database
+from search_engine import search_engine
 import os
 import time
 
-def update_database():
-
-    clients = parse_netstore.update_clients()
-    json_clients_dict = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
-    with open('clients.json', 'w') as dict_with_clients:
-        dict_with_clients.write(json_clients_dict)
-
 def main():
     start = time.time()
-    if os.path.isfile('clients.json'):
-        update_database()
+    if not os.path.isfile('search_engine/clients.json'):
+       update_clients_database.update_clients_data()
     end = time.time()
     print(end - start)
 
@@ -33,6 +25,9 @@ def main():
             print(client_name)
     print(client_name)
     print(client_data)
+
+
+
     # client_switch_data = parse_switch.main(client_data[-2])
     # print(client_switch_data)
     # client_data = (
