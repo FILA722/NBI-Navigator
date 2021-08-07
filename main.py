@@ -54,12 +54,10 @@ def main():
             client_name = search_result[0]
             client_data = search_result[1]
             console_output(client_name, client_data)
-            break
-
-        print('Выберите клиента:')
-        print('-----------------------------------------')
-
-        for client_name in search_result:
-            print(client_name)
+        else:
+            print('Выберите клиента:')
+            print('-----------------------------------------')
+            for client_name in search_result:
+                print(client_name)
 
 main()
