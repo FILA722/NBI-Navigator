@@ -15,7 +15,7 @@ def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
 
     return client_connection_preferences
 
-def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_name_ip_dict):
+def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_name_ip_dict, ip_mask_dictionary):
     client_ip_addresses = tuple(ip_address.text for ip_address in browser.find_elements(*NetstoreClientPageLocators.IP_ADDRESSES))
 
     switches = re.findall(r'==[A-Za-z0-9-_\/. #]+==', note)
@@ -47,8 +47,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
     client_connection_data = {}
     for i in range(len(client_ip_addresses)):
         if not switches:
-            client_connection_data[client_ip_addresses[
-                i]] = 'В нотатках клиента необходимо указать название свича и порт подключения в виде "==switch_name sw1#port==" где "switch_name sw1" - название свича из Cacti, "port" - порт подключения. Знаки "==" и "#" обязательны'
+            client_connection_data[client_ip_addresses[i]] = 'В нотатках клиента необходимо указать название свича и порт подключения в виде "==switch_name sw1#port==" где "switch_name sw1" - название свича из Cacti, "port" - порт подключения. Знаки "==" и "#" обязательны'
             break
         try:
             client_port = re.findall(r'#\d+', switches[i])
@@ -69,8 +68,15 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
         # except IndexError:
         #     client_mac_address = 'ff:ff:ff:ff:ff:ff'
         # client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
+
+        for ip_zone in ip_mask_dictionary.keys():
+            if client_ip_addresses[i] in ip_zone:
+                # print('true')
+                client_connection_preferences = ip_mask_dictionary[ip_zone]
+        print(client_ip_addresses[i])
+        print(client_connection_preferences)
         try:
-            client_connection_data[client_ip_addresses[i]] = (client_switch_name, client_switch_ip, client_port[0])
+            client_connection_data[client_ip_addresses[i]] = (client_switch_name, client_switch_ip, client_port[0], client_connection_preferences)
         except IndexError:
             client_connection_data = {'Ошибка в данных подключения, проверьте Нетсторе'}
 
@@ -108,7 +114,7 @@ def collect_clients_data(url, login_, password):
 
         for client in clients_netstore_name_url_list:
             client_name = client[0].lower()
-            client_name = client_name.lower()
+            # client_name = client_name.lower()
             client_netstore_url = client[1]
 
             if client_name in confidential.UnprocessedNames.not_processed_clients:
@@ -127,11 +133,14 @@ def collect_clients_data(url, login_, password):
                 client_physical_address_notes = None
 
             client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
+
             client_is_converter = browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked")
+            client_is_converter = 'Нет' if client_is_converter == None else 'Есть'
+
             client_speed = browser.find_element(*NetstoreClientPageLocators.SPEED).get_attribute("value")
             client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
-            client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes, switch_name_ip_dict)
-            client_connection_preferences = get_client_connection_preferences(client_connection_data.keys(), clients_ip_gateway_mask_dict)
+            client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes, switch_name_ip_dict,  clients_ip_gateway_mask_dict)
+            # client_connection_preferences = get_client_connection_preferences(client_connection_data.keys(), clients_ip_gateway_mask_dict)
 
             clients_database = {}
             clients_database[client_name] = (
@@ -144,7 +153,7 @@ def collect_clients_data(url, login_, password):
                     client_speed,
                     client_notes,
                     client_connection_data,
-                    client_connection_preferences,
+                    # client_connection_preferences,
                     client_netstore_url)
     finally:
         browser.quit()
