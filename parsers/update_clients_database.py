@@ -68,18 +68,19 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
         # except IndexError:
         #     client_mac_address = 'ff:ff:ff:ff:ff:ff'
         # client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
-
         for ip_zone in ip_mask_dictionary.keys():
             if client_ip_addresses[i] in ip_zone:
-                # print('true')
                 client_connection_preferences = ip_mask_dictionary[ip_zone]
-        print(client_ip_addresses[i])
-        print(client_connection_preferences)
-        try:
-            client_connection_data[client_ip_addresses[i]] = (client_switch_name, client_switch_ip, client_port[0], client_connection_preferences)
-        except IndexError:
-            client_connection_data = {'Ошибка в данных подключения, проверьте Нетсторе'}
 
+        try:
+            client_connection_data[client_ip_addresses[i]] = (client_switch_name, client_switch_ip, client_port[0], client_connection_preferences[0], client_connection_preferences[1])
+        except IndexError:
+            client_connection_preferences = {'Ошибка в данных подключения, проверьте Нетсторе'}
+        except UnboundLocalError:
+            client_connection_preferences = {f'Ошибка в данных подключения, проверьте Нетсторе {client_ip_addresses[i]}'}
+        except TypeError:
+            print(client_ip_addresses[i])
+            print(client_connection_preferences)
     return client_connection_data
 
 
@@ -112,6 +113,7 @@ def collect_clients_data(url, login_, password):
             client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
             clients_netstore_name_url_list.append((client_name, client_netstore_url))
 
+        clients_database = {}
         for client in clients_netstore_name_url_list:
             client_name = client[0].lower()
             # client_name = client_name.lower()
@@ -126,11 +128,13 @@ def collect_clients_data(url, login_, password):
             client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
             try:
                 client_physical_address = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS).text
-                client_physical_address_notes = browser.find_element(
-                    *NetstoreClientPageLocators.PHYSICAL_ADDRESS_NOTES).text
+                client_physical_address_notes = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS_NOTES).text
             except NoSuchElementException:
                 client_physical_address = None
                 client_physical_address_notes = None
+
+            if client_physical_address == 'Бизнес-центр Новозабарська, 2/6':
+                continue
 
             client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
 
@@ -142,7 +146,6 @@ def collect_clients_data(url, login_, password):
             client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes, switch_name_ip_dict,  clients_ip_gateway_mask_dict)
             # client_connection_preferences = get_client_connection_preferences(client_connection_data.keys(), clients_ip_gateway_mask_dict)
 
-            clients_database = {}
             clients_database[client_name] = (
                     client_tel,
                     client_email,
@@ -162,14 +165,14 @@ def collect_clients_data(url, login_, password):
 
 def update_clients_data():
     clients_data = {}
-    # clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
-    #                                         confidential.NetstoreLoginData.netstore1_login,
-    #                                         confidential.NetstoreLoginData.netstore_passwd))
+    clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
+                                            confidential.NetstoreLoginData.netstore1_login,
+                                            confidential.NetstoreLoginData.netstore_passwd))
 
     clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
                                              confidential.NetstoreLoginData.netstore2_login,
                                              confidential.NetstoreLoginData.netstore_passwd))
 
     json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)
-    with open('clients.json', 'w') as dict_with_clients:
+    with open('search_engine/clients.json', 'w') as dict_with_clients:
         dict_with_clients.write(json_clients_dict)

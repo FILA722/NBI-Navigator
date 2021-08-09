@@ -1,14 +1,19 @@
 from search_engine.transliterations import Transliterations
 import json
 import re
+"""
+-разобраться почему словарь не работает должным образом
+-добавить вывод "клиент не найден"
+"""
 
 with open('search_engine/clients.json', 'r') as dict_with_clients:
     clients = json.loads(dict_with_clients.read())
     clients_names = clients.keys()
 
 def transliteration(client):
-    translations = []
+    translations = [client]
     for dictionary in Transliterations.dictionaries:
+
         word = ''
         for letter in client:
             try:
