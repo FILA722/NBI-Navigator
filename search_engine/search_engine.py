@@ -25,7 +25,7 @@ def search(client):
     coincidence_names = []
     for client_name in clients_names:
         for search_name in search_names:
-            pattern = f'{search_name}[ \w]+'
+            pattern = f'{search_name}[  \'\w]+'
 
             if re.match(pattern, client_name):
                 coincidence_names.append(client_name)
