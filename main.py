@@ -1,7 +1,6 @@
 from parsers import update_clients_database
 from search_engine import search_engine
 import os
-import time
 
 def console_output(client_name, client_data):
     print(f'-' * 100)
@@ -13,10 +12,7 @@ def console_output(client_name, client_data):
     print(f'-' * 100)
     print(f'| Состояние клиента ', ' ' * (30 - len('Состояние клиента')), '|', client_data[4].upper(), ' ' * (60 - len(client_data[4])), '|')
     print(f'-' * 100)
-
     print(f'| Наличие конвертора ', ' '*(30 - len('Наличие конвертора')),'|',client_data[5].upper(), ' '*(60 - len(client_data[5])),'|')
-    # print(f'| Наличие конвертора ', ' ' * (30 - len('Наличие конвертора')), '|', 'Нет', ' ' * (60 - len('Нет')), '|')
-
     print(f'-' * 100)
     print(f'| Скорость ', ' ' * (30 - len('Скорость')), '|', f'{client_data[6]} Kb/sec', ' ' * (60 - len(f'{client_data[6]} Kb/sec')), '|')
     print(f'-' * 100)
@@ -31,25 +27,23 @@ def console_output(client_name, client_data):
             print(f'- ' * 50)
             print(f'| Параметры подключения ', ' ' * (30 - len(f'Параметры подключения')), '|', f'{answer_connection}', ' ' * (60 - len(f'{answer_connection}')), '|')
             print(f'-' * 100)
-
-    # print(f'| Нотатки ', ' ' * (30 - len('Нотатки')), '|', f'{client_data[7]} Kb/sec', ' ' * (60 - len(f'{client_data[7]} Kb/sec')), '|')
-    # print(f'-' * 100)
     print(f'| Netstore ', ' ' * (30 - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (60 - len(f'{client_data[-1]} Kb/sec')), '|')
     print(f'-' * 100)
 
 def main():
-    start = time.time()
-    if os.path.isfile('search_engine/clients.json'):
+    if not os.path.isfile('search_engine/clients.json'):
        update_clients_database.update_clients_data()
-    end = time.time()
-    print(end - start)
+
 
     while True:
         print('==========================================')
         client = input('Введите имя клиента:').lower()
         search_result = search_engine.search(client)
 
-        if str(search_result.__class__) == "<class 'tuple'>":
+        if search_result == False:
+            print('КЛИЕНТ НЕ НАЙДЕН')
+            continue
+        elif str(search_result.__class__) == "<class 'tuple'>":
             client_name = search_result[0]
             client_data = search_result[1]
             console_output(client_name, client_data)
