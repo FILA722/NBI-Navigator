@@ -1,6 +1,7 @@
 from parsers import update_clients_database
 from search_engine import search_engine
 import os
+import time
 
 def console_output(client_name, client_data):
     print(f'-' * 100)
@@ -34,7 +35,10 @@ def console_output(client_name, client_data):
 
 def main():
     if not os.path.isfile('search_engine/clients.json'):
-       update_clients_database.update_clients_data()
+        print('Обновление базы данных, это может занять около 4-х минут...')
+        start = time.time()
+        update_clients_database.update_clients_data()
+        print(f'-=База данных обновлена=-\nВремя обновления: {time.time() - start} сек.')
 
     while True:
         print('=' * 100)
