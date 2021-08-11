@@ -33,7 +33,7 @@ def console_output(client_name, client_data):
     print(f'| Netstore ', ' ' * (30 - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (60 - len(f'{client_data[-1]}')), '|')
 
 def main():
-    if os.path.isfile('search_engine/clients.json'):
+    if not os.path.isfile('search_engine/clients.json'):
        update_clients_database.update_clients_data()
 
     while True:
