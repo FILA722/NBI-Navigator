@@ -1,4 +1,5 @@
 from parsers import update_clients_database
+from parsers import switch_parse
 from search_engine import search_engine
 import os
 import time
@@ -19,16 +20,24 @@ def console_output(client_name, client_data):
     print(f'-' * 100)
     if client_data[-2]:
         for count in range(len(client_data[-2])):
-            ip_address = list(client_data[-2].keys())[count]
-            gateway = client_data[-2][ip_address][-3]
-            mask = client_data[-2][ip_address][-2]
-            switch_model = client_data[-2][ip_address][5]
-            switch_ip = client_data[-2][ip_address][1]
-            switch_ip = f'http://{switch_ip}/' if switch_model != 'huawei' else switch_ip
-            answer_connection = f'IP: {ip_address} | GW: {gateway} | MASK: {mask}'
-            answer_connection_to = f'{client_data[-2][ip_address][0]}{client_data[-2][ip_address][2]} -> {switch_ip} {switch_model}'
+            client_ip_address = list(client_data[-2].keys())[count]
+            gateway = client_data[-2][client_ip_address][-3]
+            mask = client_data[-2][client_ip_address][-2]
+            switch_name = client_data[-2][client_ip_address][0]
+            switch_model = client_data[-2][client_ip_address][5]
+            switch_port = client_data[-2][client_ip_address][2][1:]
+            switch_ip_address = client_data[-2][client_ip_address][1]
+
+            switch_ip_str = f'http://{switch_ip_address}/' if switch_model != 'huawei' else switch_ip_address
+            answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
+            answer_connection_to = f'{switch_name}#{switch_port} -> {switch_ip_str} {switch_model}'
+
             print(f'| Подключение {count + 1} ', ' ' * (30 - len(f'Подключение {count + 1}')), '|', f'{answer_connection_to}', ' ' * (60 - len(f'{answer_connection_to}')), '|')
             print(f'- ' * 50)
+
+            if switch_model == 'huawei':
+                port_condition, saved_mac_address, current_mac_address, port_errors = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
+
             print(f'| Параметры подключения ', ' ' * (30 - len(f'Параметры подключения')), '|', f'{answer_connection}', ' ' * (60 - len(f'{answer_connection}')), '|')
             print(f'-' * 100)
     print(f'| Netstore ', ' ' * (30 - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (60 - len(f'{client_data[-1]}')), '|')
