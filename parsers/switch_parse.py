@@ -43,31 +43,21 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
         display_interface_brief = re.findall(display_interface_brief_search_pattern, str(telnet.read_until(b'NULL')))
         port_condition, port_errors = parse_current_configuration(display_interface_brief, switch_port)
 
+        telnet.write(to_bytes('display current-configuration'))
+        current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface \w+\/\d+\/{switch_port} vlan \d+'
+        current_configuration_of_search_port = re.findall(current_configuration_pattern, str(telnet.read_until(b"http")))
+        saved_ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', current_configuration_of_search_port[0])[0]
+        saved_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', current_configuration_of_search_port[0])[0]
 
+        telnet.write(to_bytes(f'display mac-address Ethernet0/0/{switch_port}'))
+        current_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', str(telnet.read_until(b"Total")))[0]
+        if not current_mac_address:
+            current_mac_address = 'Нет'
 
-        # telnet.write(to_bytes('display current-configuration'))
-        # current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface \w+\/\d+\/{port} vlan \d+'
-        # current_configuration = re.findall(current_configuration_pattern, str(telnet.read_until(b"http")))
-        # for i in current_configuration:
-        #     print(i)
-        #
-        # print('---------------------------')
-        #
-        # telnet.write(to_bytes('p'))
-        # telnet.read_until(b"]")
-        #
-        # telnet.write(to_bytes(f'display mac-address Ethernet0/0/{port}'))
-        # port_mac_address_pattern = '\w{4}-\w{4}-\w{4}'
-        # mac_address_on_port = re.findall(port_mac_address_pattern, str(telnet.read_until(b"Total")))
-        # print(mac_address_on_port)
-        #
-        # print('---------------------------')
-
-
+        if saved_ip_address != client_ip_address:
+            port_errors = f'На порту прописан IP:{saved_ip_address}'
 
     return port_condition, saved_mac_address, current_mac_address, port_errors
-
-parse_huawei('10.10.26.4', '9')
 
 def parse_zyxel(ip, password, port):
     pass

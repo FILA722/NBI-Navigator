@@ -5,19 +5,22 @@ import os
 import time
 
 def console_output(client_name, client_data):
-    print(f'-' * 100)
-    print(f'| Имя клиента ', ' ' * (30 - len('Имя клиента')), '|', client_name.upper(), ' ' * (60 - len(client_name)), '|')
-    print(f'-' * 100)
-    print(f'| Контактный телефон ', ' ' * (30 - len('Контактный телефон')), '|', client_data[0], ' ' * (60 - len(client_data[0])), '|')
-    print(f'-' * 100)
-    print(f'| Email ', ' ' * (30 - len('Email')), '|', client_data[1].lower(), ' ' * (60 - len(client_data[1])), '|')
-    print(f'-' * 100)
-    print(f'| Состояние клиента ', ' ' * (30 - len('Состояние клиента')), '|', client_data[4].upper(), ' ' * (60 - len(client_data[4])), '|')
-    print(f'-' * 100)
-    print(f'| Наличие конвертора ', ' '*(30 - len('Наличие конвертора')),'|',client_data[5], ' '*(60 - len(client_data[5])),'|')
-    print(f'-' * 100)
-    print(f'| Скорость ', ' ' * (30 - len('Скорость')), '|', f'{client_data[6]} Kb/sec', ' ' * (60 - len(f'{client_data[6]} Kb/sec')), '|')
-    print(f'-' * 100)
+    left_field = 20
+    right_field = 70
+    total_width = 100
+    print(f'-' * total_width)
+    print(f'| Имя клиента ', ' ' * (left_field - len('Имя клиента')), '|', client_name.upper(), ' ' * (right_field - len(client_name)), '|')
+    print(f'-' * total_width)
+    print(f'| Контактный телефон ', ' ' * (left_field - len('Контактный телефон')), '|', client_data[0], ' ' * (right_field - len(client_data[0])), '|')
+    print(f'-' * total_width)
+    print(f'| Email ', ' ' * (left_field - len('Email')), '|', client_data[1].lower(), ' ' * (right_field - len(client_data[1])), '|')
+    print(f'-' * total_width)
+    print(f'| Состояние клиента ', ' ' * (left_field - len('Состояние клиента')), '|', client_data[4].upper(), ' ' * (right_field - len(client_data[4])), '|')
+    print(f'-' * total_width)
+    print(f'| Наличие конвертора ', ' '*(left_field - len('Наличие конвертора')),'|',client_data[5], ' '*(right_field - len(client_data[5])),'|')
+    print(f'-' * total_width)
+    print(f'| Скорость ', ' ' * (left_field - len('Скорость')), '|', f'{client_data[6]} Kb/sec', ' ' * (right_field - len(f'{client_data[6]} Kb/sec')), '|')
+    print(f'-' * total_width)
     if client_data[-2]:
         for count in range(len(client_data[-2])):
             client_ip_address = list(client_data[-2].keys())[count]
@@ -32,15 +35,19 @@ def console_output(client_name, client_data):
             answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
             answer_connection_to = f'{switch_name}#{switch_port} -> {switch_ip_str} {switch_model}'
 
-            print(f'| Подключение {count + 1} ', ' ' * (30 - len(f'Подключение {count + 1}')), '|', f'{answer_connection_to}', ' ' * (60 - len(f'{answer_connection_to}')), '|')
-            print(f'- ' * 50)
+            print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', f'{answer_connection_to}', ' ' * (right_field - len(f'{answer_connection_to}')), '|')
+            print(f'- ' * (total_width / 2))
 
             if switch_model == 'huawei':
                 port_condition, saved_mac_address, current_mac_address, port_errors = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
+                if saved_mac_address == current_mac_address:
+                    print(f'| Cостояние:', ' ' * (left_field - len(f'Cостояние:')), '|', f'Порт:{port_condition}', '|', f'MAC:{current_mac_address}', '|', f'Errors:{port_errors}', ' ' * (right_field - len(f'{answer_connection_to}')), '|')
+                else:
+                    print(f'| Cостояние:', ' ' * (left_field - len(f'Cостояние:')), '|', f'Порт:{port_condition}', '|', f'MAC прописан:{saved_mac_address}' , '|',f'MAC приходит:{current_mac_address}', '|', f'Errors:{port_errors}', ' ' * (right_field - len(f'{answer_connection_to}')), '|')
 
-            print(f'| Параметры подключения ', ' ' * (30 - len(f'Параметры подключения')), '|', f'{answer_connection}', ' ' * (60 - len(f'{answer_connection}')), '|')
-            print(f'-' * 100)
-    print(f'| Netstore ', ' ' * (30 - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (60 - len(f'{client_data[-1]}')), '|')
+            print(f'| Параметры подключения ', ' ' * (left_field - len(f'Параметры подключения')), '|', f'{answer_connection}', ' ' * (right_field - len(f'{answer_connection}')), '|')
+            print(f'-' * total_width)
+    print(f'| Netstore ', ' ' * (left_field - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (right_field - len(f'{client_data[-1]}')), '|')
 
 def main():
     if not os.path.isfile('search_engine/clients.json'):
