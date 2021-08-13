@@ -29,12 +29,15 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
         telnet.read_until(b"Password:")
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
-        # telnet.write(to_bytes('su'))
-        # print(telnet.read_until(b"Password:"))
+
+        telnet.write(to_bytes('su'))
+        telnet.expect([b"Password:", b">"], timeout=2)
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
+
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
+
         telnet.write(to_bytes(f'display interface brief'))
         telnet.write(to_bytes(' '))
         display_interface_brief_search_pattern = r'Ethernet\d\/\d\/\d+ +\**\w+ +\w+ +\d+\.*\d*% +\d+\.*\d*% +\d+ +\d+'
