@@ -10,14 +10,15 @@ with open('search_engine/clients.json', 'r') as dict_with_clients:
 def transliteration(client):
     translations = [client]
     for dictionary in Transliterations.dictionaries:
-        word = ''
-        for letter in client:
-            try:
-                word += dictionary[letter]
-            except KeyError:
-                word += letter
-        if word not in translations and word != client:
-            translations.append(word)
+        for client in translations:
+            word = ''
+            for letter in client:
+                try:
+                    word += dictionary[letter]
+                except KeyError:
+                    word += letter
+            if word not in translations and word != client:
+                translations.append(word)
     return translations
 
 def search(client):
