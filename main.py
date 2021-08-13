@@ -1,5 +1,4 @@
 from parsers import update_clients_database
-from parsers import switch_parse
 from search_engine import search_engine
 import os
 import time
