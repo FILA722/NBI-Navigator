@@ -24,8 +24,8 @@ def console_output(client_name, client_data):
     if client_data[-2]:
         for count in range(len(client_data[-2])):
             client_ip_address = list(client_data[-2].keys())[count]
-            gateway = client_data[-2][client_ip_address][-3]
-            mask = client_data[-2][client_ip_address][-2]
+            gateway = client_data[-2][client_ip_address][3]
+            mask = client_data[-2][client_ip_address][4]
             switch_name = client_data[-2][client_ip_address][0]
             switch_model = client_data[-2][client_ip_address][5]
             switch_port = client_data[-2][client_ip_address][2][1:]
@@ -38,7 +38,10 @@ def console_output(client_name, client_data):
             print(f'- ' * int(total_width / 2))
 
             if switch_model == 'huawei':
-                port_condition, saved_mac_address, current_mac_address, port_errors = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
+                port_condition = client_data[-2][client_ip_address][6]
+                saved_mac_address = client_data[-2][client_ip_address][7]
+                current_mac_address = client_data[-2][client_ip_address][8]
+                port_errors = client_data[-2][client_ip_address][9]
                 for ip in current_mac_address:
                     if ip in saved_mac_address:
                         port_status = f'   {port_condition.upper()}   |  MAC: {str(*saved_mac_address)}  |  Errors: {port_errors}'
