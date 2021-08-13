@@ -30,13 +30,12 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
         telnet.read_until(b"Password:")
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
-        telnet.write(to_bytes('su'))
-        telnet.read_until(b"Password:")
+        # telnet.write(to_bytes('su'))
+        # print(telnet.read_until(b"Password:"))
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
-
         telnet.write(to_bytes(f'display interface brief'))
         telnet.write(to_bytes(' '))
         display_interface_brief_search_pattern = r'Ethernet\d\/\d\/\d+ +\**\w+ +\w+ +\d+\.*\d*% +\d+\.*\d*% +\d+ +\d+'
@@ -44,13 +43,16 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
         port_condition, port_errors = parse_current_configuration(display_interface_brief, switch_port)
 
         telnet.write(to_bytes('display current-configuration'))
+        telnet.write(to_bytes(' '))
         current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface \w+\/\d+\/{switch_port} vlan \d+'
         current_configuration_of_search_port = re.findall(current_configuration_pattern, str(telnet.read_until(b"http")))
         saved_ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', current_configuration_of_search_port[0])[0]
         saved_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', current_configuration_of_search_port[0])[0]
 
+        telnet.write(to_bytes('p'))
         telnet.write(to_bytes(f'display mac-address Ethernet0/0/{switch_port}'))
         current_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', str(telnet.read_until(b"Total")))[0]
+
         if not current_mac_address:
             current_mac_address = 'Нет'
 

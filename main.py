@@ -32,21 +32,25 @@ def console_output(client_name, client_data):
             switch_ip_address = client_data[-2][client_ip_address][1]
 
             switch_ip_str = f'http://{switch_ip_address}/' if switch_model != 'huawei' else switch_ip_address
-            answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
-            answer_connection_to = f'{switch_name}#{switch_port} -> {switch_ip_str} {switch_model}'
 
+            answer_connection_to = f'{switch_name}#{switch_port} -> {switch_ip_str} {switch_model}'
             print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', f'{answer_connection_to}', ' ' * (right_field - len(f'{answer_connection_to}')), '|')
-            print(f'- ' * (total_width / 2))
+            print(f'- ' * int(total_width / 2))
 
             if switch_model == 'huawei':
                 port_condition, saved_mac_address, current_mac_address, port_errors = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
                 if saved_mac_address == current_mac_address:
-                    print(f'| Cостояние:', ' ' * (left_field - len(f'Cостояние:')), '|', f'Порт:{port_condition}', '|', f'MAC:{current_mac_address}', '|', f'Errors:{port_errors}', ' ' * (right_field - len(f'{answer_connection_to}')), '|')
+                    port_status = f'   {port_condition.upper()}   |  MAC: {current_mac_address}  |  Errors: {port_errors}'
+                    print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
                 else:
-                    print(f'| Cостояние:', ' ' * (left_field - len(f'Cостояние:')), '|', f'Порт:{port_condition}', '|', f'MAC прописан:{saved_mac_address}' , '|',f'MAC приходит:{current_mac_address}', '|', f'Errors:{port_errors}', ' ' * (right_field - len(f'{answer_connection_to}')), '|')
+                    port_status = f'   {port_condition.upper()}   | MAC прописан: {saved_mac_address} | MAC приходит: {current_mac_address} | Errors: {port_errors}'
+                    print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
+                print(f'- ' * int(total_width / 2))
 
-            print(f'| Параметры подключения ', ' ' * (left_field - len(f'Параметры подключения')), '|', f'{answer_connection}', ' ' * (right_field - len(f'{answer_connection}')), '|')
+            answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
+            print(f'| Параметры подключения:', '|', answer_connection, ' ' * (right_field - len(answer_connection)), '|')
             print(f'-' * total_width)
+
     print(f'| Netstore ', ' ' * (left_field - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (right_field - len(f'{client_data[-1]}')), '|')
 
 def main():

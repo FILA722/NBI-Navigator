@@ -34,6 +34,7 @@ def search(client):
         return False
 
     elif len(coincidence_names) == 1:
+        #тут должно быть обращение к свичу
         return coincidence_names[0], clients[coincidence_names[0]]
 
     return coincidence_names
