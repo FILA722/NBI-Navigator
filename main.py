@@ -39,12 +39,13 @@ def console_output(client_name, client_data):
 
             if switch_model == 'huawei':
                 port_condition, saved_mac_address, current_mac_address, port_errors = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
-                if saved_mac_address == current_mac_address:
-                    port_status = f'   {port_condition.upper()}   |  MAC: {current_mac_address}  |  Errors: {port_errors}'
-                    print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
-                else:
-                    port_status = f'   {port_condition.upper()}   | MAC прописан: {saved_mac_address} | MAC приходит: {current_mac_address} | Errors: {port_errors}'
-                    print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
+                for ip in current_mac_address:
+                    if ip in saved_mac_address:
+                        port_status = f'   {port_condition.upper()}   |  MAC: {str(*saved_mac_address)}  |  Errors: {port_errors}'
+                        print('| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
+                    else:
+                        port_status = f'   {port_condition.upper()}   | MAC прописан: {str(*saved_mac_address)} | MAC приходит: {str(*current_mac_address)} | Errors: {port_errors}'
+                        print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
                 print(f'- ' * int(total_width / 2))
 
             answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
