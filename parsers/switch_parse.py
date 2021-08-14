@@ -6,7 +6,6 @@ def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 
 def parse_huawei(switch_ip_address, client_ip_address, switch_port):
-
     def parse_current_configuration(display_interface_brief, switch_port):
         for connection_status_string in display_interface_brief:
             search_port = re.search(f'Ethernet0/0/{switch_port}', connection_status_string)
@@ -56,7 +55,7 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
         current_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', str(telnet.read_until(b"Total")))
 
         if not current_mac_address:
-            current_mac_address = 'Не приходит'
+            current_mac_address = ['Не приходит']
 
         if client_ip_address not in saved_ip_address:
             port_errors = f'На порту прописан IP:{saved_ip_address}'

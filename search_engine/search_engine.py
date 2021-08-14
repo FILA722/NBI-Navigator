@@ -41,6 +41,7 @@ def search(client):
         for client_ip_address in client_connection_data.keys():
             if client_connection_data[client_ip_address][5] == 'huawei':
                 print(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}...')
+
                 switch_ip_address = client_connection_data[client_ip_address][1]
                 switch_port = client_connection_data[client_ip_address][2][1:]
 

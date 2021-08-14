@@ -65,6 +65,8 @@ def main():
 
     while True:
         print('=' * 100)
+        print(' ' * 40, '-=NBI-NAVIGATOR=-')
+        print('=' * 100)
         client = input('Введите имя клиента:').lower()
         search_result = search_engine.search(client)
 
