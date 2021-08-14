@@ -2,8 +2,10 @@ from parsers.confidential import SwitchLoginData
 import telnetlib
 import re
 
+
 def to_bytes(line):
     return f"{line}\n".encode("utf-8")
+
 
 def parse_huawei(switch_ip_address, client_ip_address, switch_port):
     def parse_current_configuration(display_interface_brief, switch_port):
@@ -62,8 +64,10 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
 
     return port_condition, saved_mac_address, current_mac_address, port_errors
 
+
 def parse_zyxel(ip, password, port):
     pass
+
 
 def parse_asotel(ip, password, port):
     pass

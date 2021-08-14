@@ -6,6 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 import json
 import re
 
+
 def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
     client_connection_preferences = {}
     for ip_addr in ip_addresses:
@@ -14,11 +15,13 @@ def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
                 client_connection_preferences[ip_addr] = ip_mask_dictionary[ip_zone]
     return client_connection_preferences
 
+
 def get_switch_name(client_switch_ip):
     for switch_model_ips in confidential.SwitchModels.switches:
         if client_switch_ip in switch_model_ips:
             return switch_model_ips[0]
     return 'Модель свича не найдена'
+
 
 def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_name_ip_dict, ip_mask_dictionary):
     client_ip_addresses = tuple(ip_address.text for ip_address in browser.find_elements(*NetstoreClientPageLocators.IP_ADDRESSES))
@@ -92,6 +95,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
             client_connection_preferences = {f'Ошибка в данных подключения, проверьте Нетсторе {client_ip_addresses[i]}'}
     return client_connection_data
 
+
 def collect_clients_data(url, login_, password):
     switch_name_ip_dict = parse_cacti.main()
     clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
@@ -163,6 +167,7 @@ def collect_clients_data(url, login_, password):
         browser.quit()
 
     return clients_database
+
 
 def update_clients_data():
     clients_data = {}

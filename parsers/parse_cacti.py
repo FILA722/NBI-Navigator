@@ -4,6 +4,7 @@ from parsers.locators import CactiLocators
 import re
 import time
 
+
 def get_to_the_switches_page(browser):
     login = browser.find_element(*CactiLocators.LOGIN)
     login.send_keys(CactiLoginData.cacti_login)
@@ -36,6 +37,7 @@ def get_to_the_switches_page(browser):
     nbi_dropdown_switch_bc_button.click()
 
     return browser
+
 
 def main():
     try:

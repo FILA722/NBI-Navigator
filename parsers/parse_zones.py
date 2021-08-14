@@ -2,6 +2,7 @@ from parsers.confidential import ZonesLoginData, IPMASK
 import paramiko
 import re
 
+
 def parse_zone_data(zones):
     len_zones = len(zones)
     str_num = 0
@@ -39,6 +40,7 @@ def parse_zone_data(zones):
         str_num += 1
 
     return ip_gateway_dict
+
 
 def get_zone_data():
     login_data = {

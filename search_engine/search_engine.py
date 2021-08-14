@@ -7,6 +7,7 @@ with open('search_engine/clients.json', 'r') as dict_with_clients:
     clients = json.loads(dict_with_clients.read())
     clients_names = clients.keys()
 
+
 def transliteration(client):
     translations = [client]
     for dictionary in Transliterations.dictionaries:
@@ -20,6 +21,7 @@ def transliteration(client):
             if word not in translations and word != client:
                 translations.append(word)
     return translations
+
 
 def search(client):
     search_names = transliteration(client)
