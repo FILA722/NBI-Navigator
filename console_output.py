@@ -1,3 +1,5 @@
+import logging
+
 def print_nbi_header():
     print('=' * 100)
     print(' ' * 40, '-=NBI-NAVIGATOR=-')
