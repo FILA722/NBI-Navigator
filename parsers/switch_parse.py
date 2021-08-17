@@ -1,6 +1,7 @@
 from parsers.confidential import SwitchLoginData
 import telnetlib
 import re
+import time
 
 
 def to_bytes(line):
@@ -27,7 +28,7 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
                 connection_status_list.append(word)
                 port_condition = connection_status_list[1]
                 port_errors = int(connection_status_list[-1]) + int(connection_status_list[-2])
-                return port_condition, port_errors
+                return port_condition, str(port_errors)
 
     with telnetlib.Telnet(switch_ip_address) as telnet:
         telnet.read_until(b"Password:")
@@ -79,13 +80,59 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
             current_mac_address = ['Не приходит']
 
         if client_ip_address not in saved_ip_address:
-            port_errors = f'На порту прописан IP:{saved_ip_address}'
+            port_errors = [f'На порту прописан IP:{saved_ip_address}']
 
     return port_condition, saved_mac_address, current_mac_address, port_errors
 
 
-def parse_zyxel(ip, password, port):
-    pass
+def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
+
+    with telnetlib.Telnet(switch_ip_address) as telnet:
+        telnet.read_until(b"User name:")
+
+        telnet.write(to_bytes(SwitchLoginData.sw_login))
+        telnet.read_until(b"Password:")
+
+        telnet.write(to_bytes(SwitchLoginData.sw_passwd))
+        telnet.read_until(b"#")
+
+        telnet.write(to_bytes(f'show interfaces config {switch_port}'))
+        show_interfaces_config = re.findall('Active \\\\t:\w+', str(telnet.read_until(b"#")))[0]
+        port_condition_slice = show_interfaces_config[show_interfaces_config.index(':') + 1:]
+        port_condition = 'UP' if port_condition_slice == 'Yes' else 'DOWN'
+
+        telnet.write(to_bytes(f'show mac address-table port {switch_port}'))
+        current_mac_addresses = re.findall('\w+:\w+:\w+:\w+:\w+:\w+', str(telnet.read_until(b'ic')))
+        if not current_mac_addresses:
+            current_mac_addresses = ['Не приходит']
+
+        telnet.write(to_bytes('show ip source binding'))
+        time.sleep(1)
+        show_ip_source_binding_pattern = f'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w +{client_ip_address} + \w+ + \w+ +\d+ +{switch_port}'
+        show_ip_source_binding = re.findall(show_ip_source_binding_pattern, str(telnet.read_until(b'Total')))
+        port_errors = []
+        if len(show_ip_source_binding) == 0:
+            saved_mac_addresses = []
+            port_errors.append(f'Нет привязки к {client_ip_address}')
+        else:
+            saved_mac_addresses = []
+            for bind in show_ip_source_binding:
+                saved_mac_address = re.findall('\w+:\w+:\w+:\w+:\w+:\w+', bind)[0]
+                saved_mac_addresses.append(saved_mac_address)
+            for current_mac_address in current_mac_addresses:
+                if current_mac_address not in saved_mac_addresses:
+                    port_errors.append(f'Приходящий {current_mac_address} не прописан')
+
+        if not port_errors:
+            telnet.write(to_bytes('show loopguard'))
+            output_1 = telnet.expect([b"continue", b"#"], timeout=2)
+            telnet.write(to_bytes('c'))
+            output_2 = str(telnet.read_until(b'#'))
+            show_loopguard_output = f'{output_1} {output_2}'
+            show_loopguard = re.findall(f'{switch_port} +Active +\w+ +\d+ +\d+ +\d+', show_loopguard_output)[0]
+            port_errors = [show_loopguard.split("  ")[-1].strip()]
+
+    return port_condition, saved_mac_addresses, current_mac_addresses, port_errors
 
 
 def parse_asotel(ip, password, port):

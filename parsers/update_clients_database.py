@@ -55,7 +55,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
     client_connection_data = {}
     for i in range(len(client_ip_addresses)):
         if not switches:
-            client_connection_data[client_ip_addresses[i]] = 'В нотатках клиента необходимо указать название свича и порт подключения в виде "==switch_name sw1#port==" где "switch_name sw1" - название свича из Cacti, "port" - порт подключения. Знаки "==" и "#" обязательны'
+            client_connection_data[client_ip_addresses[i]] = 'В нотатках нетсторе клиента не прописан свич'
             break
         try:
             client_port = re.findall(r'#\d+', switches[i])

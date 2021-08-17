@@ -26,35 +26,42 @@ def console_output(client_name, client_data):
     if client_data[-2]:
         for count in range(len(client_data[-2])):
             client_ip_address = list(client_data[-2].keys())[count]
-            gateway = client_data[-2][client_ip_address][3]
-            mask = client_data[-2][client_ip_address][4]
-            switch_name = client_data[-2][client_ip_address][0]
-            switch_model = client_data[-2][client_ip_address][5]
-            switch_port = client_data[-2][client_ip_address][2][1:]
-            switch_ip_address = client_data[-2][client_ip_address][1]
+            if client_data[-2][client_ip_address] == 'В нотатках нетсторе клиента не прописан свич':
+                print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address], ' ' * (right_field - len(client_data[-2][client_ip_address])), '|')
+            else:
+                gateway = client_data[-2][client_ip_address][3]
+                mask = client_data[-2][client_ip_address][4]
+                switch_name = client_data[-2][client_ip_address][0]
+                switch_model = client_data[-2][client_ip_address][5]
+                switch_port = client_data[-2][client_ip_address][2][1:]
+                switch_ip_address = client_data[-2][client_ip_address][1]
 
-            switch_ip_str = f'http://{switch_ip_address}/' if switch_model != 'huawei' else switch_ip_address
+                switch_ip_str = f'http://{switch_ip_address}/' if switch_model != 'huawei' else switch_ip_address
 
-            answer_connection_to = f'{switch_name}#{switch_port} -> {switch_ip_str} {switch_model}'
-            print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', f'{answer_connection_to}', ' ' * (right_field - len(f'{answer_connection_to}')), '|')
-            print(f'- ' * int(total_width / 2))
-
-            if switch_model == 'huawei':
-                port_condition = client_data[-2][client_ip_address][6]
-                saved_mac_address = client_data[-2][client_ip_address][7]
-                current_mac_address = client_data[-2][client_ip_address][8]
-                port_errors = client_data[-2][client_ip_address][9]
-                for ip in current_mac_address:
-                    if ip in saved_mac_address:
-                        port_status = f'   {port_condition.upper()}   |  MAC: {str(*saved_mac_address)}  |  Errors: {port_errors}'
-                        print('| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
-                    else:
-                        port_status = f'   {port_condition.upper()}   | MAC прописан: {str(*saved_mac_address)} | MAC приходит: {str(*current_mac_address)} | Errors: {port_errors}'
-                        print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
+                answer_connection_to = f'{switch_name}#{switch_port} -> {switch_ip_str} {switch_model}'
+                print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', f'{answer_connection_to}', ' ' * (right_field - len(f'{answer_connection_to}')), '|')
                 print(f'- ' * int(total_width / 2))
 
-            answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
-            print(f'| Параметры подключения:', '|', answer_connection, ' ' * (right_field - len(answer_connection)), '|')
-            print(f'-' * total_width)
+                if switch_model in ['huawei', 'zyxel']:
+                    port_condition = client_data[-2][client_ip_address][6]
+                    if port_condition == 'Невозможно подключиться к свичу':
+                        print('| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_condition, ' ' * (right_field - len(port_condition)), '|')
+                    else:
+                        saved_mac_address = client_data[-2][client_ip_address][7]
+                        current_mac_address = client_data[-2][client_ip_address][8]
+                        port_errors = client_data[-2][client_ip_address][9]
+                        for ip in current_mac_address:
+                            if ip in saved_mac_address:
+                                port_status = f'   {port_condition.upper()}   |  MAC: {str(*saved_mac_address)}  |  Errors: {str(*port_errors)}'
+                                print('| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
+                            else:
+                                port_status = f'   {str(port_condition.upper())}   | MAC прописан: {str(saved_mac_address)} | MAC на порту: {str(current_mac_address)} | Errors: {str(*port_errors)}'
+                                print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
+                    print(f'- ' * int(total_width / 2))
+
+
+                answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
+                print(f'| Параметры подключения:', '|', answer_connection, ' ' * (right_field - len(answer_connection)), '|')
+                print(f'-' * total_width)
 
     print(f'| Netstore ', ' ' * (left_field - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (right_field - len(f'{client_data[-1]}')), '|')

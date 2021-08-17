@@ -41,14 +41,23 @@ def search(client):
         client_connection_data = clients[coincidence_names[0]][8]
 
         for client_ip_address in client_connection_data.keys():
-            if client_connection_data[client_ip_address][5] == 'huawei':
-                print(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}...')
+            print(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}...')
 
-                switch_ip_address = client_connection_data[client_ip_address][1]
-                switch_port = client_connection_data[client_ip_address][2][1:]
+            switch_ip_address = client_connection_data[client_ip_address][1]
+            switch_port = client_connection_data[client_ip_address][2][1:]
 
-                data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
+            data_from_switch = []
 
+            try:
+                if client_connection_data[client_ip_address][5] == 'huawei':
+                    data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
+                elif client_connection_data[client_ip_address][5] == 'zyxel':
+                    data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
+            except EOFError:
+                data_from_switch = ['Невозможно подключиться к свичу']
+
+
+            if data_from_switch:
                 client_connection_data[client_ip_address] += data_from_switch
 
         return coincidence_names[0], clients[coincidence_names[0]]
