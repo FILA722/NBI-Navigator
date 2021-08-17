@@ -3,8 +3,11 @@ from parsers import confidential
 from start_browser import driver
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
 from selenium.common.exceptions import NoSuchElementException
+import logging
 import json
 import re
+
+logging.basicConfig(filename="logs.txt", level=logging.INFO)
 
 
 def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
@@ -29,29 +32,6 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
     switches = re.findall(r'==[A-Za-z0-9-_\/. #]+==', note)
     switches = tuple(switch.strip('==') for switch in switches)
 
-    # mac_addresses = re.findall(r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w', note)
-    # mac_addresses += re.findall(r'\w\w\w\w-\w\w\w\w-\w\w\w\w', note)
-    #
-    # if len(mac_addresses) > len(client_ip_addresses):
-    #     connection_interfaces = []
-    #     for i in range(len(switches)-1):
-    #         connection_interface = []
-    #         for mac_address in mac_addresses:
-    #             if note.index(switches[i]) < note.index(mac_address) < note.index(switches[i+1]):
-    #                 connection_interface.append(mac_address)
-    #         connection_interfaces.append(connection_interface)
-    #
-    #     index = -1
-    #     connection_interface = []
-    #     for _ in range(len(mac_addresses)):
-    #         if not connection_interfaces:
-    #             connection_interfaces = [mac_addresses]
-    #         elif mac_addresses[index] not in connection_interfaces[-1]:
-    #             connection_interface.append(mac_addresses[index])
-    #             index -= 1
-    #     connection_interfaces.append(connection_interface)
-    #     mac_addresses = connection_interfaces
-
     client_connection_data = {}
     for i in range(len(client_ip_addresses)):
         if not switches:
@@ -73,12 +53,6 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
             client_switch_ip = 'ip адресс свича не найден'
         client_switch_model = get_switch_name(client_switch_ip)
 
-        # try:
-        #     client_mac_address = mac_addresses[i]
-        # except IndexError:
-        #     client_mac_address = 'ff:ff:ff:ff:ff:ff'
-        # client_connection_data[client_ip_addresses[i]] = (client_switch, client_port[0], client_mac_address)
-
         for ip_zone in ip_mask_dictionary.keys():
             if client_ip_addresses[i] in ip_zone:
                 client_connection_preferences = ip_mask_dictionary[ip_zone]
@@ -91,8 +65,11 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
                                                               client_switch_model)
         except IndexError:
             client_connection_preferences = {'Ошибка в данных подключения, проверьте Нетсторе'}
+            logging.warning('Ошибка в данных подключения, проверьте Нетсторе')
         except UnboundLocalError:
             client_connection_preferences = {f'Ошибка в данных подключения, проверьте Нетсторе {client_ip_addresses[i]}'}
+            logging.warning(f'Ошибка в данных подключения, проверьте Нетсторе {client_ip_addresses[i]}')
+
     return client_connection_data
 
 
@@ -100,6 +77,7 @@ def collect_clients_data(url, login_, password):
     switch_name_ip_dict = parse_cacti.main()
     clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
     try:
+        logging.info("Запуск браузера")
         browser = driver(url)
 
         login = browser.find_element(*NetstoreLocators.LOGIN)
@@ -113,8 +91,10 @@ def collect_clients_data(url, login_, password):
 
         open_all_clients_button = browser.find_element(*NetstoreLocators.GET_ALL_CLIENTS_PAGE)
         open_all_clients_button.click()
+        logging.info("Авторизация в нетсторе прошла успешно")
 
         client_objects = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST) + browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
+        logging.info("Сбор клиент-объектов прошел успешно")
 
         clients_netstore_name_url_list = []
 
@@ -125,6 +105,7 @@ def collect_clients_data(url, login_, password):
             clients_netstore_name_url_list.append((client_name, client_netstore_url))
 
         clients_database = {}
+        logging.info("Начало сбора данных всех клиентов с нетсторе")
         for client in clients_netstore_name_url_list:
             client_name = client[0].lower()
             client_netstore_url = client[1]
@@ -165,20 +146,27 @@ def collect_clients_data(url, login_, password):
                     client_netstore_url)
     finally:
         browser.quit()
-
+    logging.info("Конец сбора данных с нетсторе")
     return clients_database
 
 
 def update_clients_data():
     clients_data = {}
+    logging.info("Обновление нетсторе 1")
     clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,
                                             confidential.NetstoreLoginData.netstore_passwd))
+    logging.info("Обновление нетсторе 1 прошел успешно")
 
+    logging.info("Обновление нетсторе 2")
     clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
                                              confidential.NetstoreLoginData.netstore2_login,
                                              confidential.NetstoreLoginData.netstore_passwd))
+    logging.info("Обновление нетсторе 2 прошел успешно")
 
+    logging.info("Запись БД в clients.json")
     json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)
     with open('search_engine/clients.json', 'w') as dict_with_clients:
         dict_with_clients.write(json_clients_dict)
+    logging.info("БД обновлена успешно")
+

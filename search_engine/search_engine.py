@@ -1,12 +1,13 @@
 from search_engine.transliterations import Transliterations
 from parsers import switch_parse
+import logging
 import json
 import re
 
 with open('search_engine/clients.json', 'r') as dict_with_clients:
     clients = json.loads(dict_with_clients.read())
     clients_names = clients.keys()
-
+    logging.info('Файл с БД клиентов открыт для чтения')
 
 def transliteration(client):
     translations = [client]
