@@ -1,6 +1,7 @@
 from parsers import update_clients_database
 from search_engine import search_engine
 from console_output import print_nbi_header, console_output
+from time import gmtime, strftime
 import logging
 import time
 
@@ -25,6 +26,7 @@ def main():
             continue
 
         logging.info(f"Выполнить поиск клиента {client}")
+        logging.info(f"{strftime('%d  %m % H: % M')}")
         search_result = search_engine.search(client)
 
         if search_result == False:

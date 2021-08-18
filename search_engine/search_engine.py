@@ -45,11 +45,12 @@ def search(client):
         logging.info(f'Найден клиент: {coincidence_names[0]}')
         client_connection_data = clients[coincidence_names[0]][8]
 
-        for client_ip_address in client_connection_data.keys():
-            print(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}...')
-            logging.info(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}')
+        print(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}...')
+        logging.info(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}')
 
+        for client_ip_address in client_connection_data.keys():
             switch_ip_address = client_connection_data[client_ip_address][1]
+
             if not ping_status(switch_ip_address):
                 data_from_switch = 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ'
             else:
@@ -72,7 +73,7 @@ def search(client):
                 else:
                     client_connection_data[client_ip_address] += data_from_switch
                 logging.info('Данные со свича успешно добавлены в данные по клиенту')
-        print(client_connection_data[client_ip_address])
+
         return coincidence_names[0], clients[coincidence_names[0]]
 
     return coincidence_names

@@ -34,8 +34,8 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
                 return port_condition, str(port_errors)
 
     with telnetlib.Telnet(switch_ip_address) as telnet:
-        logging.info("Телнет сессия установлена")
         telnet.read_until(b"Password:")
+        logging.info("Телнет сессия установлена")
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
         logging.info("Авторизация админа на свиче прошла успешно")
@@ -159,7 +159,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             port_errors = [show_loopguard.split("  ")[-1].strip()]
         logging.info(f"Команда show ip source binding выполнена, вернула значение saved_mac_addresses: {saved_mac_addresses}, и port_errors: {port_errors}")
 
-    logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_address}, {port_errors}")
+    logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_addresses}, {current_mac_addresses}, {port_errors}")
     return port_condition, saved_mac_addresses, current_mac_addresses, port_errors
 
 
