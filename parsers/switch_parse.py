@@ -69,7 +69,7 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
         elif switch_port == '26':
             current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface GigabitEthernet0/0/2 vlan \d+'
         else:
-            current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface \w+\/\d+\/{switch_port} vlan \d+'
+            current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface Ethernet0\/\d+\/{switch_port} vlan \d+'
 
         current_configuration_of_search_port = re.findall(current_configuration_pattern, str(telnet.read_until(b"http")))
 
