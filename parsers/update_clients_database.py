@@ -37,25 +37,30 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
         if not switches:
             client_connection_data[client_ip_addresses[i]] = 'В нотатках нетсторе клиента не прописан свич'
             break
+
         try:
             client_port = re.findall(r'#\d+', switches[i])
         except IndexError:
             client_port = re.findall(r'#\d+', switches[0])
+
         try:
             client_switch_name = switches[i][:switches[i].index('#')].strip()
         except IndexError:
             client_switch_name = switches[0][:switches[0].index('#')].strip()
         except ValueError:
             client_switch_name = switches[0].strip()
+
         try:
             client_switch_ip = switch_name_ip_dict[client_switch_name]
         except KeyError:
             client_switch_ip = 'ip адресс свича не найден'
+
         client_switch_model = get_switch_name(client_switch_ip)
 
         for ip_zone in ip_mask_dictionary.keys():
             if client_ip_addresses[i] in ip_zone:
                 client_connection_preferences = ip_mask_dictionary[ip_zone]
+
         try:
             client_connection_data[client_ip_addresses[i]] = (client_switch_name,
                                                               client_switch_ip,
@@ -168,5 +173,5 @@ def update_clients_data():
     json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)
     with open('search_engine/clients.json', 'w') as dict_with_clients:
         dict_with_clients.write(json_clients_dict)
-    logging.info("БД обновлена успешно")
+    logging.info("*************** БД обновлена успешно ***************")
 

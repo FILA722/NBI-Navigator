@@ -21,6 +21,7 @@ def transliteration(client):
                     word += letter
             if word not in translations and word != client:
                 translations.append(word)
+    logging.info(f'Составлен список для поиска в БД: {translations}')
     return translations
 
 
@@ -36,23 +37,29 @@ def search(client):
                 coincidence_names.append(client_name)
 
     if not coincidence_names:
+        logging.info(f'Клиент не найден')
         return False
 
     elif len(coincidence_names) == 1:
+        logging.info(f'Найден клиент: {coincidence_names[0]}')
         client_connection_data = clients[coincidence_names[0]][8]
 
         for client_ip_address in client_connection_data.keys():
             print(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}...')
+            logging.info(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}')
 
             switch_ip_address = client_connection_data[client_ip_address][1]
+            #пустить пинг на свич
             switch_port = client_connection_data[client_ip_address][2][1:]
 
             data_from_switch = []
 
             try:
                 if client_connection_data[client_ip_address][5] == 'huawei':
+                    logging.info(f'Установка телнет-сессии с huawei {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                     data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
                 elif client_connection_data[client_ip_address][5] == 'zyxel':
+                    logging.info(f'Установка телнет-сессии с zyxel {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                     data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
             except EOFError:
                 data_from_switch = ['Невозможно подключиться к свичу']
@@ -60,6 +67,7 @@ def search(client):
 
             if data_from_switch:
                 client_connection_data[client_ip_address] += data_from_switch
+                logging.info('Данные со свича успешно добавлены в данные по клиенту')
 
         return coincidence_names[0], clients[coincidence_names[0]]
 

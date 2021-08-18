@@ -33,14 +33,16 @@ def main():
         elif str(search_result.__class__) == "<class 'tuple'>":
             client_name = search_result[0]
             client_data = search_result[1]
+            logging.info(f"Данные о клиенте {client_name} переданы на вывод в консоль")
             console_output(client_name, client_data)
+            logging.info("************************************************************")
 
         else:
             print('Выберите клиента:')
             print('-' * 100)
+            logging.info(f"По запросу найдены клиенты: {search_result}")
             for client_name in search_result:
                 print(client_name)
-
 
 if '__name__' == '__main__':
     pass

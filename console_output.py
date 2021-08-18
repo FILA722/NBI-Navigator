@@ -1,5 +1,7 @@
 import logging
 
+logging.info('Вывод данных в консоль')
+
 def print_nbi_header():
     print('=' * 100)
     print(' ' * 40, '-=NBI-NAVIGATOR=-')
@@ -59,9 +61,9 @@ def console_output(client_name, client_data):
                                 print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
                     print(f'- ' * int(total_width / 2))
 
-
                 answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
                 print(f'| Параметры подключения:', '|', answer_connection, ' ' * (right_field - len(answer_connection)), '|')
                 print(f'-' * total_width)
 
     print(f'| Netstore ', ' ' * (left_field - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (right_field - len(f'{client_data[-1]}')), '|')
+    logging.info('Данные выведены в консоль')
