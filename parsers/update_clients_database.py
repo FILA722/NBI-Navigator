@@ -1,6 +1,7 @@
 from parsers import parse_cacti, parse_zones
 from parsers import confidential
 from start_browser import driver
+from check_ping_status import ping_status
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
 from selenium.common.exceptions import NoSuchElementException
 import logging
@@ -157,17 +158,26 @@ def collect_clients_data(url, login_, password):
 
 def update_clients_data():
     clients_data = {}
+
     logging.info("Обновление нетсторе 1")
-    clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
+    if not ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]):
+        print('!!!Нет соединения с Нетсторе 1!!!')
+        logging.info("!!!Нет соединения с Нетсторе 1!!!")
+    else:
+        clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,
                                             confidential.NetstoreLoginData.netstore_passwd))
-    logging.info("Обновление нетсторе 1 прошел успешно")
+        logging.info("Обновление нетсторе 1 прошел успешно")
 
-    logging.info("Обновление нетсторе 2")
-    clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
-                                             confidential.NetstoreLoginData.netstore2_login,
-                                             confidential.NetstoreLoginData.netstore_passwd))
-    logging.info("Обновление нетсторе 2 прошел успешно")
+    if not ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+        print('!!!Нет соединения с Нетсторе 2!!!')
+        logging.info("!!!Нет соединения с Нетсторе 2!!!")
+    else:
+        logging.info("Обновление нетсторе 2")
+        clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
+                                                 confidential.NetstoreLoginData.netstore2_login,
+                                                 confidential.NetstoreLoginData.netstore_passwd))
+        logging.info("Обновление нетсторе 2 прошел успешно")
 
     logging.info("Запись БД в clients.json")
     json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)

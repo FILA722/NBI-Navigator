@@ -1,4 +1,5 @@
 from parsers.confidential import ZonesLoginData, IPMASK
+from check_ping_status import ping_status
 import paramiko
 import re
 
@@ -49,6 +50,10 @@ def get_zone_data():
         'password': ZonesLoginData.zones_passwd,
         'port': 22
     }
+
+    if not ping_status(ZonesLoginData.zones_ip):
+        print('!!!ЕНЦЕЛАДУС НЕ ДОСТУПЕН!!!')
+
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(**login_data)

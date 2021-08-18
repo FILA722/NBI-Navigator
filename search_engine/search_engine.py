@@ -1,4 +1,5 @@
 from search_engine.transliterations import Transliterations
+from check_ping_status import ping_status
 from parsers import switch_parse
 import logging
 import json
@@ -49,26 +50,29 @@ def search(client):
             logging.info(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}')
 
             switch_ip_address = client_connection_data[client_ip_address][1]
-            #пустить пинг на свич
-            switch_port = client_connection_data[client_ip_address][2][1:]
-
-            data_from_switch = []
-
-            try:
-                if client_connection_data[client_ip_address][5] == 'huawei':
-                    logging.info(f'Установка телнет-сессии с huawei {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
-                    data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
-                elif client_connection_data[client_ip_address][5] == 'zyxel':
-                    logging.info(f'Установка телнет-сессии с zyxel {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
-                    data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
-            except EOFError:
-                data_from_switch = ['Невозможно подключиться к свичу']
-
+            if not ping_status(switch_ip_address):
+                data_from_switch = 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ'
+            else:
+                switch_port = client_connection_data[client_ip_address][2][1:]
+                data_from_switch = []
+                try:
+                    if client_connection_data[client_ip_address][5] == 'huawei':
+                        logging.info(f'Установка телнет-сессии с huawei {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
+                        data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
+                    elif client_connection_data[client_ip_address][5] == 'zyxel':
+                        logging.info(f'Установка телнет-сессии с zyxel {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
+                        data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
+                except EOFError:
+                    logging.info('Не получилось собрать информацию')
+                    data_from_switch = ['Не получилось собрать информацию']
 
             if data_from_switch:
-                client_connection_data[client_ip_address] += data_from_switch
+                if data_from_switch == 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ':
+                    client_connection_data[client_ip_address].append(data_from_switch)
+                else:
+                    client_connection_data[client_ip_address] += data_from_switch
                 logging.info('Данные со свича успешно добавлены в данные по клиенту')
-
+        print(client_connection_data[client_ip_address])
         return coincidence_names[0], clients[coincidence_names[0]]
 
     return coincidence_names
