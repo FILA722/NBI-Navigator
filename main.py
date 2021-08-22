@@ -24,6 +24,7 @@ def main():
             update_db()
             continue
 
+        logging.info(f"***************************-={time.asctime(time.localtime())}=-***************************")
         logging.info(f"Выполнить поиск клиента {client}")
         search_result = search_engine.search(client)
 
@@ -35,7 +36,6 @@ def main():
             client_data = search_result[1]
             logging.info(f"Данные о клиенте {client_name} переданы на вывод в консоль")
             console_output(client_name, client_data)
-            logging.info(f"***************************-={time.asctime(time.localtime())}=-***************************")
 
         else:
             print('Выберите клиента:')
