@@ -110,19 +110,20 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
 
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
     with telnetlib.Telnet(switch_ip_address) as telnet:
-        telnet.expect([b"User name:"], timeout=2)
-        session = telnet.write(to_bytes(SwitchLoginData.sw_login))
 
-        if session:
+        start_question = telnet.expect([b"User name:"], timeout=2)
+        if start_question:
             logging.info("Телнет сессия установлена")
         else:
             logging.info("Телнет сессия НЕ установлена")
             raise EOFError
 
+        telnet.write(to_bytes(SwitchLoginData.sw_login))
+
         telnet.read_until(b"Password:")
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
 
-        telnet.read_until(b"#")
+        telnet.expect([b"#"])
         logging.info("Авторизация админа на свиче прошла успешно")
 
         telnet.write(to_bytes(f'show interfaces config {switch_port}'))
