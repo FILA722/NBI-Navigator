@@ -5,7 +5,6 @@ import re
 import time
 
 
-
 def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 

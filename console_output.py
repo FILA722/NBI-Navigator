@@ -1,4 +1,7 @@
 import logging
+import colorama
+from colorama import Fore, Back, Style
+colorama.init()
 
 logging.info('Вывод данных в консоль')
 
