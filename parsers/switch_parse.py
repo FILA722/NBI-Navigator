@@ -145,7 +145,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         logging.info("Выполнить команду show ip source binding")
         time.sleep(1)
         show_ip_source_binding_pattern = f'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w +{client_ip_address} + \w+ + \w+ +\d+ +{switch_port}'
-        show_ip_source_binding = re.findall(show_ip_source_binding_pattern, str(telnet.read_until(b'Total')))
+        show_ip_source_binding = re.findall(show_ip_source_binding_pattern, str(telnet.expect([b'Total', b'#'])))
 
         port_errors = []
         if len(show_ip_source_binding) == 0:
