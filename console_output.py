@@ -1,7 +1,4 @@
 import logging
-import colorama
-from colorama import Fore, Back, Style
-colorama.init()
 
 logging.info('Вывод данных в консоль')
 
@@ -60,10 +57,10 @@ def console_output(client_name, client_data):
                         port_errors = client_data[-2][client_ip_address][9]
                         for ip in current_mac_address:
                             if ip in saved_mac_address:
-                                port_status = f'   {port_condition.upper()}   |  MAC: {str(*saved_mac_address)}  |  Errors: {str(*port_errors)}'
+                                port_status = f'   {port_condition.upper()}   |  MAC: {str(saved_mac_address)}  |  Errors: {str(port_errors)}'
                                 print('| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
                             else:
-                                port_status = f'   {str(port_condition.upper())}   | MAC прописан: {str(saved_mac_address)} | MAC на порту: {str(current_mac_address)} | Errors: {str(*port_errors)}'
+                                port_status = f'   {str(port_condition.upper())}   | MAC прописан: {str(saved_mac_address)} | MAC на порту: {str(current_mac_address)} | Errors: {str(port_errors)}'
                                 print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
                     print(f'- ' * int(total_width / 2))
 

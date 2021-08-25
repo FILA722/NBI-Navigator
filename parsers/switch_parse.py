@@ -135,7 +135,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
 
         telnet.write(to_bytes(f'show mac address-table port {switch_port}'))
         logging.info(f"Выполнить команду show mac address-table port {switch_port}")
-        current_mac_addresses = re.findall('\w+:\w+:\w+:\w+:\w+:\w+', str(telnet.read_until(b'ic')))
+        current_mac_addresses = re.findall('\w+:\w+:\w+:\w+:\w+:\w+', str(telnet.read_until(b'#')))
 
         if not current_mac_addresses:
             current_mac_addresses = ['Не приходит']
@@ -144,6 +144,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         telnet.write(to_bytes('show ip source binding'))
         logging.info("Выполнить команду show ip source binding")
         time.sleep(1)
+        telnet.write(to_bytes('c'))
         show_ip_source_binding_pattern = f'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w +{client_ip_address} + \w+ + \w+ +\d+ +{switch_port}'
         show_ip_source_binding = re.findall(show_ip_source_binding_pattern, str(telnet.expect([b'Total', b'#'])))
 
