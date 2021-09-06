@@ -55,7 +55,7 @@ def console_output(client_name, client_data):
                         saved_mac_address = client_data[-2][client_ip_address][7]
                         current_mac_address = client_data[-2][client_ip_address][8]
                         port_errors = client_data[-2][client_ip_address][9]
-                     
+
                         if current_mac_address == saved_mac_address:
                             port_status = f'   {port_condition.upper()}   |  MAC: {str(saved_mac_address)}  |  Errors: {str(port_errors)}'
                             print('| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')

@@ -36,7 +36,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
     client_connection_data = {}
     for i in range(len(client_ip_addresses)):
         if not switches:
-            client_connection_data[client_ip_addresses[i]] = 'В нотатках нетсторе клиента не прописан свич'
+            client_connection_data[client_ip_addresses[i]] = 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе'
             break
 
         try:

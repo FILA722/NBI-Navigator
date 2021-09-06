@@ -50,7 +50,8 @@ def search(client):
 
         for client_ip_address in client_connection_data.keys():
             switch_ip_address = client_connection_data[client_ip_address][1]
-
+            if switch_ip_address == ' ':
+                break
             if not ping_status(switch_ip_address):
                 data_from_switch = 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ'
             else:
