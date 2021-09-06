@@ -2,11 +2,17 @@ bcrypt==3.2.0
 certifi==2021.5.30
 cffi==1.14.6
 charset-normalizer==2.0.4
+click==8.0.1
+colorama==0.4.4
 cryptography==3.4.7
 DateTime==4.3
+Flask==2.0.1
 future==0.18.2
 idna==3.2
 ipaddress==1.0.23
+itsdangerous==2.0.1
+Jinja2==3.0.1
+MarkupSafe==2.0.1
 netmiko==3.4.0
 ntc-templates==2.2.0
 paramiko==2.7.2
@@ -25,4 +31,5 @@ six==1.16.0
 tenacity==8.0.1
 textfsm==1.1.2
 urllib3==1.26.6
+Werkzeug==2.0.1
 zope.interface==5.4.0

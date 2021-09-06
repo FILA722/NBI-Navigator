@@ -1,0 +1,11 @@
+{% extends 'search_base.html' %}
+
+{% block title %}
+NBI-Navigator
+{% endblock %}
+
+{% block body %}
+    {% for name in client%}
+        <h5>{{ name }}</h5>
+    {% endfor %}
+{% endblock %}
