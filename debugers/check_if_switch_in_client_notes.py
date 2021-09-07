@@ -10,3 +10,5 @@ def check():
             for client_ip_address in client_data:
                 if client_data[client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе':
                     print(client_name)
+                    print(clients[client_name][-1])
+                    print('-' * 60)

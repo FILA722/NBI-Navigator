@@ -167,8 +167,11 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             telnet.write(to_bytes('c'))
             output_2 = str(telnet.read_until(b'#'))
             show_loopguard_output = f'{output_1} {output_2}'
-            show_loopguard = re.findall(f'{switch_port} +Active +\w+ +\d+ +\d+ +\d+', show_loopguard_output)[0]
-            port_errors = [show_loopguard.split("  ")[-1].strip()]
+            show_loopguard = re.findall(f'{switch_port} +Active +\w+ +\d+ +\d+ +\d+', show_loopguard_output)
+            if show_loopguard:
+                port_errors = [show_loopguard[0].split("  ")[-1].strip()]
+            else:
+                port_errors = 0
         logging.info(f"Команда show ip source binding выполнена, вернула значение saved_mac_addresses: {saved_mac_addresses}, и port_errors: {port_errors}")
 
     logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_addresses}, {current_mac_addresses}, {port_errors}")

@@ -1,7 +1,7 @@
 from parsers import parse_cacti, parse_zones
 from parsers import confidential
 from start_browser import driver
-from check_ping_status import ping_status
+from debugers.check_ping_status import ping_status
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
 from selenium.common.exceptions import NoSuchElementException
 import logging
@@ -61,7 +61,6 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
         for ip_zone in ip_mask_dictionary.keys():
             if client_ip_addresses[i] in ip_zone:
                 client_connection_preferences = ip_mask_dictionary[ip_zone]
-
         try:
             client_connection_data[client_ip_addresses[i]] = (client_switch_name,
                                                               client_switch_ip,

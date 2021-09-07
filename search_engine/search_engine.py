@@ -1,5 +1,5 @@
 from search_engine.transliterations import Transliterations
-from check_ping_status import ping_status
+from debugers.check_ping_status import ping_status
 from parsers import switch_parse
 import logging
 import json

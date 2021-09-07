@@ -1,5 +1,5 @@
 from parsers.confidential import ZonesLoginData, IPMASK
-from check_ping_status import ping_status
+from debugers.check_ping_status import ping_status
 import paramiko
 import re
 

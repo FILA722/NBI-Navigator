@@ -25,7 +25,7 @@ def main():
             update_db()
             continue
 
-        if client == '--check_db':
+        if client == '--check':
             check_if_switch_in_client_notes.check()
             continue
 
@@ -49,6 +49,5 @@ def main():
             for client_name in search_result:
                 print(client_name)
 
-if '__name__' == '__main__':
-    pass
-main()
+if __name__ == '__main__':
+    main()
