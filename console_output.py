@@ -28,14 +28,14 @@ def console_output(client_name, client_data):
     if client_data[-2]:
         for count in range(len(client_data[-2])):
             client_ip_address = list(client_data[-2].keys())[count]
-            gateway = client_data[-2][client_ip_address][3]
-            mask = client_data[-2][client_ip_address][4]
-            if client_data[-2][client_ip_address] == 'В нотатках нетсторе клиента не прописан свич':
-                print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address], ' ' * (right_field - len(client_data[-2][client_ip_address])), '|')
+            if client_data[-2][client_ip_address][-1] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе':
+                print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address][0], ' ' * (right_field - len(client_data[-2][client_ip_address][0])), '|')
+                print(f'-' * total_width)
             elif client_data[-2][client_ip_address][-1] == 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ':
                 print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', f'НЕТ СВЯЗИ С {client_data[-2][client_ip_address][0]}', ' ' * (right_field - len(client_data[-2][client_ip_address])), '|')
                 print(f'-' * total_width)
             else:
+
                 switch_name = client_data[-2][client_ip_address][0]
                 switch_model = client_data[-2][client_ip_address][5]
                 switch_port = client_data[-2][client_ip_address][2][1:]
@@ -63,10 +63,11 @@ def console_output(client_name, client_data):
                             port_status = f'   {str(port_condition.upper())}   | MAC прописан: {str(saved_mac_address)} | MAC на порту: {str(current_mac_address)} | Errors: {str(port_errors)}'
                             print(f'| Cостояние порта: ', ' ' * (left_field - len(f'Cостояние порта:')), '|', port_status, ' ' * (right_field - len(port_status)), '|')
                     print(f'- ' * int(total_width / 2))
-
-            answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
-            print(f'| Параметры подключения:', '|', answer_connection, ' ' * (right_field - len(answer_connection)), '|')
-            print(f'-' * total_width)
+                gateway = client_data[-2][client_ip_address][3]
+                mask = client_data[-2][client_ip_address][4]
+                answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
+                print(f'| Параметры подключения:', '|', answer_connection, ' ' * (right_field - len(answer_connection)), '|')
+                print(f'-' * total_width)
 
     print(f'| Netstore ', ' ' * (left_field - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (right_field - len(f'{client_data[-1]}')), '|')
     logging.info('Данные выведены в консоль')

@@ -49,9 +49,11 @@ def search(client):
         logging.info(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}')
 
         for client_ip_address in client_connection_data.keys():
+
+            if client_connection_data[client_ip_address] == ['Пожалуйста пропишите имя свича и порт клиента в Нетсторе']:
+                return coincidence_names[0], clients[coincidence_names[0]]
+
             switch_ip_address = client_connection_data[client_ip_address][1]
-            if switch_ip_address == ' ':
-                break
             if not ping_status(switch_ip_address):
                 data_from_switch = 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ'
             else:

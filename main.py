@@ -1,6 +1,7 @@
 from parsers import update_clients_database
 from search_engine import search_engine
 from console_output import print_nbi_header, console_output
+from debugers import check_if_switch_in_client_notes
 import logging
 import time
 
@@ -22,6 +23,10 @@ def main():
 
         if client == '--update':
             update_db()
+            continue
+
+        if client == '--check_db':
+            check_if_switch_in_client_notes.check()
             continue
 
         logging.info(f"***************************-={time.asctime(time.localtime())}=-***************************")
