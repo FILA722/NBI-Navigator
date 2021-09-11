@@ -29,14 +29,34 @@ def get_switch_name(client_switch_ip):
 
 def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_name_ip_dict, ip_mask_dictionary):
     client_ip_addresses = tuple(ip_address.text for ip_address in browser.find_elements(*NetstoreClientPageLocators.IP_ADDRESSES))
-
     switches = re.findall(r'==[A-Za-z0-9-_\/. #]+==', note)
     switches = tuple(switch.strip('==') for switch in switches)
 
     client_connection_data = {}
+
+    if not client_ip_addresses:
+        client_connection_data['IP не указан'] = 'Пожалуйста заполните анкету клиента в нетсторе'
+        return client_connection_data
+
     for i in range(len(client_ip_addresses)):
+
+        for ip_zone in ip_mask_dictionary.keys():
+            if client_ip_addresses[i] in ip_zone:
+                try:
+                    client_connection_preferences = ip_mask_dictionary[ip_zone]
+                    client_gateway = client_connection_preferences[0]
+                    client_mask = client_connection_preferences[1]
+                except (IndexError, UnboundLocalError) :
+                    logging.warning(f'Ошибка в данных подключения, проверьте Нетсторе {client_ip_addresses[i]}')
+                break
+            else:
+                client_gateway = 'не найден'
+                client_mask = 'не найден'
+
         if not switches:
-            client_connection_data[client_ip_addresses[i]] = ['Пожалуйста пропишите имя свича и порт клиента в Нетсторе']
+            client_connection_data[client_ip_addresses[i]] = ['Пожалуйста пропишите имя свича и порт клиента в Нетсторе',
+                                                              client_gateway,
+                                                              client_mask]
             continue
 
         try:
@@ -58,22 +78,12 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
 
         client_switch_model = get_switch_name(client_switch_ip)
 
-        for ip_zone in ip_mask_dictionary.keys():
-            if client_ip_addresses[i] in ip_zone:
-                client_connection_preferences = ip_mask_dictionary[ip_zone]
-        try:
-            client_connection_data[client_ip_addresses[i]] = (client_switch_name,
-                                                              client_switch_ip,
-                                                              client_port[0],
-                                                              client_connection_preferences[0],
-                                                              client_connection_preferences[1],
-                                                              client_switch_model)
-        except IndexError:
-            client_connection_preferences = {'Ошибка в данных подключения, проверьте Нетсторе'}
-            logging.warning('Ошибка в данных подключения, проверьте Нетсторе')
-        except UnboundLocalError:
-            client_connection_preferences = {f'Ошибка в данных подключения, проверьте Нетсторе {client_ip_addresses[i]}'}
-            logging.warning(f'Ошибка в данных подключения, проверьте Нетсторе {client_ip_addresses[i]}')
+        client_connection_data[client_ip_addresses[i]] = (client_switch_name,
+                                                          client_switch_ip,
+                                                          client_port[0],
+                                                          client_gateway,
+                                                          client_mask,
+                                                          client_switch_model)
 
     return client_connection_data
 
@@ -81,6 +91,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
 def collect_clients_data(url, login_, password):
     switch_name_ip_dict = parse_cacti.main()
     clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
+
     try:
         logging.info("Запуск браузера")
         browser = driver(url)
@@ -115,8 +126,8 @@ def collect_clients_data(url, login_, password):
             client_name = client[0].lower()
             client_netstore_url = client[1]
 
-            if client_name in confidential.UnprocessedNames.not_processed_clients:
-                continue
+            # if client_name in confidential.UnprocessedNames.not_processed_clients:
+            #     continue
 
             browser.get(client_netstore_url)
 

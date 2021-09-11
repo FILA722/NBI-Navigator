@@ -1,6 +1,8 @@
 from search_engine.transliterations import Transliterations
 from debugers.check_ping_status import ping_status
 from parsers import switch_parse
+from parsers.confidential import UnprocessedNames
+from console_output import console_output_not_processed_clients
 import logging
 import json
 import re
@@ -43,6 +45,10 @@ def search(client):
 
     elif len(coincidence_names) == 1:
         logging.info(f'Найден клиент: {coincidence_names[0]}')
+
+        if coincidence_names[0] in UnprocessedNames.not_processed_clients:
+            console_output_not_processed_clients(coincidence_names[0])
+
         client_connection_data = clients[coincidence_names[0]][8]
 
         print(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}...')
@@ -50,12 +56,12 @@ def search(client):
 
         for client_ip_address in client_connection_data.keys():
 
-            if client_connection_data[client_ip_address] == ['Пожалуйста пропишите имя свича и порт клиента в Нетсторе']:
+            if client_connection_data[client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе' :
                 return coincidence_names[0], clients[coincidence_names[0]]
 
             switch_ip_address = client_connection_data[client_ip_address][1]
             if not ping_status(switch_ip_address):
-                data_from_switch = 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ'
+                data_from_switch = ['НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ']
             else:
                 switch_port = client_connection_data[client_ip_address][2][1:]
                 data_from_switch = []
@@ -68,11 +74,11 @@ def search(client):
                         data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
                 except EOFError:
                     logging.info('Не получилось собрать информацию')
-                    data_from_switch = ['Не получилось собрать информацию']
+                    data_from_switch = ['НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ']
 
             if data_from_switch:
-                if data_from_switch == 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ':
-                    client_connection_data[client_ip_address].append(data_from_switch)
+                if data_from_switch[0] == 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ':
+                    client_connection_data[client_ip_address].append(data_from_switch[0])
                 else:
                     client_connection_data[client_ip_address] += data_from_switch
                 logging.info('Данные со свича успешно добавлены в данные по клиенту')

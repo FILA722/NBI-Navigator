@@ -2,6 +2,10 @@ import logging
 
 logging.info('Вывод данных в консоль')
 
+left_field = 20
+right_field = 70
+total_width = 100
+
 def print_nbi_header():
     print('=' * 100)
     print(' ' * 40, '-=NBI-NAVIGATOR=-')
@@ -9,9 +13,6 @@ def print_nbi_header():
 
 
 def console_output(client_name, client_data):
-    left_field = 20
-    right_field = 70
-    total_width = 100
     print(f'-' * total_width)
     print(f'| Имя клиента ', ' ' * (left_field - len('Имя клиента')), '|', client_name.upper(), ' ' * (right_field - len(client_name)), '|')
     print(f'-' * total_width)
@@ -28,7 +29,7 @@ def console_output(client_name, client_data):
     if client_data[-2]:
         for count in range(len(client_data[-2])):
             client_ip_address = list(client_data[-2].keys())[count]
-            if client_data[-2][client_ip_address][-1] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе':
+            if client_data[-2][client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе':
                 print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address][0], ' ' * (right_field - len(client_data[-2][client_ip_address][0])), '|')
                 print(f'-' * total_width)
             elif client_data[-2][client_ip_address][-1] == 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ':
@@ -71,3 +72,11 @@ def console_output(client_name, client_data):
 
     print(f'| Netstore ', ' ' * (left_field - len('Netstore')), '|', f'{client_data[-1]}', ' ' * (right_field - len(f'{client_data[-1]}')), '|')
     logging.info('Данные выведены в консоль')
+
+def console_output_not_processed_clients(client_name):
+    print_nbi_header()
+    print(f'-' * total_width)
+    print(f'| Имя клиента ', ' ' * (left_field - len('Имя клиента')), '|', client_name.upper(), ' ' * (right_field - len(client_name)), '|')
+    print(f'-' * total_width)
+    output = 'Данные о подключении клиента некорректны, пожалуйста исправьте их в нетсторе'
+    print(f'| {output} ', ' ' * (left_field - len(output)), '|')
