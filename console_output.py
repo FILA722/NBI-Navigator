@@ -24,7 +24,7 @@ def console_output(client_name, client_data):
     print(f'-' * total_width)
     print(f'| Наличие конвертора ', ' '*(left_field - len('Наличие конвертора')),'|',client_data[5], ' '*(right_field - len(client_data[5])),'|')
     print(f'-' * total_width)
-    print(f'| Скорость ', ' ' * (left_field - len('Скорость')), '|', f'{client_data[6]} Kb/sec', ' ' * (right_field - len(f'{client_data[6]} Kb/sec')), '|')
+    print(f'| Менеджер ', ' ' * (left_field - len('Менеджер')), '|', client_data[6], ' ' * (right_field - len(client_data[6])), '|')
     print(f'-' * total_width)
     if client_data[-2]:
         for count in range(len(client_data[-2])):
@@ -33,6 +33,8 @@ def console_output(client_name, client_data):
                 print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address], ' ' * (right_field - len(client_data[-2][client_ip_address])), '|')
                 print(f'-' * total_width)
             elif client_data[-2][client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе':
+                print(f'| Адрес ', ' ' * (left_field - len('Адрес')), '|',client_data[2],' ' * (right_field - len(client_data[2])), '|')
+                print(f'-' * total_width)
                 print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address][0], ' ' * (right_field - len(client_data[-2][client_ip_address][0])), '|')
                 print(f'-' * total_width)
 

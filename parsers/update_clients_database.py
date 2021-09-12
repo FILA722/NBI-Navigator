@@ -10,6 +10,8 @@ import re
 
 logging.basicConfig(filename="logs.txt", level=logging.INFO)
 
+def get_manager_info(name):
+    return confidential.MANAGERS.manager_dictionary[name]
 
 def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
     client_connection_preferences = {}
@@ -145,7 +147,13 @@ def collect_clients_data(url, login_, password):
             client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
             client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
             client_is_converter = 'НЕТ' if browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked") == None else 'ЕСТЬ'
-            client_speed = browser.find_element(*NetstoreClientPageLocators.SPEED).get_attribute("value")
+            #client_speed = browser.find_element(*NetstoreClientPageLocators.SPEED).get_attribute("value")
+
+            try:
+                client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER).get_attribute("value"))
+            except NoSuchElementException:
+                client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER_2).get_attribute("value"))
+
             client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
             client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes, switch_name_ip_dict,  clients_ip_gateway_mask_dict)
 
@@ -156,7 +164,8 @@ def collect_clients_data(url, login_, password):
                     client_physical_address_notes,
                     client_is_active,
                     client_is_converter,
-                    client_speed,
+                    # client_speed,
+                    client_manager,
                     client_notes,
                     client_connection_data,
                     client_netstore_url)
