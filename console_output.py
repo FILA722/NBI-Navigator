@@ -33,10 +33,17 @@ def console_output(client_name, client_data):
                 print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address], ' ' * (right_field - len(client_data[-2][client_ip_address])), '|')
                 print(f'-' * total_width)
             elif client_data[-2][client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе':
-                print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address], ' ' * (right_field - len(client_data[-2][client_ip_address])), '|')
+                print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', client_data[-2][client_ip_address][0], ' ' * (right_field - len(client_data[-2][client_ip_address][0])), '|')
                 print(f'-' * total_width)
+
+                gateway = client_data[-2][client_ip_address][1]
+                mask = client_data[-2][client_ip_address][2]
+                answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
+                print(f'| Параметры подключения:', '|', answer_connection, ' ' * (right_field - len(answer_connection)),'|')
+                print(f'-' * total_width)
+
             elif client_data[-2][client_ip_address][-1] == 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ':
-                print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', f'НЕТ СВЯЗИ С {client_data[-2][client_ip_address][0]}', ' ' * (right_field - len(client_data[-2][client_ip_address])), '|')
+                print(f'| Подключение {count + 1} ', ' ' * (left_field - len(f'Подключение {count + 1}')), '|', f'НЕТ СВЯЗИ С {client_data[-2][client_ip_address][0]}', ' ' * (right_field - len(f'НЕТ СВЯЗИ С {client_data[-2][client_ip_address][0]}')), '|')
                 print(f'-' * total_width)
             else:
 
