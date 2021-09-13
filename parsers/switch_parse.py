@@ -126,12 +126,15 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         telnet.expect([b"#"])
         logging.info("Авторизация админа на свиче прошла успешно")
 
-        telnet.write(to_bytes(f'show interfaces config {switch_port}'))
-        logging.info(f"Выполнить команду show interfaces config {switch_port}")
-        show_interfaces_config = re.findall('Active \\\\t:\w+', str(telnet.read_until(b"#")))[0]
-        port_condition_slice = show_interfaces_config[show_interfaces_config.index(':') + 1:]
-        port_condition = 'UP' if port_condition_slice == 'Yes' else 'DOWN'
-        logging.info(f"Команда show interfaces config {switch_port} выполнена, вернула значение port_condition: {port_condition}")
+        telnet.write(to_bytes(f'show interfaces {switch_port}'))
+        logging.info(f"Выполнить команду show interfaces {switch_port}")
+        show_interfaces_answer = str(telnet.expect([b"quit"], timeout=2))
+        show_interfaces_config = re.findall(r'\\t\\tLink\\t\\t\\t:\w+', show_interfaces_answer)
+        if show_interfaces_config:
+            port_condition = 'DOWN' if show_interfaces_config[0].split(':')[1].strip() == 'Down' else 'UP'
+        else:
+            port_condition = 'Не определён'
+        logging.info(f"Команда show interfaces {switch_port} выполнена, вернула значение port_condition: {port_condition}")
 
         telnet.write(to_bytes(f'show mac address-table port {switch_port}'))
         logging.info(f"Выполнить команду show mac address-table port {switch_port}")
