@@ -127,6 +127,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         logging.info("Авторизация админа на свиче прошла успешно")
 
         telnet.write(to_bytes(f'show interfaces {switch_port}'))
+        time.sleep(1)
         logging.info(f"Выполнить команду show interfaces {switch_port}")
         show_interfaces_answer = str(telnet.expect([b"quit"], timeout=2))
         show_interfaces_config = re.findall(r'\\t\\tLink\\t\\t\\t:\w+', show_interfaces_answer)
