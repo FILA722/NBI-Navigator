@@ -109,9 +109,9 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
 
 
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
+    time.sleep(1)
     with telnetlib.Telnet(switch_ip_address) as telnet:
-
-        start_question = telnet.expect([b"User name:"], timeout=2)
+        start_question = telnet.expect([b":"], timeout=2)
         if start_question:
             logging.info("Телнет сессия установлена")
         else:
@@ -215,7 +215,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
                 port_errors = 0
         logging.info(f"Команда show ip source binding выполнена, вернула значение saved_mac_addresses: {saved_mac_addresses}, и port_errors: {port_errors}")
 
-        telnet.write(to_bytes('exit'))
+        # telnet.write(to_bytes('exit'))
 
     logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_addresses}, {current_mac_addresses}, {port_errors}")
     return port_condition, saved_mac_addresses, current_mac_addresses, port_errors

@@ -9,17 +9,17 @@ def search():
     return render_template('search.html')
 
 
-@app.route('/client', methods=('GET', 'POST'))
-def find_client():
-    if request.method == 'POST':
-        client = request.form['client']
-
-        if not client:
-            flash('Client not found')
-        else:
-            coincidence_names = search_engine.search(client)
-            print(coincidence_names)
-            return render_template('client.html', client=coincidence_names)
+@app.route('/client/<client_name>')
+def find_client(client_name):
+    search_result = search_engine.search(client_name)
+    client_name = search_result[0]
+    client_data = search_result[1]
+    print(client_name)
+    print(client_data)
+    if not search_result:
+        return 'Client not found'
+    else:
+        return client_name
 
 
 

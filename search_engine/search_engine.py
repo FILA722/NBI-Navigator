@@ -60,18 +60,13 @@ def search(client):
                 else:
                     switch_port = client_connection_data[client_ip_address][2][1:]
                     data_from_switch = []
-                    # try:
+
                     if client_connection_data[client_ip_address][5] == 'huawei':
                         logging.info(f'Установка телнет-сессии с huawei {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                         data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
                     elif client_connection_data[client_ip_address][5] == 'zyxel':
                         logging.info(f'Установка телнет-сессии с zyxel {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                         data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
-                    # except EOFError:
-                    #     logging.info('Не получилось собрать информацию')
-                    #     print(2)
-                    #     data_from_switch = ['НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ']
-                # print(data_from_switch)
 
             if data_from_switch:
                 if data_from_switch[0] == 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ':
