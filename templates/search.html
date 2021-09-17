@@ -42,9 +42,11 @@ NBI-Navigator
    </thead>
   <tbody>
   {% for client in clients %}
+
     <tr>
-        <td> <a href="/client/{{ client }}">{{ client.upper() }}</a></td>
+      <td> <a href="/client/{{ client }}"> {{ client.upper() }} </a> </td>
     </tr>
+
   {% endfor %}
   </tbody>
   </table>
