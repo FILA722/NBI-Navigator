@@ -12,28 +12,44 @@ NBI-Navigator
       <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
         <h5>NBI-Navigator</h5>
       </ul>
-
+      <div class="col-md-1 dropdown">
+        <button class="btn btn-secondary dropdown-toggle b1" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+          Отключенные за неуплату
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          <li><a class="dropdown-item" href="#">Action</a></li>
+          <li><a class="dropdown-item" href="#">Another action</a></li>
+        </ul>
+      </div>
       <div class="col-md-3 text-end">
         <button type="button" class="btn btn-warning"><font color="#696969">Обновить базу данных</font></button>
+
       </div>
     </header>
   </div>
 <br>
 <form method="post">
   <div class="input-group mb-3">
-    <input type="text" class="form-control" value="{{ request.form['client'] }}" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
-    <button class="btn btn-outline-primary" type="button" id="button-addon2">Найти</button>
+    <input type="text" name="client" class="form-control" value="{{ request.form['client'] }}" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
+    <input type="submit" class="btn btn-outline-primary" value="Найти">
   </div>
+  <br>
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th scope="col">Результаты поиска:</th>
+    </tr>
+   </thead>
+  <tbody>
+  {% for client in clients %}
+    <tr>
+        <td> <a href="/client/{{ client }}">{{ client.upper() }}</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  </table>
 </form>
 <br>
-<div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle b1" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-    Отключенные за неуплату
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-    <li><a class="dropdown-item" href="#">Action</a></li>
-    <li><a class="dropdown-item" href="#">Another action</a></li>
-  </ul>
-</div>
+
 
 {% endblock%}
