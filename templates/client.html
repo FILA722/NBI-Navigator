@@ -7,12 +7,10 @@ NBI-Navigator
 {% block body %}
 <br>
 <div class="row">
-    <div class="col-8">
+    <div class="col-9">
         <div class="card">
             <div class="card-header">
-                <div class="about ">
-                    <h5>{{ client_name.upper() }} | <a href="{{ client_url }}">Netsore</a></h5>
-                </div>
+                <h5>{{ client_name.upper() }} | <a href="{{ client_url }}">Netsore</a></h5>
             </div>
                     <table class="table table-bordered">
                         <tbody>
@@ -36,21 +34,29 @@ NBI-Navigator
                                 <th scope="row">Конвертор: </th>
                                 <td>{{ client_converter }}</td>
                             </tr>
+
                         </tbody>
                     </table>
                 </div>
     </div>
-    <div class="col-4">
+    <div class="col-3">
         <div class="card">
             <div class="card-header">
-                <h5>{{ client_address }}</h5>
+                <h5>Нотатки клиента:</h5>
+            </div>
+            <div class="card-body">
+                {{ client_notes }}
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h5>Нотатки бизнес-центра:</h5>
             </div>
             <div class="card-body">
                 {{ client_address_notes }}
             </div>
         </div>
-</div>
-
+    </div>
 
 <h4>{{ client_name.upper() }}</h4>
 <p>{{ client_tel }}</p>
