@@ -6,6 +6,52 @@ NBI-Navigator
 
 {% block body %}
 <br>
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="about ">
+                    <h5>{{ client_name.upper() }} | <a href="{{ client_url }}">Netsore</a></h5>
+                </div>
+            </div>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                              <th scope="row">Телефон: </th>
+                              <td>{{ client_tel }}</td>
+                            </tr>
+                            <tr>
+                              <th scope="row">Менеджер: </th>
+                              <td>{{ client_manager }}</td>
+                            </tr>
+                            <tr>
+                              <th scope="row">E-mail: </th>
+                              <td>{{ client_email }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Состояние: </th>
+                                <td>{{ client_is_active }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Конвертор: </th>
+                                <td>{{ client_converter }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+    </div>
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>{{ client_address }}</h5>
+            </div>
+            <div class="card-body">
+                {{ client_address_notes }}
+            </div>
+        </div>
+</div>
+
+
 <h4>{{ client_name.upper() }}</h4>
 <p>{{ client_tel }}</p>
 <p>{{ client_email }}</p>

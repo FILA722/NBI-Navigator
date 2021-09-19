@@ -2,3 +2,9 @@ body {
     background: #FFFAF0;
     color: #696969;
 }
+.col {
+    background-color: white;
+}
+.about {
+ display:inline-block;
+}
