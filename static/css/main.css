@@ -5,3 +5,13 @@ body {
 .col {
     background-color: white;
 }
+.dropdown {
+  left: 25%;
+}
+.center {
+    text-align: center;
+}
+.client-table {
+    margin: -2px;
+    background-color: white;
+}

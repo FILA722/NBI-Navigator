@@ -27,7 +27,7 @@ def transliteration(client):
 
 
 def search(client):
-    search_names = transliteration(client)
+    search_names = transliteration(f'{client}')
 
     coincidence_names = []
     for client_name in clients_names:

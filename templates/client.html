@@ -6,68 +6,54 @@ NBI-Navigator
 
 {% block body %}
 <br>
-<div class="row">
-    <div class="col-9">
-        <div class="card">
-            <div class="card-header">
-                <h5>{{ client_name.upper() }} | <a href="{{ client_url }}">Netsore</a></h5>
-            </div>
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                              <th scope="row">Телефон: </th>
-                              <td>{{ client_tel }}</td>
-                            </tr>
-                            <tr>
-                              <th scope="row">Менеджер: </th>
-                              <td>{{ client_manager }}</td>
-                            </tr>
-                            <tr>
-                              <th scope="row">E-mail: </th>
-                              <td>{{ client_email }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Состояние: </th>
-                                <td>{{ client_is_active }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Конвертор: </th>
-                                <td>{{ client_converter }}</td>
-                            </tr>
+<table class="table table-bordered client-table border border-2">
+    <tbody>
+        <tr>
+            <th scope="row" class="center"><h5>{{ client_name.upper() }} | <a href="{{ client_url }}">Netsore</a></h5></th>
+        </tr>
+    </tbody>
+</table>
+<table class="table table-bordered client-table border border-2">
+        <tbody>
+            <tr>
+              <th scope="row" class="center">Телефон: </th>
+              <td class="center">{{ client_tel }}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="center">Менеджер: </th>
+              <td class="center">{{ client_manager }}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="center">E-mail: </th>
+              <td class="center">{{ client_email }}</td>
+            </tr>
+            <tr>
+                <th scope="row" class="center">Состояние: </th>
+                <td class="center">{{ client_is_active }}</td>
+            </tr>
+            <tr>
+                <th scope="row" class="center">Конвертор: </th>
+                <td class="center">{{ client_converter }}</td>
+            </tr>
+        </tbody>
+</table>
+<br>
+{% for ip in client_connection_data%}
+<table class="table table-bordered client-table border border-2">
+    <tbody>
+        <tr>
+          <th scope="row" class="center">{{ ip }}</th>
+          <td class="center">GW: {{ client_connection_data[ip][3] }}</td>
+          <td class="center">MASK: {{ client_connection_data[ip][4] }}</td>
+        </tr>
+        <tr>
+          <td class="center"><a href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
+          <td class="center">{{ client_connection_data[ip][6].upper() }}</td>
+          <td class="center">Ошибки: {{ client_connection_data[ip][9] }}</td>
 
-                        </tbody>
-                    </table>
-                </div>
-    </div>
-    <div class="col-3">
-        <div class="card">
-            <div class="card-header">
-                <h5>Нотатки клиента:</h5>
-            </div>
-            <div class="card-body">
-                {{ client_notes }}
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <h5>Нотатки бизнес-центра:</h5>
-            </div>
-            <div class="card-body">
-                {{ client_address_notes }}
-            </div>
-        </div>
-    </div>
-
-<h4>{{ client_name.upper() }}</h4>
-<p>{{ client_tel }}</p>
-<p>{{ client_email }}</p>
-<p>{{ client_address }}</p>
-<p>{{ client_address_notes }}</p>
-<p>{{ client_is_active }}</p>
-<p>{{ client_converter }}</p>
-<p>{{ client_manager }}</p>
-<p>{{ client_notes }}</p>
-<p>{{ client_connection_data }}</p>
-<p>{{ client_url }}</p>
-
+        </tr>
+    </tbody>
+</table>
+<br>
+{% endfor %}
 {% endblock %}
