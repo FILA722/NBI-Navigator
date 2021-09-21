@@ -27,24 +27,13 @@ NBI-Navigator
   <br>
   <div class="row">
     <div class="col-6">
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th scope="col">Результаты поиска:</th>
-          </tr>
-        </thead>
-        <tbody>
+<!--        <h5>Результаты поиска:</h5>-->
+        <div class="list-group">
           {% for client in clients %}
-            <tr>
-               <td>
-                 <a href="/client/{{ client }}">
-                  {{ client.upper() }}
-                 </a>
-               </td>
-            </tr>
+              <a href="/client/{{ client }}" class="list-group-item list-group-item-action list-group-item-light">{{ client.upper() }}</a>
           {% endfor %}
-        </tbody>
-      </table>
+        </div>
+
     </div>
     <div class="col-6">
       <div class="col-md-1 dropdown">
@@ -63,3 +52,11 @@ NBI-Navigator
 
 
 {% endblock%}
+
+<!--<tr>-->
+<!--   <td>-->
+<!--     <a href="/client/{{ client }}">-->
+<!--      {{ client.upper() }}-->
+<!--     </a>-->
+<!--   </td>-->
+<!--</tr>-->

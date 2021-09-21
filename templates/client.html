@@ -39,21 +39,40 @@ NBI-Navigator
 </table>
 <br>
 {% for ip in client_connection_data%}
-<table class="table table-bordered client-table border border-2">
-    <tbody>
-        <tr>
-          <th scope="row" class="center">{{ ip }}</th>
-          <td class="center">GW: {{ client_connection_data[ip][3] }}</td>
-          <td class="center">MASK: {{ client_connection_data[ip][4] }}</td>
-        </tr>
-        <tr>
-          <td class="center"><a href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
-          <td class="center">{{ client_connection_data[ip][6].upper() }}</td>
-          <td class="center">Ошибки: {{ client_connection_data[ip][9] }}</td>
 
-        </tr>
-    </tbody>
-</table>
-<br>
+    <div class="col-3">
+        <table class="table table-bordered client-table border border-2">
+            <tbody>
+                <tr>
+                    <th scope="row" class="center"><h5>{{ ip }} </h5></th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <table class="table table-bordered client-table border border-2">
+        <tbody>
+            <tr>
+              <td class="center"><a href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
+              <td class="center">{{ client_connection_data[ip][6].upper() }}</td>
+              <td class="center">Ошибки: {{ client_connection_data[ip][9] }}</td>
+              <td class="center col-4"><button type="button" class="btn btn-danger">Дернуть порт</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-bordered client-table border border-2">
+        <tbody>
+            <tr>
+              <td class="center col-4"> Мак приходит: {{ client_connection_data[ip][8] }}</td>
+              <td class="center col-4"> Мак прописан: {{ client_connection_data[ip][7] }}</td>
+              <td class="center col-4"><button type="button" class="btn btn-warning">Прописать мак</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
 {% endfor %}
+
+<br>
+
 {% endblock %}
