@@ -20,10 +20,6 @@ NBI-Navigator
               <td class="center">{{ client_tel }}</td>
             </tr>
             <tr>
-              <th scope="row" class="center">Менеджер: </th>
-              <td class="center">{{ client_manager }}</td>
-            </tr>
-            <tr>
               <th scope="row" class="center">E-mail: </th>
               <td class="center">{{ client_email }}</td>
             </tr>
@@ -34,6 +30,10 @@ NBI-Navigator
             <tr>
                 <th scope="row" class="center">Конвертор: </th>
                 <td class="center">{{ client_converter }}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="center">Менеджер: </th>
+              <td class="center">{{ client_manager }}</td>
             </tr>
         </tbody>
 </table>
@@ -53,10 +53,11 @@ NBI-Navigator
     <table class="table table-bordered client-table border border-2">
         <tbody>
             <tr>
+              <th scope="row" class="center col-3">Состояние порта:</th>
               <td class="center"><a href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
-              <td class="center">{{ client_connection_data[ip][6].upper() }}</td>
+              <td class="center">Port: {{ client_connection_data[ip][6].upper() }}</td>
               <td class="center">Ошибки: {{ client_connection_data[ip][9] }}</td>
-              <td class="center col-4"><button type="button" class="btn btn-danger">Дернуть порт</button></td>
+              <td class="center col-3"><button type="button" class="btn btn-danger">Дернуть порт</button></td>
             </tr>
         </tbody>
     </table>
@@ -64,9 +65,22 @@ NBI-Navigator
     <table class="table table-bordered client-table border border-2">
         <tbody>
             <tr>
-              <td class="center col-4"> Мак приходит: {{ client_connection_data[ip][8] }}</td>
-              <td class="center col-4"> Мак прописан: {{ client_connection_data[ip][7] }}</td>
-              <td class="center col-4"><button type="button" class="btn btn-warning">Прописать мак</button></td>
+              <th scope="row" class="center сol-3">MAC на порту:</th>
+              <td class="center col-3">
+                  Прописан:
+                  {% for mac_on in client_connection_data[ip][7] %}
+                    <br>
+                    {{ mac_on }}
+                  {% endfor %}
+              </td>
+              <td class="center col-3">
+                Приходит:
+                  {% for mac_in in client_connection_data[ip][8] %}
+                    <br>
+                    {{ mac_in }}
+                  {% endfor %}
+              </td>
+              <td class="center col-3"><button type="button" class="btn btn-warning">Прописать мак</button></td>
             </tr>
         </tbody>
     </table>
