@@ -1,6 +1,6 @@
 import logging
 from debugers import check_mac_address
-from debugers import check_ping_status
+
 logging.info('Вывод данных в консоль')
 
 left_field = 20
@@ -81,7 +81,7 @@ def console_output(client_name, client_data):
                 gateway = client_data[-2][client_ip_address][3]
                 mask = client_data[-2][client_ip_address][4]
                 answer_connection = f'IP: {client_ip_address} | GW: {gateway} | MASK: {mask}'
-                ping_status = 'PING IS OK!' if check_ping_status.ping_status(client_ip_address)==True else 'NO PING'
+                ping_status = 'PING IS OK!' if client_data[-2][client_ip_address][10]==True else 'NO PING'
                 print(f'| Параметры подключения:', '|', answer_connection, ' ' * (right_field - len(answer_connection)), '|')
                 print(f'- ' * int(total_width / 2))
                 print(f'| Ping статус: ', ' ' * (left_field - len(f'Ping статус:')), '|', ' ' * (int(right_field / 2) - len(ping_status)), ping_status, ' ' * (int(right_field/2)-1), '|')

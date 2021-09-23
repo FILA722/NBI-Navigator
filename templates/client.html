@@ -39,15 +39,18 @@ NBI-Navigator
 </table>
 <br>
 {% for ip in client_connection_data%}
-
     <div class="col-3">
-        <table class="table table-bordered client-table border border-2">
+        {% if client_connection_data[ip][10] == True %}
+            <table class="table table-bordered table-success client-table border border-2">
+        {% else %}
+            <table class="table table-bordered table-danger client-table border border-2">
+        {% endif %}
             <tbody>
                 <tr>
-                    <th scope="row" class="center"><h5>{{ ip }} </h5></th>
+                    <th scope="row" class="center"><h5>{{ ip }}</h5></th>
                 </tr>
             </tbody>
-        </table>
+            </table>
     </div>
 
     <table class="table table-bordered client-table border border-2">
