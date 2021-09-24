@@ -127,7 +127,7 @@ def collect_clients_data(url, login_, password):
         clients_database = {}
         logging.info("Начало сбора данных всех клиентов с нетсторе")
         for client in clients_netstore_name_url_list:
-            client_name = client[0].lower()
+            client_name = ((client[0].lower()).replace('(', '')).replace(')', '')
             client_netstore_url = client[1]
 
             # if client_name in confidential.UnprocessedNames.not_processed_clients:
