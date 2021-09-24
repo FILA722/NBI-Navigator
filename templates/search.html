@@ -6,25 +6,23 @@ NBI-Navigator
 
 {% block body %}
 <br>
-<div class="container">
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
 
       <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
         <h5>NBI-Navigator</h5>
       </ul>
       <div class="col-md-3 text-end">
-        <button type="button" class="btn btn-warning"><font color="#696969">Обновить базу данных</font></button>
+        <button type="button" class="btn btn-warning"><font color="#696969">Обновить БД</font></button>
 
       </div>
     </header>
-  </div>
 <br>
 <form method="post">
   <div class="input-group mb-3">
     <input type="text" name="client" class="form-control" value="{{ request.form['client'] }}" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
     <input type="submit" class="btn btn-outline-primary" value="Найти">
   </div>
-  <br>
+<br>
   <div class="row">
     <div class="col-6">
         <div class="list-group">

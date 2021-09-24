@@ -111,7 +111,9 @@ def collect_clients_data(url, login_, password):
         open_all_clients_button.click()
         logging.info("Авторизация в нетсторе прошла успешно")
 
-        client_objects = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST) + browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
+        active_clients = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
+        terminated_clients = browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
+        client_objects = active_clients + terminated_clients
         logging.info("Сбор клиент-объектов прошел успешно")
 
         clients_netstore_name_url_list = []

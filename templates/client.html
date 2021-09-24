@@ -1,4 +1,5 @@
 {% extends 'search_base.html' %}
+@import "../node_modules/bootstrap/scss/bootstrap";
 
 {% block title %}
 NBI-Navigator
@@ -6,14 +7,31 @@ NBI-Navigator
 
 {% block body %}
 <br>
-<table class="table table-bordered client-table border border-2">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+      <ul class="nav col-12 col-md-auto mb-3 justify-content-center mb-md-0">
+        <a class="btn btn-outline-secondary" href="/">NBI-Navigator</a>
+      </ul>
+      <div class="col-8">
+          <form method="post">
+              <div class="input-group">
+                <input type="text" name="client" class="form-control" value="{{ request.form['client'] }}" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
+                <input type="submit" class="btn btn-outline-primary" value="Найти">
+              </div>
+            </form>
+      </div>
+        <button type="button" class="btn btn-warning"><font color="#696969">Обновить БД</font></button>
+      </div>
+    </header>
+<br>
+<div class="container">
+<table class="table table-bordered client-table border border-2 ip">
     <tbody>
         <tr>
-            <th scope="row" class="center"><h5>{{ client_name.upper() }} | <a href="{{ client_url }}">Netsore</a></h5></th>
+            <th scope="row" class="center"><h5>{{ client_name.upper() }} | <a class="btn btn-outline-primary btn-sm" href="{{ client_url }}">Netsore</a></h5></th>
         </tr>
     </tbody>
 </table>
-<table class="table table-bordered client-table border border-2">
+<table class="table table-bordered client-table border border-2 ip">
         <tbody>
             <tr>
               <th scope="row" class="center">Телефон: </th>
@@ -28,7 +46,7 @@ NBI-Navigator
                 {% if client_is_active == "Активний" %}
                     <td class="center"><font color="green"> {{ client_is_active }} </font></td>
                 {% else %}
-                    <td class="center"><font color="red"> {{ client_is_active }} </font></td>
+                    <td class="center"><font color="red"> {{ client_is_active }} </font> <button type="button" class="btn btn-outline-success btn-sm">Включить</button> </td>
                 {% endif %}
             </tr>
             <tr>
@@ -43,30 +61,37 @@ NBI-Navigator
 </table>
 <br>
 {% for ip in client_connection_data%}
-    <div class="col-3">
-        {% if client_connection_data[ip][10] == True %}
-            <table class="table table-bordered table-success client-table border border-2">
-        {% else %}
-            <table class="table table-bordered table-danger client-table border border-2">
-        {% endif %}
-            <tbody>
-                <tr>
-                    <th scope="row" class="center"><h5>{{ ip }}</h5></th>
-                </tr>
-            </tbody>
-            </table>
+
+    <div class="row">
+        <div class="col-3">
+            {% if client_connection_data[ip][10] == True %}
+                <table class="table table-bordered table-success client-table border border-2 ip">
+            {% else %}
+                <table class="table table-bordered table-danger client-table border border-2 ip">
+            {% endif %}
+                    <tbody>
+                        <tr>
+                            <th scope="row" class="center"><h5>{{ ip }}</h5></th>
+                        </tr>
+                    </tbody>
+                </table>
+        </div>
     </div>
 
-    <table class="table table-bordered client-table border border-2">
+    <table class="table table-bordered client-table border border-2 ip">
         <tbody>
             <tr>
-              <th scope="row" class="center col-3">Состояние порта:</th>
-              <td class="center"><a href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
+              <th scope="row" class="center col-2">Состояние порта:</th>
+              {% if client_connection_data[ip][11] == True %}
+                <td class="center col-3"><a class="btn btn-outline-primary btn-sm" href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
+              {% else %}
+                <td class="center col-3"><a class="btn btn-outline-primary btn-sm disabled" role="button" aria-disabled="true">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
+              {% endif %}
 
               {% if client_connection_data[ip][6] == 'up' %}
-                <td class="center">Port: <font color="green">{{ client_connection_data[ip][6].upper() }}</font></td>
+                <td class="center"><font color="green">{{ client_connection_data[ip][6].upper() }}</font></td>
               {% else %}
-                <td class="center">Port: <font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
+                <td class="center"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
               {% endif %}
 
               {% if client_connection_data[ip][9] == '0' %}
@@ -75,23 +100,23 @@ NBI-Navigator
                 <td class="center">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
               {% endif %}
 
-              <td class="center col-3"><button type="button" class="btn btn-danger">Дернуть порт</button></td>
+              <td class="center col-2"><button type="button" class="btn btn-danger">Дернуть порт</button></td>
             </tr>
         </tbody>
     </table>
 
-    <table class="table table-bordered client-table border border-2">
+    <table class="table table-bordered client-table border border-2 ip">
         <tbody>
             <tr>
-              <th scope="row" class="center сol-3">MAC на порту:</th>
-              <td class="center col-3">
+              <th scope="row" class="center">MAC на порту:</th>
+              <td class="center col-4">
                   Прописан:
                   {% for mac_on in client_connection_data[ip][7] %}
                     <br>
                     <font color="green">{{ mac_on }}</font>
                   {% endfor %}
               </td>
-              <td class="center col-3">
+              <td class="center col-4">
                 Приходит:
                   {% for mac_in in client_connection_data[ip][8] %}
                     <br>
@@ -102,7 +127,7 @@ NBI-Navigator
                       {% endif %}
                   {% endfor %}
               </td>
-              <td class="center col-3"><button type="button" class="btn btn-warning">Прописать мак</button></td>
+              <td class="center col-2"><button type="button" class="btn btn-warning">Прописать</button></td>
             </tr>
         </tbody>
     </table>
@@ -146,5 +171,7 @@ NBI-Navigator
     </div>
 </div>
 <br>
+</div>
+
 
 {% endblock %}

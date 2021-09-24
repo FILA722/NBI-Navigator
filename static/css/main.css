@@ -2,16 +2,22 @@ body {
     background: #FFFAF0;
     color: #696969;
 }
+
 .col {
     background-color: white;
 }
+
 .dropdown {
   left: 25%;
 }
+
 .center {
     text-align: center;
+    margin: auto;
 }
-.client-table {
-    margin: -2px;
+
+.ip {
+    margin: -1px;
     background-color: white;
 }
+

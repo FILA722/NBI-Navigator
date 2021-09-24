@@ -75,7 +75,7 @@ def search(client):
                     client_connection_data[client_ip_address] += data_from_switch
                 logging.info('Данные со свича успешно добавлены в данные по клиенту')
 
-            client_connection_data[client_ip_address] += [ping_status(client_ip_address)]
+            client_connection_data[client_ip_address] += [ping_status(client_ip_address), ping_status(switch_ip_address)]
 
 
         return coincidence_names[0], clients[coincidence_names[0]]
