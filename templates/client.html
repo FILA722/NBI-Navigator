@@ -25,7 +25,11 @@ NBI-Navigator
             </tr>
             <tr>
                 <th scope="row" class="center">Состояние: </th>
-                <td class="center">{{ client_is_active }}</td>
+                {% if client_is_active == "Активний" %}
+                    <td class="center"><font color="green"> {{ client_is_active }} </font></td>
+                {% else %}
+                    <td class="center"><font color="red"> {{ client_is_active }} </font></td>
+                {% endif %}
             </tr>
             <tr>
                 <th scope="row" class="center">Конвертор: </th>
@@ -58,8 +62,19 @@ NBI-Navigator
             <tr>
               <th scope="row" class="center col-3">Состояние порта:</th>
               <td class="center"><a href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
-              <td class="center">Port: {{ client_connection_data[ip][6].upper() }}</td>
-              <td class="center">Ошибки: {{ client_connection_data[ip][9] }}</td>
+
+              {% if client_connection_data[ip][6] == 'up' %}
+                <td class="center">Port: <font color="green">{{ client_connection_data[ip][6].upper() }}</font></td>
+              {% else %}
+                <td class="center">Port: <font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
+              {% endif %}
+
+              {% if client_connection_data[ip][9] == '0' %}
+                <td class="center">Ошибки: <font color="green">{{ client_connection_data[ip][9] }}</font></td>
+              {% else %}
+                <td class="center">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
+              {% endif %}
+
               <td class="center col-3"><button type="button" class="btn btn-danger">Дернуть порт</button></td>
             </tr>
         </tbody>
@@ -73,14 +88,18 @@ NBI-Navigator
                   Прописан:
                   {% for mac_on in client_connection_data[ip][7] %}
                     <br>
-                    {{ mac_on }}
+                    <font color="green">{{ mac_on }}</font>
                   {% endfor %}
               </td>
               <td class="center col-3">
                 Приходит:
                   {% for mac_in in client_connection_data[ip][8] %}
                     <br>
-                    {{ mac_in }}
+                      {% if mac_in in client_connection_data[ip][7]%}
+                        <font color="green">{{ mac_in }}</font>
+                      {% else %}
+                        <font color="red">{{ mac_in }}</font>
+                      {% endif %}
                   {% endfor %}
               </td>
               <td class="center col-3"><button type="button" class="btn btn-warning">Прописать мак</button></td>
