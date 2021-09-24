@@ -119,7 +119,10 @@ NBI-Navigator
         </h2>
         <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
           <div class="accordion-body">
-              {{ client_notes }}
+              {% for string in client_notes %}
+                  {{ string }}
+                  <br>
+              {% endfor %}
           </div>
         </div>
       </div>
@@ -133,7 +136,10 @@ NBI-Navigator
         </h2>
         <div id="collapseOne1" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample1">
           <div class="accordion-body">
-              {{ client_address_notes }}
+              {% for string in client_address_notes %}
+                  {{ string }}
+                  <br>
+              {% endfor %}
           </div>
         </div>
       </div>

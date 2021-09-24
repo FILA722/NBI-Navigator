@@ -25,8 +25,6 @@ def search():
 def find_client(client_name):
     search_result = search_engine.search(client_name)
 
-
-    # print(search_result)
     client_name = search_result[0]
     client_data = search_result[1]
     # client_name = 'кармазіна ірина юрївна'
@@ -44,11 +42,11 @@ def find_client(client_name):
     client_tel = client_data[0]
     client_email = client_data[1]
     client_address = client_data[2]
-    client_address_notes = client_data[3]
+    client_address_notes = client_data[3].split('\n')
     client_is_active = client_data[4]
     client_converter = client_data[5]
     client_manager = client_data[6]
-    client_notes = client_data[7]
+    client_notes = client_data[7].split('\n')
     client_connection_data = client_data[8]
     client_url = client_data[9]
 
