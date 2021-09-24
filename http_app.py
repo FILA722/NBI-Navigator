@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for, flash, redirect
 from search_engine import search_engine
-from debugers import check_ping_status
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'iuywfiyug23poiuj2piou5h2pio53thj2[3io5jtp25'
@@ -8,17 +8,24 @@ app.config['SECRET_KEY'] = 'iuywfiyug23poiuj2piou5h2pio53thj2[3io5jtp25'
 
 @app.route('/', methods=['POST', 'GET'])
 def search():
+    suspended_clients = []
+    with open('search_engine/clients.json', 'r') as dict_with_clients:
+        clients = json.loads(dict_with_clients.read())
+        for client in clients:
+            if clients[client][4] == "Неактивний":
+                suspended_clients.append(client)
+
     if request.method == 'POST':
         clients = search_engine.search(request.form['client'])
         if clients == False:
-            return render_template('search.html', clients=['Клиент не найден'])
+            return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients)
         elif str(clients.__class__) == "<class 'tuple'>":
             client_name = clients[0]
             return redirect(f'/client/{client_name}')
         else:
-            return render_template('search.html', clients=clients)
+            return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
     else:
-        return render_template('search.html')
+        return render_template('search.html', suspended_clients=suspended_clients)
 
 
 @app.route('/client/<client_name>', methods=['POST', 'GET'])

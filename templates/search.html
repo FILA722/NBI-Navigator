@@ -38,8 +38,13 @@ NBI-Navigator
           Отключенные за неуплату
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          <li><a class="dropdown-item" href="#">Action</a></li>
-          <li><a class="dropdown-item" href="#">Another action</a></li>
+          {% for sus_client in suspended_clients %}
+          <li><a class="dropdown-item" href="/client/{{ sus_client }}">
+                {{ sus_client.upper() }}
+                <button type="button" class="btn btn-outline-success btn-sm col-md-push-2">Включить</button>
+              </a>
+          </li>
+          {% endfor %}
         </ul>
       </div>
     </div>
