@@ -83,9 +83,13 @@ NBI-Navigator
             <tr>
               <th scope="row" class="center col-2">Состояние порта:</th>
               {% if client_connection_data[ip][11] == True %}
-                <td class="center col-3"><a class="btn btn-outline-primary btn-sm" href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
+                    {% if client_connection_data[ip][5] == "huawei" %}
+                        <td class="center col-3"><a class="btn btn-outline-success btn-sm disabled">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> <{{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }}></td>
+                    {% else %}
+                        <td class="center col-3"><a class="btn btn-outline-success btn-sm" href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
+                    {% endif %}
               {% else %}
-                <td class="center col-3"><a class="btn btn-outline-primary btn-sm disabled" role="button" aria-disabled="true">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
+                <td class="center col-3"><a class="btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
               {% endif %}
 
               {% if client_connection_data[ip][6] == 'up' %}
@@ -100,7 +104,7 @@ NBI-Navigator
                 <td class="center">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
               {% endif %}
 
-              <td class="center col-2"><button type="button" class="btn btn-danger">Дернуть порт</button></td>
+              <td class="center col-2"><button type="button" class="btn btn-warning">Дернуть порт</button></td>
             </tr>
         </tbody>
     </table>
