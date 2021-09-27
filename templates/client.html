@@ -6,6 +6,50 @@ NBI-Navigator
 {% endblock %}
 
 {% block body %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+        $(function() {
+          $('button#port_reboot').on('click', function(e) {
+            e.preventDefault()
+            $.getJSON('/port_reboot',
+                function(data) {
+              //do nothing
+            });
+            return false;
+          });
+        });
+
+        $(function() {
+          $('button#write_mac').on('click', function(e) {
+            e.preventDefault()
+            $.getJSON('/write_mac',
+                function(data) {
+              //do nothing
+            });
+            return false;
+          });
+        });
+
+        $(function() {
+          $('button#client_turn_on').on('click', function(e) {
+            e.preventDefault()
+            $.getJSON('/client_turn_on',
+                function(data) {
+              //do nothing
+            });
+            return false;
+          });
+        });
+
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+            })
+            var popover = new bootstrap.Popover(document.querySelector('.example-popover'), {
+        container: 'body'
+            })
+</script>
+
 <br>
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
       <ul class="nav col-12 col-md-auto mb-3 justify-content-center mb-md-0">
@@ -46,7 +90,7 @@ NBI-Navigator
                 {% if client_is_active == "Активний" %}
                     <td class="center"><font color="green"> {{ client_is_active }} </font></td>
                 {% else %}
-                    <td class="center"><font color="red"> {{ client_is_active }} </font> <button type="button" class="btn btn-outline-success btn-sm">Включить</button> </td>
+                    <td class="center"><font color="red"> {{ client_is_active }} </font><button type="button" class="btn btn-outline-success btn-sm" id="client_turn_on">Включить</button></td>
                 {% endif %}
             </tr>
             <tr>
@@ -91,7 +135,11 @@ NBI-Navigator
 
               {% if client_connection_data[ip][11] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
-                        <td class="center col-3"><a class="btn btn-outline-success btn-sm disabled">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> <{{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }}></td>
+                        <td class="center col-3">
+                            <a class="btn btn-outline-success btn-sm disabled">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a>
+                            <br>
+                            {{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }}
+                        </td>
                     {% else %}
                         <td class="center col-3"><a class="btn btn-outline-success btn-sm" href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
                     {% endif %}
@@ -105,7 +153,7 @@ NBI-Navigator
                 <td class="center">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
               {% endif %}
 
-              <td class="center col-2"><button type="button" class="btn btn-warning">Дернуть порт</button></td>
+              <td class="center col-2"><button type="button" class="btn btn-warning" id="port_reboot">Дернуть порт</button></td>
             </tr>
         </tbody>
     </table>
@@ -132,7 +180,17 @@ NBI-Navigator
                       {% endif %}
                   {% endfor %}
               </td>
-              <td class="center col-2"><button type="button" class="btn btn-warning">Прописать</button></td>
+              <td class="center col-2"><button type="button" class="btn btn-warning" id="write_mac">Прописать</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-bordered client-table border border-2 ip">
+        <tbody>
+            <tr>
+              <th scope="row" class="center">Настройки подключения:</th>
+                <td class="center col-5">Шлюз: <br> {{ client_connection_data[ip][3] }}</td>
+                <td class="center col-5">Маска: <br> {{ client_connection_data[ip][4] }}</td>
+
             </tr>
         </tbody>
     </table>
@@ -174,9 +232,9 @@ NBI-Navigator
         </div>
       </div>
     </div>
+  </div>
 </div>
 <br>
-</div>
-
+<br>
 
 {% endblock %}

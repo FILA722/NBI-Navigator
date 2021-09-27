@@ -5,6 +5,24 @@ import json
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'iuywfiyug23poiuj2piou5h2pio53thj2[3io5jtp25'
 
+@app.route('/port_reboot')
+def port_reboot():
+    print("Port reboot")
+    return "nothing"
+
+
+@app.route('/write_mac')
+def write_mac():
+    print("Write mac")
+    return "nothing"
+
+
+@app.route('/client_turn_on')
+def client_tuen_on():
+    print('client_turn_on')
+    return 'nothing'
+
+
 def get_suspended_clients():
     suspended_clients = []
     with open('search_engine/clients.json', 'r') as dict_with_clients:
@@ -13,6 +31,8 @@ def get_suspended_clients():
             if clients[client][4] == "Неактивний":
                 suspended_clients.append(client)
     return suspended_clients
+
+
 @app.route('/', methods=['POST', 'GET'])
 def search():
     suspended_clients = get_suspended_clients()
@@ -51,7 +71,7 @@ def find_client(client_name):
                        'i.dronova@nbi.ua, i.dronova@unitex.od.ua',
                        'Бизнес-центр Євгена Сверстюка, 11A',
                        'ВНДІХІМПРОЕКТ - хозяин здания\n516-8478 Александр Владимирович - нач.тех.отдела\n\nсвязист Константин 095 4456484 (работает только по понедельникам)\n\nОборудование стоит в НОВИЙ БЦ ТОВ, знает где стоит - Артем гл. инж.\n050 1520558 (ребутнет если чего, категорически не приветствует)\n!!! Шлюз 80.78.40.17 !!!\nПодключено конверторами с МР17. Конвертор МР11-МР17 FOXGATE EC-23721-1SM-20 #EC20110252670\nSwitch Zyxel MES-35000-24\nS/N: S120H27009921\n(АТС подвал)\nSwitch2 Quidway  S2326TP-EI \n12(пов.)',
-                       'Активний',
+                       'Неактивний',
                        'НЕТ',
                        '(050)383-06-91 Николай Дмитриевич',
                        '==Sverstyuka 11A sw2#5==\nНеобмежений:\nсвіт - 10М\nУкраїна - до 100М\n\nМАС-адрес:\n50ff-204a-eb4e\n\nзміна прізвища з Дронова на Кармазіна Ірина Юріївна',
@@ -80,7 +100,6 @@ def find_client(client_name):
                                             client_notes=client_notes,
                                             client_connection_data=client_connection_data,
                                             client_url=client_url)
-
 
 
 if __name__ == '__main__':
