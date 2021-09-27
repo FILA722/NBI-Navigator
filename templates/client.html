@@ -82,6 +82,13 @@ NBI-Navigator
         <tbody>
             <tr>
               <th scope="row" class="center col-2">Состояние порта:</th>
+
+              {% if client_connection_data[ip][6] == 'up' %}
+                <td class="center"><font color="green">{{ client_connection_data[ip][6].upper() }}</font></td>
+              {% else %}
+                <td class="center"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
+              {% endif %}
+
               {% if client_connection_data[ip][11] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
                         <td class="center col-3"><a class="btn btn-outline-success btn-sm disabled">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> <{{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }}></td>
@@ -90,12 +97,6 @@ NBI-Navigator
                     {% endif %}
               {% else %}
                 <td class="center col-3"><a class="btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">{{ client_connection_data[ip][0]}}{{ client_connection_data[ip][2]}}</a> ({{ client_connection_data[ip][5] }})</td>
-              {% endif %}
-
-              {% if client_connection_data[ip][6] == 'up' %}
-                <td class="center"><font color="green">{{ client_connection_data[ip][6].upper() }}</font></td>
-              {% else %}
-                <td class="center"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
               {% endif %}
 
               {% if client_connection_data[ip][9] == '0' %}
