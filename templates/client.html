@@ -73,6 +73,20 @@ NBI-Navigator
     $(document).ready(function(){$('[data-toggle="popover"]').popover();});
 </script>
 
+<script>
+function copy(text) {
+    var input = document.createElement('input');
+    input.setAttribute('value', text);
+    document.body.appendChild(input);
+    input.select();
+    var result = document.execCommand('copy');
+    document.body.removeChild(input)
+    alert('Это Huawei, его IP скопирован в буфер обмена.');
+    return result;
+ }
+
+</script>
+
 <br>
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
       <ul class="nav col-12 col-md-auto mb-3 justify-content-center mb-md-0">
@@ -151,32 +165,30 @@ NBI-Navigator
 
               {% if client_connection_data[ip][11] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
-                        <td class="center col-5">
-                            <a class="align-middle center btn btn-outline-success btn-sm disabled">
+                        <td class="center col-4">
+                            <button class="align-middle center btn btn-outline-success btn-sm" onclick="copy('{{ client_connection_data[ip][1] }}')">
                                 {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}
-                            </a>
-                            <br>
-                            {{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }}
+                            </button>
                         </td>
                     {% else %}
-                        <td class="center col-5">
+                        <td class="center col-4">
                             <a class="align-middle center btn btn-outline-success btn-sm" href="http://{{ client_connection_data[ip][1] }}">
                                 {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
-                            ({{ client_connection_data[ip][5] }})
                         </td>
                     {% endif %}
               {% else %}
-                <td class="center col-5">
+                <td class="center col-4">
                     <a class="align-middle center btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">
                         {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
-                    ({{ client_connection_data[ip][5] }})
+                    <br>
+                    (no ping to {{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }})
                 </td>
               {% endif %}
 
               {% if client_connection_data[ip][9] == '0' %}
-                <td class="align-middle center col-2">Ошибки: <font color="green">{{ client_connection_data[ip][9] }}</font></td>
+                <td class="align-middle center col-3">Ошибки: <font color="green">{{ client_connection_data[ip][9] }}</font></td>
               {% else %}
-                <td class="align-middle center col-2">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
+                <td class="align-middle center col-3">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
               {% endif %}
 
               <td class="align-middle center col-2">
@@ -271,4 +283,5 @@ NBI-Navigator
   </div>
 </div>
 <br>
+
 {% endblock %}
