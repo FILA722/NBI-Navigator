@@ -88,7 +88,7 @@ def find_client(client_name):
         client_notes = client_data[7].split('\n')
         client_connection_data = client_data[8]
         client_url = client_data[9]
-        print(client_connection_data)
+
         return render_template('client.html', client_name=client_name,
                                             client_tel = client_tel,
                                             client_email=client_email,

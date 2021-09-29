@@ -45,6 +45,33 @@ NBI-Navigator
 
 </script>
 
+<script>
+
+    function openCity(evt, cityName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+</script>
+
+<script>
+    $(document).ready(function(){$('[data-toggle="popover"]').popover();});
+</script>
 
 <br>
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
@@ -101,64 +128,61 @@ NBI-Navigator
 </table>
 <br>
 {% for ip in client_connection_data %}
-    <div class="row">
-        <div class="col-3">
-            {% if client_connection_data[ip][10] == True %}
-                <table class="table table-bordered table-success client-table border border-2 ip">
-            {% else %}
-                <table class="table table-bordered table-danger client-table border border-2 ip">
-            {% endif %}
-                    <tbody>
-                        <tr>
-                            <th scope="row" class="align-middle center"><h5>{{ ip }}</h5></th>
-                        </tr>
-                    </tbody>
-                </table>
-        </div>
-    </div>
+    {% if client_connection_data[ip][10] == True %}
+        <button class="tab btn btn-outline-success btn-lg tablinks"  onclick="openCity(event, '{{ ip }}')">{{ ip }}</button>
+    {% else %}
+        <button class="tab btn btn-outline-danger btn-lg tablinks" onclick="openCity(event, '{{ ip }}')">{{ ip }}</button>
+    {% endif %}
+{% endfor %}
+<br>
+{% for ip in client_connection_data %}
+  <div id="{{ ip }}" class="tabcontent">
     <table class="table table-bordered client-table border border-2 ip">
         <tbody>
             <tr>
-              <th scope="row" class="align-middle center">Настройки подключения:</th>
-                <td class="center col-5">Шлюз: <br> {{ client_connection_data[ip][3] }}</td>
-                <td class="center col-5">Маска: <br> {{ client_connection_data[ip][4] }}</td>
 
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-bordered client-table border border-2 ip">
-        <tbody>
-            <tr>
-              <th scope="row" class="align-middle center col-2">Состояние порта:</th>
+              <th scope="row" class="align-middle center col-2">Порт:</th>
 
                   {% if client_connection_data[ip][6] == 'up' %}
-                    <td class="align-middle center"><font color="green">{{ client_connection_data[ip][6].upper() }}</font></td>
+                    <td class="align-middle center col-1"><font color="green">{{ client_connection_data[ip][6].upper() }}</font></td>
                   {% else %}
-                    <td class="align-middle center"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
+                    <td class="align-middle center col-1"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
                   {% endif %}
-
 
               {% if client_connection_data[ip][11] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
-                        <td class="center col-3">
-                            <a class="align-middle center btn btn-outline-success btn-sm disabled">{{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
+                        <td class="center col-5">
+                            <a class="align-middle center btn btn-outline-success btn-sm disabled">
+                                {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}
+                            </a>
                             <br>
                             {{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }}
                         </td>
                     {% else %}
-                        <td class="center col-3"><a class="align-middle center btn btn-outline-success btn-sm" href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a> ({{ client_connection_data[ip][5] }})</td>
+                        <td class="center col-5">
+                            <a class="align-middle center btn btn-outline-success btn-sm" href="http://{{ client_connection_data[ip][1] }}">
+                                {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
+                            ({{ client_connection_data[ip][5] }})
+                        </td>
                     {% endif %}
               {% else %}
-                <td class="center col-3"><a class="align-middle center btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">{{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a> ({{ client_connection_data[ip][5] }})</td>
+                <td class="center col-5">
+                    <a class="align-middle center btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">
+                        {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
+                    ({{ client_connection_data[ip][5] }})
+                </td>
               {% endif %}
 
               {% if client_connection_data[ip][9] == '0' %}
-                <td class="align-middle center">Ошибки: <font color="green">{{ client_connection_data[ip][9] }}</font></td>
+                <td class="align-middle center col-2">Ошибки: <font color="green">{{ client_connection_data[ip][9] }}</font></td>
               {% else %}
-                <td class="align-middle center">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
+                <td class="align-middle center col-2">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
               {% endif %}
 
-              <td class="align-middle center col-2"><button type="button" class="btn btn-warning" id="port_reboot">Дернуть порт</button></td>
+              <td class="align-middle center col-2">
+                  <button type="button" class="btn btn-warning" id="port_reboot">Дернуть порт</button>
+              </td>
+
             </tr>
         </tbody>
     </table>
@@ -166,7 +190,8 @@ NBI-Navigator
     <table class="table table-bordered client-table border border-2 ip">
         <tbody>
             <tr>
-              <th scope="row" class="align-middle center">MAC на порту:</th>
+              <th scope="row" class="align-middle center col-2">MAC на порту:</th>
+
               <td class="center col-4">
                   Прописан:
                   {% for mac_on in client_connection_data[ip][7] %}
@@ -174,6 +199,7 @@ NBI-Navigator
                     <font color="green">{{ mac_on }}</font>
                   {% endfor %}
               </td>
+
               <td class="center col-4">
                 Приходит:
                   {% for mac_in in client_connection_data[ip][8] %}
@@ -189,7 +215,22 @@ NBI-Navigator
             </tr>
         </tbody>
     </table>
-    <br>
+    <div class="col-10">
+      <table class="table table-bordered client-table border border-2 ip">
+            <tbody>
+                <tr>
+                  <th scope="row" class="align-middle center col-2">Настройки:</th>
+                  <td class="center col-4">
+                      Шлюз: {{ client_connection_data[ip][3] }}
+                  </td>
+                  <td class="center col-4">
+                      Маска: {{ client_connection_data[ip][4] }}
+                  </td>
+                </tr>
+            </tbody>
+      </table>
+    </div>
+  </div>
 {% endfor %}
 <br>
 <div class="row">
@@ -230,6 +271,4 @@ NBI-Navigator
   </div>
 </div>
 <br>
-<br>
-
 {% endblock %}
