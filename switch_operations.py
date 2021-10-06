@@ -3,8 +3,32 @@ import telnetlib
 import logging
 import time
 
+
 def to_bytes(line):
     return f"{line}\n".encode("utf-8")
+
+def write_mac_address(new_mac, switch_ip, client_port, switch_model):
+
+
+    def write_mac_huawei(new_mac, switch_ip_address, client_port):
+        pass
+
+
+    def write_mac_zyxel(new_mac, switch_ip_address, client_port):
+        pass
+
+
+    if switch_model == 'zyxel':
+        write_mac_zyxel(new_mac, switch_ip, client_port)
+
+    elif switch_model == 'huawei':
+        write_mac_huawei(new_mac, switch_ip, client_port)
+
+    else:
+        return False
+
+
+
 
 
 def port_reboot_huawei(switch_ip_address, switch_port):
@@ -49,4 +73,9 @@ def port_reboot_huawei(switch_ip_address, switch_port):
         telnet.write(to_bytes('undo shutdown'))
         telnet.expect(b">", timeout=2)
 
-        return 'port reboot successful'
+        return True
+
+
+def port_reboot_zyxel(switch_ip_address, switch_port):
+    pass
+

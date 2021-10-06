@@ -95,10 +95,11 @@ function copy(text) {
               </div>
             </form>
       </div>
-        <button type="button" class="btn btn-warning"><font color="#696969">Обновить БД</font></button>
+        <a type="button" class="btn btn-warning" href="/update_db_waiter"><font color="#696969">Обновить БД</font></a>
       </div>
     </header>
 <br>
+
 <div class="container">
 <table class="table table-bordered client-table border border-2 ip">
     <tbody>
@@ -218,7 +219,9 @@ function copy(text) {
                       {% endif %}
                   {% endfor %}
               </td>
-              <td class="align-middle center col-2"><button type="button" class="btn btn-warning" id="write_mac">Прописать</button></td>
+              <form action="/write_mac" method="post">
+                <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][8][0] }},{{ client_connection_data[ip][1] }},{{ client_connection_data[ip][2] }},{{ switch_model }}">Прописать</button></td>
+              </form>
             </tr>
         </tbody>
     </table>
@@ -279,4 +282,7 @@ function copy(text) {
 </div>
 <br>
 
+<form action="/foo" method="post">
+    <button type="submit" name="client" class="form-control" value="{{ client_manager }}">Cick</button>
+</form>
 {% endblock %}

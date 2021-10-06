@@ -8,7 +8,7 @@ import time
 logging.basicConfig(filename="logs.txt", level=logging.INFO)
 
 
-def update_db():
+def update_main_db():
     print('Обновление базы данных, это может занять около 4-х минут...')
     start = time.time()
     logging.info("Вызов ф-ции update_db")
@@ -22,7 +22,7 @@ def main():
         client = input('Введите имя клиента:').lower()
 
         if client == '--update':
-            update_db()
+            update_main_db()
             continue
 
         if client == '--check':
@@ -48,6 +48,8 @@ def main():
             logging.info(f"По запросу найдены клиенты: {search_result}")
             for client_name in search_result:
                 print(client_name)
+
+        del search_result
 
 if __name__ == '__main__':
     main()

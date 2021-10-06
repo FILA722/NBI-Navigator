@@ -12,14 +12,13 @@ NBI-Navigator
         <h5>NBI-Navigator</h5>
       </ul>
       <div class="col-md-3 text-end">
-        <button type="button" class="btn btn-warning"><font color="#696969">Обновить БД</font></button>
-
+        <a class="btn btn-warning" href="/update_db_waiter"><font color="#696969">Обновить БД</font></a>
       </div>
     </header>
 <br>
 <form method="post">
   <div class="input-group mb-3">
-    <input type="text" name="client" class="form-control" value="{{ request.form['client'] }}" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
+    <input type="text" name="client" class="form-control" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
     <input type="submit" class="btn btn-outline-primary" value="Найти">
   </div>
 <br>
