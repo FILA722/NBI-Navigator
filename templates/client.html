@@ -214,14 +214,17 @@ function copy(text) {
                     <br>
                       {% if mac_in in client_connection_data[ip][7]%}
                         <font color="green">{{ mac_in }}</font>
+                        </td>
+                        <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
                       {% else %}
                         <font color="red">{{ mac_in }}</font>
+                        </td>
+                        <form action="/write_mac" method="post">
+                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][8][0] }},{{ client_connection_data[ip][1] }},{{ client_connection_data[ip][2] }},{{ switch_model }}">Прописать</button></td>
+                        </form>
                       {% endif %}
                   {% endfor %}
               </td>
-              <form action="/write_mac" method="post">
-                <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][8][0] }},{{ client_connection_data[ip][1] }},{{ client_connection_data[ip][2] }},{{ switch_model }}">Прописать</button></td>
-              </form>
             </tr>
         </tbody>
     </table>
@@ -281,8 +284,4 @@ function copy(text) {
   </div>
 </div>
 <br>
-
-<form action="/foo" method="post">
-    <button type="submit" name="client" class="form-control" value="{{ client_manager }}">Cick</button>
-</form>
 {% endblock %}
