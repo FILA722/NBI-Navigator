@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, url_for, flash, redirect
 from search_engine import search_engine
 from switch_operations import write_mac_address
 import json
+import re
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'iuywfiyug23poiuj2piou5h2pio53thj2[3io5jtp25'
@@ -20,17 +21,20 @@ def get_suspended_clients():
 @app.route('/write_mac', methods=['GET', 'POST'])
 def write_mac():
     if request.method == 'POST':
+
         write_mac_data = request.form['write_mac_address']
-        write_mac_data_list = write_mac_data.split(',')
+        write_mac_data_list = write_mac_data.split('+')
+        saved_mac_addresses = re.findall(r'\w{4}-\w{4}-\w{4}', write_mac_data_list[0])
+        current_mac_addresses = re.findall(r'\w{4}-\w{4}-\w{4}', write_mac_data_list[1])
+        switch_ip = write_mac_data_list[2]
+        client_port = write_mac_data_list[3][1:]
+        switch_model = write_mac_data_list[4]
+        client_ip = write_mac_data_list[5]
+        client_name = write_mac_data_list[6]
 
-        new_mac = write_mac_data_list[0]
-        switch_ip = write_mac_data_list[1]
-        client_port = write_mac_data_list[2][1:]
-        switch_model = write_mac_data_list[3]
-
-        write_mac_address(new_mac, switch_ip, client_port, switch_model)
-
-        return "nothing"
+        ans = write_mac_address(saved_mac_addresses, current_mac_addresses, switch_ip, client_port, switch_model, client_ip)
+        print(ans)
+        return redirect(f'/client/{client_name}')
 
 
 @app.route('/test')
@@ -92,13 +96,13 @@ def find_client(client_name):
                        'НЕТ',
                        '(050)383-06-91 Николай Дмитриевич',
                        '==Sverstyuka 11A sw2#5==\nНеобмежений:\nсвіт - 10М\nУкраїна - до 100М\n\nМАС-адрес:\n50ff-204a-eb4e\n\nзміна прізвища з Дронова на Кармазіна Ірина Юріївна',
-                       {'80.78.40.13': ['Sverstyuka 11A sw2', '10.10.16.8', '#5', '80.78.40.17', '255.255.255.224', 'huawei', 'up', ['50ff-204a-eb4e'], [('50ff-204a-eb4e', 'green')], '0', False, True, True]},
+                       {'80.78.40.13': ['Sverstyuka 11A sw2', '10.10.16.8', '#5', '80.78.40.17', '255.255.255.224', 'huawei', 'up', ['50ff-204a-eb4e'], [('50ff-204a-eb4e', 'green'), ('dw23-123r-98gg', 'red')], '0', True, True, True]},
                        'https://netstore2.nbi.com.ua/show_client.php?client_id=124']
 
         client_tel = client_data[0]
         client_email = client_data[1]
         client_address = client_data[2]
-        client_address_notes = client_data[3].split('\
+        client_address_notes = client_data[3].split('\n')
         client_is_active = client_data[4]
         client_converter = client_data[5]
         client_manager = client_data[6]

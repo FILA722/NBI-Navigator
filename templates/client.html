@@ -98,7 +98,6 @@ function copy(text) {
         <a type="button" class="btn btn-warning" href="/update_db_waiter"><font color="#696969">Обновить БД</font></a>
       </div>
     </header>
-<br>
 
 <div class="container">
 <table class="table table-bordered client-table border border-2 ip">
@@ -222,7 +221,7 @@ function copy(text) {
                       <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
                   {% else %}
                       <form action="/write_mac" method="post">
-                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][8][0] }},{{ client_connection_data[ip][1] }},{{ client_connection_data[ip][2] }},{{ switch_model }}">Прописать</button></td>
+                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][8] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}">Прописать</button></td>
                       </form>
                   {% endif %}
               </td>

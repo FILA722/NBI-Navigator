@@ -21,7 +21,7 @@ def current_mac_address_color_marker(saved_mac_address, current_mac_address):
     return current_mac_address_colored, write_mac_address_button_status
 
 
-def parse_huawei(switch_ip_address, client_ip_address, switch_port):
+def parse_huawei(switch_ip_address, client_ip_address, client_port):
 
     def parse_current_configuration(display_interface_brief, switch_port):
         if len(display_interface_brief) > 24:
@@ -74,20 +74,21 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
         display_interface_brief = re.findall(display_interface_brief_search_pattern, str(telnet.read_until(b'NULL')))
         logging.info("команда display interface brief выполнена")
 
-        port_condition, port_errors = parse_current_configuration(display_interface_brief, switch_port)
+        port_condition, port_errors = parse_current_configuration(display_interface_brief, client_port)
         logging.info(f"данные port_condition и port_errors получены: {port_condition}, {port_errors}")
 
         telnet.write(to_bytes('display current-configuration'))
         telnet.write(to_bytes(' '))
         logging.info("команда display current-configuration выполнена")
 
-        if switch_port == '25':
-            current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface GigabitEthernet0/0/1 vlan \d+'
-        elif switch_port == '26':
-            current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface GigabitEthernet0/0/2 vlan \d+'
+        if client_port == '25':
+            interface_name = 'GigabitEthernet0/0/1'
+        elif client_port == '26':
+            interface_name = 'GigabitEthernet0/0/2'
         else:
-            current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface Ethernet0\/\d+\/{switch_port} vlan \d+'
+            interface_name = f'Ethernet0/0/{client_port}'
 
+        current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface {interface_name} vlan \d+'
         current_configuration_of_search_port = re.findall(current_configuration_pattern, str(telnet.read_until(b"http")))
 
         saved_ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', current_configuration_of_search_port[0])
@@ -96,12 +97,7 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
 
         telnet.write(to_bytes('p'))
 
-        if switch_port == '25':
-            telnet.write(to_bytes(f'display mac-address GigabitEthernet0/0/1'))
-        elif switch_port == '26':
-            telnet.write(to_bytes(f'display mac-address GigabitEthernet0/0/2'))
-        else:
-            telnet.write(to_bytes(f'display mac-address Ethernet0/0/{switch_port}'))
+        telnet.write(to_bytes(f'display mac-address {interface_name}'))
         logging.info(f"команда display mac-address выполнена")
 
         current_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', str(telnet.read_until(b"Total")))
@@ -226,6 +222,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
                 port_errors = [show_loopguard[0].split("  ")[-1].strip()]
             else:
                 port_errors = 0
+
         logging.info(f"Команда show ip source binding выполнена, вернула значение saved_mac_addresses: {saved_mac_addresses}, и port_errors: {port_errors}")
 
         current_mac_addresses_colored = current_mac_address_color_marker(saved_mac_address, current_mac_address)

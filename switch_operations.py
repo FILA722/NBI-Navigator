@@ -8,12 +8,36 @@ def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 
 
-def write_mac_huawei(new_mac, switch_ip_address, client_port):
-    with telnetlib.Telnet(switch_ip_address) as telnet:
+def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip):
 
+    mac_addresses_to_delete = []
+    for saved_mac_address in saved_mac_addresses:
+        if saved_mac_address not in current_mac_addresses:
+            mac_addresses_to_delete.append(saved_mac_address)
+
+    mac_addresses_to_write = []
+    for current_mac_address in current_mac_addresses:
+        if current_mac_address not in saved_mac_addresses:
+            mac_addresses_to_write.append(current_mac_address)
+
+    if client_port == '25':
+        interface_name = 'interface GigabitEthernet0/0/1'
+    elif client_port == '26':
+        interface_name = 'interface GigabitEthernet0/0/2'
+    else:
+        interface_name = f'interface Ethernet0/0/{client_port}'
+
+    with telnetlib.Telnet(switch_ip_address) as telnet:
         session = telnet.expect([b"Password:"], timeout=2)
+
         if not session:
-            return False
+            return 'not session'
+
+        telnet.write(to_bytes(SwitchLoginData.sw_passwd))
+        telnet.read_until(b">")
+
+        telnet.write(to_bytes('su'))
+        telnet.expect([b"Password:", b">"], timeout=2)
 
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
@@ -21,24 +45,56 @@ def write_mac_huawei(new_mac, switch_ip_address, client_port):
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
 
+        telnet.write(to_bytes('display current-configuration'))
+        telnet.write(to_bytes(' '))
 
-        telnet.write(to_bytes('p'))
+        find_bind_pattern = f'user-bind static ip-address {client_ip} mac-address \w+-\w+-\w+ {interface_name} vlan \d+'
+        client_current_configuration = re.findall(find_bind_pattern, str(telnet.read_until(b"http")))
+        client_data = client_current_configuration[0].split(' ')
+        vlan = client_data[-1]
 
+        for mac_address_to_delete in mac_addresses_to_delete:
+            telnet.write(to_bytes(f'undo user-bind static ip-address {client_ip} mac-address {mac_address_to_delete}'))
+            telnet.read_until(b"]")
+            time.sleep(1)
 
+        for mac_address_to_write in mac_addresses_to_write:
+            telnet.write(to_bytes(f'user-bind static ip-address {client_ip} mac-address {mac_address_to_write} {interface_name} vlan {vlan}'))
+            telnet.read_until(b"]")
+            time.sleep(1)
 
-def write_mac_zyxel(new_mac, switch_ip_address, client_port):
+        telnet.write(to_bytes('q'))
+        telnet.read_until(b">")
+
+        telnet.write(to_bytes('save'))
+        telnet.read_until(b"]")
+
+        telnet.write(to_bytes('y'))
+        telnet.expect([b">"], timeout=5)
+
+        return True
+
+def write_mac_zyxel(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip):
     pass
 
 
-def write_mac_address(new_mac, switch_ip, client_port, switch_model):
+def write_mac_address(saved_mac_addresses, current_mac_addresses, switch_ip, client_port, switch_model, client_ip):
 
     write_mac_operation = False
 
     if switch_model == 'zyxel':
-        write_mac_operation = write_mac_zyxel(new_mac, switch_ip, client_port)
+        write_mac_operation = write_mac_zyxel(saved_mac_addresses,
+                                              current_mac_addresses,
+                                              switch_ip,
+                                              client_port,
+                                              client_ip)
 
     elif switch_model == 'huawei':
-        write_mac_operation = write_mac_huawei(new_mac, switch_ip, client_port)
+        write_mac_operation = write_mac_huawei(saved_mac_addresses,
+                                               current_mac_addresses,
+                                               switch_ip,
+                                               client_port,
+                                               client_ip)
 
 
     if write_mac_operation:
