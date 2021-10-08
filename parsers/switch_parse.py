@@ -9,6 +9,18 @@ def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 
 
+def current_mac_address_color_marker(saved_mac_address, current_mac_address):
+    current_mac_address_colored = []
+    write_mac_address_button_status = False
+    for mac_address in current_mac_address:
+        if mac_address in saved_mac_address:
+            current_mac_address_colored.append((mac_address, 'green'))
+        else:
+            current_mac_address_colored.append((mac_address, 'red'))
+            write_mac_address_button_status = True
+    return current_mac_address_colored, write_mac_address_button_status
+
+
 def parse_huawei(switch_ip_address, client_ip_address, switch_port):
 
     def parse_current_configuration(display_interface_brief, switch_port):
@@ -82,7 +94,6 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
         saved_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', current_configuration_of_search_port[0])
         logging.info(f"данные saved_ip_address и saved_mac_address получены: {saved_ip_address}, {saved_mac_address}")
 
-
         telnet.write(to_bytes('p'))
 
         if switch_port == '25':
@@ -104,8 +115,10 @@ def parse_huawei(switch_ip_address, client_ip_address, switch_port):
             port_errors = [f'На порту прописан IP:{saved_ip_address}']
             logging.info(f"На порту привязка к другому IP:{saved_ip_address}")
 
-    logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_address}, {port_errors}")
-    return port_condition, saved_mac_address, current_mac_address, port_errors
+    current_mac_addresses, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_address)
+
+    logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_addresses}, {port_errors}")
+    return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status
 
 
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
@@ -215,10 +228,10 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
                 port_errors = 0
         logging.info(f"Команда show ip source binding выполнена, вернула значение saved_mac_addresses: {saved_mac_addresses}, и port_errors: {port_errors}")
 
-        # telnet.write(to_bytes('exit'))
+        current_mac_addresses_colored = current_mac_address_color_marker(saved_mac_address, current_mac_address)
 
-    logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_addresses}, {current_mac_addresses}, {port_errors}")
-    return port_condition, saved_mac_addresses, current_mac_addresses, port_errors
+    logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_addresses}, {current_mac_addresses_colored}, {port_errors}")
+    return port_condition, saved_mac_addresses, current_mac_addresses_colored, port_errors,
 
 
 def parse_asotel(ip, password, port):

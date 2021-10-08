@@ -22,11 +22,14 @@ def write_mac():
     if request.method == 'POST':
         write_mac_data = request.form['write_mac_address']
         write_mac_data_list = write_mac_data.split(',')
+
         new_mac = write_mac_data_list[0]
         switch_ip = write_mac_data_list[1]
         client_port = write_mac_data_list[2][1:]
         switch_model = write_mac_data_list[3]
+
         write_mac_address(new_mac, switch_ip, client_port, switch_model)
+
         return "nothing"
 
 
@@ -77,7 +80,7 @@ def find_client(client_name):
             return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
     else:
         # search_result = search_engine.search(client_name)
-
+        #
         # client_name = search_result[0]
         # client_data = search_result[1]
         client_name = 'кармазіна ірина юрївна'
@@ -89,13 +92,13 @@ def find_client(client_name):
                        'НЕТ',
                        '(050)383-06-91 Николай Дмитриевич',
                        '==Sverstyuka 11A sw2#5==\nНеобмежений:\nсвіт - 10М\nУкраїна - до 100М\n\nМАС-адрес:\n50ff-204a-eb4e\n\nзміна прізвища з Дронова на Кармазіна Ірина Юріївна',
-                       {'80.78.40.13': ['Sverstyuka 11A sw2', '10.10.16.8', '#5', '80.78.40.17', '255.255.255.224', 'huawei', 'up', ['50ff-204a-eb4e'], ['50ff-204a-eb4e'], '0', True, True]},
+                       {'80.78.40.13': ['Sverstyuka 11A sw2', '10.10.16.8', '#5', '80.78.40.17', '255.255.255.224', 'huawei', 'up', ['50ff-204a-eb4e'], [('50ff-204a-eb4e', 'green')], '0', False, True, True]},
                        'https://netstore2.nbi.com.ua/show_client.php?client_id=124']
 
         client_tel = client_data[0]
         client_email = client_data[1]
         client_address = client_data[2]
-        client_address_notes = client_data[3].split('\n')
+        client_address_notes = client_data[3].split('\
         client_is_active = client_data[4]
         client_converter = client_data[5]
         client_manager = client_data[6]

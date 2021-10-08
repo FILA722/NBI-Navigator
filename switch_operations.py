@@ -2,14 +2,28 @@ from parsers.confidential import SwitchLoginData
 import telnetlib
 import logging
 import time
-
+import re
 
 def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 
 
 def write_mac_huawei(new_mac, switch_ip_address, client_port):
-    pass
+    with telnetlib.Telnet(switch_ip_address) as telnet:
+
+        session = telnet.expect([b"Password:"], timeout=2)
+        if not session:
+            return False
+
+        telnet.write(to_bytes(SwitchLoginData.sw_passwd))
+        telnet.read_until(b">")
+
+        telnet.write(to_bytes('system-view'))
+        telnet.read_until(b"]")
+
+
+        telnet.write(to_bytes('p'))
+
 
 
 def write_mac_zyxel(new_mac, switch_ip_address, client_port):

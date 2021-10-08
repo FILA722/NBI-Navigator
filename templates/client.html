@@ -138,7 +138,7 @@ function copy(text) {
 </table>
 <br>
 {% for ip in client_connection_data %}
-    {% if client_connection_data[ip][10] == True %}
+    {% if client_connection_data[ip][11] == True %}
         <button class="tab btn btn-outline-success btn-lg tablinks"  onclick="openCity(event, '{{ ip }}')">{{ ip }}</button>
     {% else %}
         <button class="tab btn btn-outline-danger btn-lg tablinks" onclick="openCity(event, '{{ ip }}')">{{ ip }}</button>
@@ -159,7 +159,7 @@ function copy(text) {
                     <td class="align-middle center col-1"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
                   {% endif %}
 
-              {% if client_connection_data[ip][11] == True %}
+              {% if client_connection_data[ip][12] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
                         <td class="center col-4">
                             <button class="align-middle center btn btn-outline-success btn-sm" onclick="copy('{{ client_connection_data[ip][1] }}')">
@@ -176,8 +176,8 @@ function copy(text) {
                 <td class="center col-4">
                     <a class="align-middle center btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">
                         {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
-                    <br>
-                    (no ping to {{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }})
+<!--                    <br>-->
+<!--                    (no ping to {{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }})-->
                 </td>
               {% endif %}
 
@@ -207,23 +207,24 @@ function copy(text) {
                     <font color="green">{{ mac_on }}</font>
                   {% endfor %}
               </td>
-
               <td class="center col-4">
                 Приходит:
                   {% for mac_in in client_connection_data[ip][8] %}
                     <br>
-                      {% if mac_in in client_connection_data[ip][7]%}
-                        <font color="green">{{ mac_in }}</font>
-                        </td>
-                        <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
-                      {% else %}
-                        <font color="red">{{ mac_in }}</font>
-                        </td>
-                        <form action="/write_mac" method="post">
-                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][8][0] }},{{ client_connection_data[ip][1] }},{{ client_connection_data[ip][2] }},{{ switch_model }}">Прописать</button></td>
-                        </form>
-                      {% endif %}
+                    {% if mac_in[1] == 'green' %}
+                      <font color="green">{{ mac_in[0] }}</font>
+                    {% else %}
+                      <font color="red">{{ mac_in[0] }}</font>
+                    {% endif %}
                   {% endfor %}
+              </td>
+                  {% if client_connection_data[ip][10] == False %}
+                      <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
+                  {% else %}
+                      <form action="/write_mac" method="post">
+                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][8][0] }},{{ client_connection_data[ip][1] }},{{ client_connection_data[ip][2] }},{{ switch_model }}">Прописать</button></td>
+                      </form>
+                  {% endif %}
               </td>
             </tr>
         </tbody>
