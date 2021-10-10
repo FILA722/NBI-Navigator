@@ -50,13 +50,21 @@ def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_addre
 
         find_bind_pattern = f'user-bind static ip-address {client_ip} mac-address \w+-\w+-\w+ {interface_name} vlan \d+'
         client_current_configuration = re.findall(find_bind_pattern, str(telnet.read_until(b"http")))
-        client_data = client_current_configuration[0].split(' ')
+
+        try:
+            client_data = client_current_configuration[0].split(' ')
+        except IndexError:
+            find_vlan_pattern = r'vlan \d+'
+            telnet.write(to_bytes('display current-configuration'))
+            telnet.write(to_bytes(' '))
+            vlan_list = re.findall(find_vlan_pattern, str(telnet.read_until(b"http")))
+
         vlan = client_data[-1]
 
-        for mac_address_to_delete in mac_addresses_to_delete:
-            telnet.write(to_bytes(f'undo user-bind static ip-address {client_ip} mac-address {mac_address_to_delete}'))
-            telnet.read_until(b"]")
-            time.sleep(1)
+        # for mac_address_to_delete in mac_addresses_to_delete:
+        #     telnet.write(to_bytes(f'undo user-bind static ip-address {client_ip} mac-address {mac_address_to_delete}'))
+        #     telnet.read_until(b"]")
+        #     time.sleep(1)
 
         for mac_address_to_write in mac_addresses_to_write:
             telnet.write(to_bytes(f'user-bind static ip-address {client_ip} mac-address {mac_address_to_write} {interface_name} vlan {vlan}'))
@@ -71,6 +79,7 @@ def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_addre
 
         telnet.write(to_bytes('y'))
         telnet.expect([b">"], timeout=5)
+        telnet.write(to_bytes('q'))
 
         return True
 

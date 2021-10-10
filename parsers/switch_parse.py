@@ -91,8 +91,13 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface {interface_name} vlan \d+'
         current_configuration_of_search_port = re.findall(current_configuration_pattern, str(telnet.read_until(b"http")))
 
-        saved_ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', current_configuration_of_search_port[0])
-        saved_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', current_configuration_of_search_port[0])
+        try:
+            saved_ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', current_configuration_of_search_port[0])
+            saved_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', current_configuration_of_search_port[0])
+        except IndexError:
+            saved_ip_address = ''
+            saved_mac_address = ''
+
         logging.info(f"данные saved_ip_address и saved_mac_address получены: {saved_ip_address}, {saved_mac_address}")
 
         telnet.write(to_bytes('p'))
