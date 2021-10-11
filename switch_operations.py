@@ -31,7 +31,7 @@ def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_addre
         session = telnet.expect([b"Password:"], timeout=2)
 
         if not session:
-            return 'not session'
+            return False
 
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
@@ -45,10 +45,10 @@ def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_addre
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
 
-        # for mac_address_to_delete in mac_addresses_to_delete:
-        #     telnet.write(to_bytes(f'undo user-bind static ip-address {client_ip} mac-address {mac_address_to_delete}'))
-        #     telnet.expect([b"]"], timeout=3)
-        #     time.sleep(1)
+        for mac_address_to_delete in mac_addresses_to_delete:
+            telnet.write(to_bytes(f'undo user-bind static ip-address {client_ip} mac-address {mac_address_to_delete}'))
+            telnet.expect([b"]"], timeout=3)
+            time.sleep(1)
 
         for mac_address_to_write in mac_addresses_to_write:
             telnet.write(to_bytes(f'user-bind static ip-address {client_ip} mac-address {mac_address_to_write} {interface_name} vlan {client_vlan}'))

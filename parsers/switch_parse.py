@@ -13,7 +13,9 @@ def current_mac_address_color_marker(saved_mac_address, current_mac_address):
     current_mac_address_colored = []
     write_mac_address_button_status = False
     for mac_address in current_mac_address:
-        if mac_address in saved_mac_address:
+        if mac_address == 'Не приходит':
+            current_mac_address_colored.append((mac_address, 'red'))
+        elif mac_address in saved_mac_address:
             current_mac_address_colored.append((mac_address, 'green'))
         else:
             current_mac_address_colored.append((mac_address, 'red'))
@@ -66,7 +68,6 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
         logging.info("команда system-view выполнена")
-
 
         telnet.write(to_bytes(f'display interface brief'))
         telnet.write(to_bytes(' '))
