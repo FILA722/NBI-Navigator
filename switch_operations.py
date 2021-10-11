@@ -8,7 +8,7 @@ def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 
 
-def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip):
+def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip, client_vlan):
 
     mac_addresses_to_delete = []
     for saved_mac_address in saved_mac_addresses:
@@ -45,30 +45,14 @@ def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_addre
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
 
-        telnet.write(to_bytes('display current-configuration'))
-        telnet.write(to_bytes(' '))
-
-        find_bind_pattern = f'user-bind static ip-address {client_ip} mac-address \w+-\w+-\w+ {interface_name} vlan \d+'
-        client_current_configuration = re.findall(find_bind_pattern, str(telnet.read_until(b"http")))
-
-        try:
-            client_data = client_current_configuration[0].split(' ')
-        except IndexError:
-            find_vlan_pattern = r'vlan \d+'
-            telnet.write(to_bytes('display current-configuration'))
-            telnet.write(to_bytes(' '))
-            vlan_list = re.findall(find_vlan_pattern, str(telnet.read_until(b"http")))
-
-        vlan = client_data[-1]
-
         # for mac_address_to_delete in mac_addresses_to_delete:
         #     telnet.write(to_bytes(f'undo user-bind static ip-address {client_ip} mac-address {mac_address_to_delete}'))
-        #     telnet.read_until(b"]")
+        #     telnet.expect([b"]"], timeout=3)
         #     time.sleep(1)
 
         for mac_address_to_write in mac_addresses_to_write:
-            telnet.write(to_bytes(f'user-bind static ip-address {client_ip} mac-address {mac_address_to_write} {interface_name} vlan {vlan}'))
-            telnet.read_until(b"]")
+            telnet.write(to_bytes(f'user-bind static ip-address {client_ip} mac-address {mac_address_to_write} {interface_name} vlan {client_vlan}'))
+            telnet.expect([b"]"], timeout=3)
             time.sleep(1)
 
         telnet.write(to_bytes('q'))
@@ -78,16 +62,16 @@ def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_addre
         telnet.read_until(b"]")
 
         telnet.write(to_bytes('y'))
-        telnet.expect([b">"], timeout=5)
+        telnet.expect([b">"], timeout=7)
         telnet.write(to_bytes('q'))
 
         return True
 
-def write_mac_zyxel(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip):
+def write_mac_zyxel(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip, client_vlan):
     pass
 
 
-def write_mac_address(saved_mac_addresses, current_mac_addresses, switch_ip, client_port, switch_model, client_ip):
+def write_mac_address(saved_mac_addresses, current_mac_addresses, switch_ip, client_port, switch_model, client_ip, client_vlan, clien_name):
 
     write_mac_operation = False
 
@@ -96,23 +80,22 @@ def write_mac_address(saved_mac_addresses, current_mac_addresses, switch_ip, cli
                                               current_mac_addresses,
                                               switch_ip,
                                               client_port,
-                                              client_ip)
-
+                                              client_ip,
+                                              client_vlan)
     elif switch_model == 'huawei':
         write_mac_operation = write_mac_huawei(saved_mac_addresses,
                                                current_mac_addresses,
                                                switch_ip,
                                                client_port,
-                                               client_ip)
+                                               client_ip,
+                                               client_vlan)
 
 
     if write_mac_operation:
+        # найти по client_name клиента в БД и записать current_mac_addresses в saved_mac_addresses
         return True
     else:
         return False
-
-
-
 
 
 def port_reboot_huawei(switch_ip_address, switch_port):

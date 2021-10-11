@@ -137,7 +137,7 @@ function copy(text) {
 </table>
 <br>
 {% for ip in client_connection_data %}
-    {% if client_connection_data[ip][11] == True %}
+    {% if client_connection_data[ip][12] == True %}
         <button class="tab btn btn-outline-success btn-lg tablinks"  onclick="openCity(event, '{{ ip }}')">{{ ip }}</button>
     {% else %}
         <button class="tab btn btn-outline-danger btn-lg tablinks" onclick="openCity(event, '{{ ip }}')">{{ ip }}</button>
@@ -158,7 +158,7 @@ function copy(text) {
                     <td class="align-middle center col-1"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
                   {% endif %}
 
-              {% if client_connection_data[ip][12] == True %}
+              {% if client_connection_data[ip][13] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
                         <td class="center col-4">
                             <button class="align-middle center btn btn-outline-success btn-sm" onclick="copy('{{ client_connection_data[ip][1] }}')">
@@ -221,7 +221,7 @@ function copy(text) {
                       <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
                   {% else %}
                       <form action="/write_mac" method="post">
-                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][8] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}">Прописать</button></td>
+                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][8] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][11] }}">Прописать</button></td>
                       </form>
                   {% endif %}
               </td>

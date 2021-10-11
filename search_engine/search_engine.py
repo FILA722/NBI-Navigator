@@ -42,6 +42,7 @@ def search(client):
         return False
 
     elif len(coincidence_names) == 1:
+
         logging.info(f'Найден клиент: {coincidence_names[0]}')
 
         client_connection_data = clients[coincidence_names[0]][8]
@@ -62,9 +63,11 @@ def search(client):
                     data_from_switch = []
 
                     if client_connection_data[client_ip_address][5] == 'huawei':
+                        data_from_switch = None
                         logging.info(f'Установка телнет-сессии с huawei {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                         data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
                     elif client_connection_data[client_ip_address][5] == 'zyxel':
+                        data_from_switch = None
                         logging.info(f'Установка телнет-сессии с zyxel {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                         data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
 

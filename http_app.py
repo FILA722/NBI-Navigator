@@ -21,7 +21,6 @@ def get_suspended_clients():
 @app.route('/write_mac', methods=['GET', 'POST'])
 def write_mac():
     if request.method == 'POST':
-
         write_mac_data = request.form['write_mac_address']
         write_mac_data_list = write_mac_data.split('+')
         saved_mac_addresses = re.findall(r'\w{4}-\w{4}-\w{4}', write_mac_data_list[0])
@@ -31,9 +30,17 @@ def write_mac():
         switch_model = write_mac_data_list[4]
         client_ip = write_mac_data_list[5]
         client_name = write_mac_data_list[6]
+        client_vlan = write_mac_data_list[7]
 
-        ans = write_mac_address(saved_mac_addresses, current_mac_addresses, switch_ip, client_port, switch_model, client_ip)
-        print(ans)
+        ans = write_mac_address(saved_mac_addresses,
+                                current_mac_addresses,
+                                switch_ip,
+                                client_port,
+                                switch_model,
+                                client_ip,
+                                client_vlan,
+                                client_name)
+
         return redirect(f'/client/{client_name}')
 
 
@@ -88,15 +95,16 @@ def find_client(client_name):
         client_name = search_result[0]
         client_data = search_result[1]
         # client_name = 'кармазіна ірина юрївна'
-        # client_data = ['0675075036,0442273438',
+
+        # client_date = ['0675075036,0442273438',
         #                'i.dronova@nbi.ua, i.dronova@unitex.od.ua',
         #                'Бизнес-центр Євгена Сверстюка, 11A',
         #                'ВНДІХІМПРОЕКТ - хозяин здания\n516-8478 Александр Владимирович - нач.тех.отдела\n\nсвязист Константин 095 4456484 (работает только по понедельникам)\n\nОборудование стоит в НОВИЙ БЦ ТОВ, знает где стоит - Артем гл. инж.\n050 1520558 (ребутнет если чего, категорически не приветствует)\n!!! Шлюз 80.78.40.17 !!!\nПодключено конверторами с МР17. Конвертор МР11-МР17 FOXGATE EC-23721-1SM-20 #EC20110252670\nSwitch Zyxel MES-35000-24\nS/N: S120H27009921\n(АТС подвал)\nSwitch2 Quidway  S2326TP-EI \n12(пов.)',
-        #                'Неактивний',
+        #                'Активний',
         #                'НЕТ',
         #                '(050)383-06-91 Николай Дмитриевич',
         #                '==Sverstyuka 11A sw2#5==\nНеобмежений:\nсвіт - 10М\nУкраїна - до 100М\n\nМАС-адрес:\n50ff-204a-eb4e\n\nзміна прізвища з Дронова на Кармазіна Ірина Юріївна',
-        #                {'80.78.40.13': ['Sverstyuka 11A sw2', '10.10.16.8', '#5', '80.78.40.17', '255.255.255.224', 'huawei', 'up', [''], [('50ff-204a-eb4e', 'red')], '0', True, True, True]},
+        #                {'80.78.40.13': ['Sverstyuka 11A sw2', '10.10.16.8', '#5', '80.78.40.17', '255.255.255.224', 'huawei', 'up', ['50ff-204a-eb4e'], [('50ff-204a-eb4e', 'green')], '0', False, '5', False, True]},
         #                'https://netstore2.nbi.com.ua/show_client.php?client_id=124']
 
         client_tel = client_data[0]

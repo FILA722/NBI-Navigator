@@ -79,6 +79,7 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
 
         telnet.write(to_bytes('display current-configuration'))
         telnet.write(to_bytes(' '))
+        display_current_configuration_output = str(telnet.read_until(b"http"))
         logging.info("команда display current-configuration выполнена")
 
         if client_port == '25':
@@ -89,14 +90,25 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
             interface_name = f'Ethernet0/0/{client_port}'
 
         current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface {interface_name} vlan \d+'
-        current_configuration_of_search_port = re.findall(current_configuration_pattern, str(telnet.read_until(b"http")))
+        current_configuration_of_search_port = re.findall(current_configuration_pattern, display_current_configuration_output)
 
         try:
             saved_ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', current_configuration_of_search_port[0])
             saved_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', current_configuration_of_search_port[0])
+            saved_vlan = re.findall(r'vlan \d+', current_configuration_of_search_port[0])[0].strip('vlan ')
         except IndexError:
             saved_ip_address = ''
             saved_mac_address = ''
+
+            vlan_list = re.findall(r'vlan \d+', display_current_configuration_output)
+            vlan_nums = [i.strip('vlan ') for i in vlan_list]
+            vlan_max = ('-1', -1)
+            for vlan_num in vlan_nums:
+                if vlan_max[0] != vlan_num:
+                    vlan_num_count = vlan_nums.count(vlan_num)
+                    if vlan_num_count > vlan_max[1]:
+                        vlan_max = (vlan_num, vlan_num_count)
+            saved_vlan = vlan_max[0]
 
         logging.info(f"данные saved_ip_address и saved_mac_address получены: {saved_ip_address}, {saved_mac_address}")
 
@@ -116,10 +128,14 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
             port_errors = [f'На порту прописан IP:{saved_ip_address}']
             logging.info(f"На порту привязка к другому IP:{saved_ip_address}")
 
+        telnet.write(to_bytes('q'))
+        telnet.read_until(b">")
+        telnet.write(to_bytes('q'))
+
     current_mac_addresses, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_address)
 
     logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_addresses}, {port_errors}")
-    return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status
+    return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan
 
 
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
