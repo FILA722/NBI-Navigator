@@ -2,14 +2,13 @@ from parsers.confidential import SwitchLoginData
 import telnetlib
 import logging
 import time
-import re
+
 
 def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 
 
 def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip, client_vlan):
-
     mac_addresses_to_delete = []
     for saved_mac_address in saved_mac_addresses:
         if saved_mac_address not in current_mac_addresses:

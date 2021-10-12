@@ -10,6 +10,7 @@ with open('search_engine/clients.json', 'r') as dict_with_clients:
     clients_names = clients.keys()
     logging.info('Файл с БД клиентов открыт для чтения')
 
+
 def transliteration(client):
     translations = [client]
     for dictionary in Transliterations.dictionaries:
@@ -51,15 +52,16 @@ def search(client):
         logging.info(f'Сбор данных о подключении клиента {coincidence_names[0].upper()}')
 
         for client_ip_address in client_connection_data.keys():
-
             if client_ip_address == 'IP не указан' or client_connection_data[client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе' :
                 return coincidence_names[0], clients[coincidence_names[0]]
             else:
                 switch_ip_address = client_connection_data[client_ip_address][1]
+
                 if not ping_status(switch_ip_address):
                     data_from_switch = ['НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ']
                 else:
                     switch_port = client_connection_data[client_ip_address][2][1:]
+
                     data_from_switch = []
 
                     if client_connection_data[client_ip_address][5] == 'huawei':
@@ -77,8 +79,6 @@ def search(client):
                 logging.info('Данные со свича успешно добавлены в данные по клиенту')
 
             client_connection_data[client_ip_address] += [ping_status(client_ip_address), ping_status(switch_ip_address)]
-
-
         return coincidence_names[0], clients[coincidence_names[0]]
 
     return coincidence_names

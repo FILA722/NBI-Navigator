@@ -23,29 +23,29 @@ def current_mac_address_color_marker(saved_mac_address, current_mac_address):
     return current_mac_address_colored, write_mac_address_button_status
 
 
+def parse_current_configuration(display_interface_brief, switch_port):
+    if len(display_interface_brief) > 24:
+        display_interface_brief[-2] = display_interface_brief[-2].replace('1', '25', 1)
+        display_interface_brief[-1] = display_interface_brief[-1].replace('2', '26', 1)
+    for connection_status_string in display_interface_brief:
+        search_port = re.search(f'Ethernet0/0/{switch_port}', connection_status_string)
+        if search_port:
+            connection_status_list = []
+            word = ''
+            for letter in connection_status_string:
+                if letter != ' ':
+                    word += letter
+                else:
+                    if word:
+                        connection_status_list.append(word)
+                        word = ''
+            connection_status_list.append(word)
+            port_condition = connection_status_list[1]
+            port_errors = int(connection_status_list[-1]) + int(connection_status_list[-2])
+            return port_condition, str(port_errors)
+
+
 def parse_huawei(switch_ip_address, client_ip_address, client_port):
-
-    def parse_current_configuration(display_interface_brief, switch_port):
-        if len(display_interface_brief) > 24:
-            display_interface_brief[-2] = display_interface_brief[-2].replace('1', '25', 1)
-            display_interface_brief[-1] = display_interface_brief[-1].replace('2', '26', 1)
-        for connection_status_string in display_interface_brief:
-            search_port = re.search(f'Ethernet0/0/{switch_port}', connection_status_string)
-            if search_port:
-                connection_status_list = []
-                word = ''
-                for letter in connection_status_string:
-                    if letter != ' ':
-                        word += letter
-                    else:
-                        if word:
-                            connection_status_list.append(word)
-                            word = ''
-                connection_status_list.append(word)
-                port_condition = connection_status_list[1]
-                port_errors = int(connection_status_list[-1]) + int(connection_status_list[-2])
-                return port_condition, str(port_errors)
-
     with telnetlib.Telnet(switch_ip_address) as telnet:
         session = telnet.read_until(b"Password:")
 
@@ -68,7 +68,6 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
         logging.info("команда system-view выполнена")
-
         telnet.write(to_bytes(f'display interface brief'))
         telnet.write(to_bytes(' '))
         display_interface_brief_search_pattern = r'Ethernet\d\/\d\/\d+ +\**\w+ +\w+ +\d+\.*\d*% +\d+\.*\d*% +\d+ +\d+'
@@ -110,7 +109,6 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
                     if vlan_num_count > vlan_max[1]:
                         vlan_max = (vlan_num, vlan_num_count)
             saved_vlan = vlan_max[0]
-
         logging.info(f"данные saved_ip_address и saved_mac_address получены: {saved_ip_address}, {saved_mac_address}")
 
         telnet.write(to_bytes('p'))
@@ -120,7 +118,6 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
 
         current_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', str(telnet.read_until(b"Total")))
         logging.info(f"На порт приходят mac-адреса: {current_mac_address}")
-
         if not current_mac_address:
             current_mac_address = ['Не приходит']
             logging.info("На порт не приходит мак-адрес")
@@ -133,10 +130,10 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         telnet.read_until(b">")
         telnet.write(to_bytes('q'))
 
-    current_mac_addresses, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_address)
+        current_mac_addresses, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_address)
 
-    logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_addresses}, {port_errors}")
-    return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan
+        logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_addresses}, {port_errors}")
+        return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan
 
 
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
