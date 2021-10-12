@@ -61,6 +61,7 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
 
         telnet.write(to_bytes('su'))
         telnet.expect([b"Password:", b">"], timeout=2)
+
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
         logging.info("Авторизация рут на свиче прошла успешно")
@@ -68,7 +69,7 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
         logging.info("команда system-view выполнена")
-        print("команда system-view выполнена")
+
         telnet.write(to_bytes(f'display interface brief'))
         telnet.write(to_bytes(' '))
         display_interface_brief_search_pattern = r'Ethernet\d\/\d\/\d+ +\**\w+ +\w+ +\d+\.*\d*% +\d+\.*\d*% +\d+ +\d+'
@@ -76,12 +77,12 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         logging.info("команда display interface brief выполнена")
         port_condition, port_errors = parse_current_configuration(display_interface_brief, client_port)
         logging.info(f"данные port_condition и port_errors получены: {port_condition}, {port_errors}")
-        print(f"данные port_condition и port_errors получены: {port_condition}, {port_errors}")
+
         telnet.write(to_bytes('display current-configuration'))
         telnet.write(to_bytes(' '))
         display_current_configuration_output = str(telnet.read_until(b"http"))
         logging.info("команда display current-configuration выполнена")
-        print("команда display current-configuration выполнена")
+
         if client_port == '25':
             interface_name = 'GigabitEthernet0/0/1'
         elif client_port == '26':
@@ -111,7 +112,6 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
             saved_vlan = vlan_max[0]
         logging.info(f"данные saved_ip_address и saved_mac_address получены: {saved_ip_address}, {saved_mac_address}")
         telnet.write(to_bytes('p'))
-        print(f"данные saved_ip_address и saved_mac_address получены: {saved_ip_address}, {saved_mac_address}")
 
         telnet.write(to_bytes(f'display mac-address {interface_name}'))
         logging.info(f"команда display mac-address выполнена")
@@ -133,9 +133,9 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         current_mac_addresses, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_address)
 
         logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_addresses}, {port_errors}")
-        print(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_addresses}, {port_errors}")
+        telnet.close()
 
-        return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan
+    return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan
 
 
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):

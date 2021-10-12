@@ -5,10 +5,15 @@ import logging
 import json
 import re
 
-with open('search_engine/clients.json', 'r') as dict_with_clients:
-    clients = json.loads(dict_with_clients.read())
-    clients_names = clients.keys()
-    logging.info('Файл с БД клиентов открыт для чтения')
+
+def request_to_db(request):
+    with open('search_engine/clients.json', 'r') as dict_with_clients:
+        clients = json.loads(dict_with_clients.read())
+        clients_names = clients.keys()
+    if request == 'get_clients_names':
+        return clients_names
+    else:
+        return clients[request]
 
 
 def transliteration(client):
@@ -28,19 +33,16 @@ def transliteration(client):
 
 
 def get_coincidence_names(client):
-    print('start def search in search_engine')
     search_names = transliteration(f'{client}')
-    print('transliteration returned: ', search_names)
 
     coincidence_names = []
+    clients_names = request_to_db('get_clients_names')
     for client_name in clients_names:
         for search_name in search_names:
             pattern = f'{search_name}[  \-\'\w]*'
 
             if re.match(pattern, client_name):
                 coincidence_names.append(client_name)
-
-    print('coincidence_names: ', coincidence_names)
 
     if not coincidence_names:
         logging.info(f'Клиент не найден')
@@ -50,31 +52,26 @@ def get_coincidence_names(client):
 
 
 def get_full_client_data(client_name):
+    client_data = request_to_db(client_name)
     logging.info(f'Найден клиент: {client_name}')
 
-    client_connection_data = clients[client_name][8]
-
-    print(f'Сбор данных о подключении клиента {client_name.upper()}...')
+    client_connection_data = client_data[8]
     logging.info(f'Сбор данных о подключении клиента {client_name.upper()}')
 
     for client_ip_address in client_connection_data.keys():
-        print('client_ip_address', client_ip_address)
         if client_ip_address == 'IP не указан' or client_connection_data[client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе' :
-            return client_name, clients[client_name]
+            return client_name, client_data
         else:
             switch_ip_address = client_connection_data[client_ip_address][1]
-            print('switch_ip_address: ', switch_ip_address)
             if not ping_status(switch_ip_address):
                 data_from_switch = ['НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ']
             else:
                 switch_port = client_connection_data[client_ip_address][2][1:]
-                print('switch_port: ', switch_port)
                 data_from_switch = []
 
                 if client_connection_data[client_ip_address][5] == 'huawei':
                     logging.info(f'Установка телнет-сессии с huawei {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                     data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
-                    print('data_from_switch: ', data_from_switch)
                 elif client_connection_data[client_ip_address][5] == 'zyxel':
                     logging.info(f'Установка телнет-сессии с zyxel {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                     data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
@@ -87,6 +84,6 @@ def get_full_client_data(client_name):
             logging.info('Данные со свича успешно добавлены в данные по клиенту')
 
         client_connection_data[client_ip_address] += [ping_status(client_ip_address), ping_status(switch_ip_address)]
-    print('search engine закончил работу')
-    return client_name, clients[client_name]
+
+    return client_name, client_data
 

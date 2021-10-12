@@ -64,7 +64,9 @@ def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_addre
         telnet.expect([b">"], timeout=7)
         telnet.write(to_bytes('q'))
 
-        return True
+        telnet.close()
+
+    return True
 
 def write_mac_zyxel(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip, client_vlan):
     pass
