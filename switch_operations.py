@@ -103,7 +103,7 @@ def reboot_client_port(switch_ip, switch_port, switch_model):
         port_reboot_operation = port_reboot_zyxel(switch_ip, switch_port)
     elif switch_model == 'huawei':
         port_reboot_operation = port_reboot_huawei(switch_ip, switch_port)
-        
+
     time.sleep(3)
     return True if port_reboot_operation else False
 
@@ -154,5 +154,28 @@ def port_reboot_huawei(switch_ip_address, switch_port):
 
 
 def port_reboot_zyxel(switch_ip_address, switch_port):
-    pass
+    with telnetlib.Telnet(switch_ip_address) as telnet:
+        telnet.expect([b":"], timeout=2)
 
+        telnet.write(to_bytes(SwitchLoginData.sw_login))
+        telnet.read_until(b"Password:")
+
+        telnet.write(to_bytes(SwitchLoginData.sw_passwd))
+        telnet.expect([b"#"])
+
+        logging.info("Авторизация админа на свиче прошла успешно")
+
+        telnet.write(to_bytes('configure'))
+        telnet.expect([b"#"])
+
+        telnet.write(to_bytes(f'interface port-channel {switch_port}'))
+        telnet.expect([b"#"])
+
+        telnet.write(to_bytes('inactive'))
+        time.sleep(3)
+        telnet.write(to_bytes('no inactive'))
+
+        telnet.expect([b"#"])
+
+        time.sleep(3)
+        return True
