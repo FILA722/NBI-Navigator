@@ -186,9 +186,11 @@ function copy(text) {
                 <td class="align-middle center col-3">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
               {% endif %}
 
-              <td class="align-middle center col-2">
-                  <button type="button" class="btn btn-warning" id="port_reboot">Дернуть порт</button>
-              </td>
+              <div class="align-middle center col-2">
+                  <form action="/port_reboot" method="post">
+                    <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="port_reboot" value="{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ client_name }}">Дернуть порт</button></td>
+                  </form>
+              </div>
 
             </tr>
         </tbody>

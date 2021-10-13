@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for, flash, redirect
 from search_engine import search_engine
-from switch_operations import write_mac_address
+from switch_operations import write_mac_address, reboot_client_port
 import json
 import re
 
@@ -16,6 +16,15 @@ def get_suspended_clients():
             if clients[client][4] == "Неактивний":
                 suspended_clients.append(client)
     return suspended_clients
+
+
+@app.route('/port_reboot', methods=['GET', 'POST'])
+def port_reboot():
+    if request.method == 'POST':
+        port_reboot_data = request.form['port_reboot']
+        switch_ip, switch_port, switch_model, client_name = port_reboot_data.split('+')
+        reboot_client_port(switch_ip, switch_port[1:], switch_model)
+        return redirect(f'/client/{client_name}')
 
 
 @app.route('/write_mac', methods=['GET', 'POST'])
@@ -47,13 +56,6 @@ def write_mac():
 @app.route('/test')
 def test():
     return redirect('/')
-
-
-@app.route('/port_reboot')
-def port_reboot():
-    print("Port reboot")
-    return "nothing"
-
 
 @app.route('/client_turn_on')
 def client_turn_on():
