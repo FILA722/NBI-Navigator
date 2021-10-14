@@ -69,8 +69,28 @@ def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_addre
     return True
 
 def write_mac_zyxel(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip, client_vlan):
-    pass
+    with telnetlib.Telnet(switch_ip_address) as telnet:
+        telnet.expect([b":"], timeout=2)
 
+        telnet.write(to_bytes(SwitchLoginData.sw_login))
+        telnet.read_until(b"Password:")
+
+        telnet.write(to_bytes(SwitchLoginData.sw_passwd))
+        telnet.expect([b"#"])
+
+        logging.info("Авторизация админа на свиче прошла успешно")
+
+        telnet.write(to_bytes('configure'))
+        telnet.expect([b"#"])
+
+        telnet.write(to_bytes(f'ip source binding {current_mac_addresses} vlan {client_vlan} {client_ip} interface port-channel {client_port}'))
+        telnet.expect([b"#"])
+
+        telnet.write(to_bytes('exit'))
+        telnet.expect([b"#"])
+
+        telnet.write(to_bytes('write memory'))
+        telnet.expect([b"#"])
 
 def write_mac_address(saved_mac_addresses, current_mac_addresses, switch_ip, client_port, switch_model, client_ip, client_vlan, clien_name):
 
