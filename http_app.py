@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, url_for, flash, redirect
 from search_engine import search_engine
 from switch_operations import write_mac_address, reboot_client_port
+from parsers.confidential import KEYS
 import json
 import re
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'iuywfiyug23poiuj2piou5h2pio53thj2[3io5jtp25'
+app.config['SECRET_KEY'] = KEYS.flask_key
 
 
 def get_suspended_clients():
