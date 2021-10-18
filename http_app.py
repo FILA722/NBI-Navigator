@@ -32,16 +32,26 @@ def port_reboot():
 def write_mac():
     if request.method == 'POST':
         write_mac_data = request.form['write_mac_address']
+        print('write_mac_data: ', write_mac_data)
         write_mac_data_list = write_mac_data.split('+')
-        saved_mac_addresses = re.findall(r'\w{4}-\w{4}-\w{4}', write_mac_data_list[0])
-        current_mac_addresses = re.findall(r'\w{4}-\w{4}-\w{4}', write_mac_data_list[1])
+        print(write_mac_data_list)
+        if write_mac_data_list[4] == 'zyxel':
+            mac_address_pattern = r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w'
+        elif write_mac_data_list[4] == 'huawei':
+            mac_address_pattern = r'\w{4}-\w{4}-\w{4}'
+
+        saved_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[0])
+        current_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[1])
+
         switch_ip = write_mac_data_list[2]
         client_port = write_mac_data_list[3][1:]
         switch_model = write_mac_data_list[4]
         client_ip = write_mac_data_list[5]
         client_name = write_mac_data_list[6]
         client_vlan = write_mac_data_list[7]
-
+        print('http_app saved_mac_addresses: ', saved_mac_addresses)
+        print('http_app current_mac_addresses: ', current_mac_addresses)
+        print('==========')
         ans = write_mac_address(saved_mac_addresses,
                                 current_mac_addresses,
                                 switch_ip,

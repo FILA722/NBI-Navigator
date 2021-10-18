@@ -45,6 +45,16 @@ def parse_current_configuration(display_interface_brief, switch_port):
             return port_condition, str(port_errors)
 
 
+def find_real_net_vlan(vlan_nums):
+    vlan_max = ('-1', -1)
+    for vlan_num in vlan_nums:
+        if vlan_max[0] != vlan_num:
+            vlan_num_count = vlan_nums.count(vlan_num)
+            if vlan_num_count > vlan_max[1]:
+                vlan_max = (vlan_num, vlan_num_count)
+    return vlan_max[0]
+
+
 def parse_huawei(switch_ip_address, client_ip_address, client_port):
     with telnetlib.Telnet(switch_ip_address) as telnet:
         session = telnet.read_until(b"Password:")
@@ -103,13 +113,8 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
 
             vlan_list = re.findall(r'vlan \d+', display_current_configuration_output)
             vlan_nums = [i.strip('vlan ') for i in vlan_list]
-            vlan_max = ('-1', -1)
-            for vlan_num in vlan_nums:
-                if vlan_max[0] != vlan_num:
-                    vlan_num_count = vlan_nums.count(vlan_num)
-                    if vlan_num_count > vlan_max[1]:
-                        vlan_max = (vlan_num, vlan_num_count)
-            saved_vlan = vlan_max[0]
+            saved_vlan = find_real_net_vlan(vlan_nums)
+
         logging.info(f"данные saved_ip_address и saved_mac_address получены: {saved_ip_address}, {saved_mac_address}")
         telnet.write(to_bytes('p'))
 
@@ -121,10 +126,6 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         if not current_mac_address:
             current_mac_address = ['Не приходит']
             logging.info("На порт не приходит мак-адрес")
-
-        if client_ip_address not in saved_ip_address:
-            port_errors = [f'На порту прописан IP:{saved_ip_address}']
-            logging.info(f"На порту привязка к другому IP:{saved_ip_address}")
 
         telnet.write(to_bytes('q'))
         telnet.read_until(b">")
@@ -159,7 +160,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         time.sleep(1)
         logging.info(f"Выполнить команду show interfaces {switch_port}")
         show_interfaces_answer = str(telnet.expect([b"quit"], timeout=2))
-        print(show_interfaces_answer)
+
         show_interfaces_config = re.findall(r'\\t\\tLink\\t\\t\\t:\w+', show_interfaces_answer)
 
         if show_interfaces_config:
@@ -191,10 +192,9 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
 
         if not current_mac_addresses:
             current_mac_addresses = ['Не приходит']
-        logging.info(
-            f"Команда show mac address-table port {switch_port} выполнена, вернула значение current_mac_addresses: {current_mac_addresses}")
-
+        logging.info(f"Команда show mac address-table port {switch_port} выполнена, вернула значение current_mac_addresses: {current_mac_addresses}")
     time.sleep(2)
+
     with telnetlib.Telnet(switch_ip_address) as telnet:
         telnet.expect([b"User name:"], timeout=2)
 
@@ -212,40 +212,40 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         time.sleep(1)
 
         telnet.write(to_bytes('c'))
+        show_ip_source_binding_return = str(telnet.expect([b'Total', b'#']))
         show_ip_source_binding_pattern = f'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w +{client_ip_address} + \w+ + \w+ +\d+ +{switch_port}'
-        show_ip_source_binding = re.findall(show_ip_source_binding_pattern, str(telnet.expect([b'Total', b'#'])))
+        show_ip_source_binding = re.findall(show_ip_source_binding_pattern,  show_ip_source_binding_return)
 
-        port_errors = []
         if len(show_ip_source_binding) == 0:
             saved_mac_addresses = []
-            port_errors.append(f'Нет привязки к {client_ip_address}')
+            vlan_list = re.findall('static +\d+', show_ip_source_binding_return)
+            vlan_nums = [i.strip('static ') for i in vlan_list]
+            saved_vlan = find_real_net_vlan(vlan_nums)
+
         else:
+            saved_vlan = re.findall(r'static +\d+', show_ip_source_binding[0])[0].strip('static ')
             saved_mac_addresses = []
             for bind in show_ip_source_binding:
                 saved_mac_address = re.findall('\w+:\w+:\w+:\w+:\w+:\w+', bind)[0]
                 saved_mac_addresses.append(saved_mac_address)
-            for current_mac_address in current_mac_addresses:
-                if current_mac_address not in saved_mac_addresses:
-                    port_errors.append(f'Приходящий {current_mac_address} не прописан')
 
-        if not port_errors:
-            telnet.write(to_bytes('show loopguard'))
-            output_1 = telnet.expect([b"continue", b"#"], timeout=2)
-            telnet.write(to_bytes('c'))
-            output_2 = str(telnet.read_until(b'#'))
-            show_loopguard_output = f'{output_1} {output_2}'
-            show_loopguard = re.findall(f'{switch_port} +Active +\w+ +\d+ +\d+ +\d+', show_loopguard_output)
-            if show_loopguard:
-                port_errors = [show_loopguard[0].split("  ")[-1].strip()]
-            else:
-                port_errors = '0'
+
+        telnet.write(to_bytes('show loopguard'))
+        output_1 = telnet.expect([b"continue", b"#"], timeout=2)
+        telnet.write(to_bytes('c'))
+        output_2 = str(telnet.read_until(b'#'))
+        show_loopguard_output = f'{output_1} {output_2}'
+        show_loopguard = re.findall(f'{switch_port} +Active +\w+ +\d+ +\d+ +\d+', show_loopguard_output)
+        if show_loopguard:
+            port_errors = [show_loopguard[0].split("  ")[-1].strip()]
+        else:
+            port_errors = '0'
 
         logging.info(f"Команда show ip source binding выполнена, вернула значение saved_mac_addresses: {saved_mac_addresses}, и port_errors: {port_errors}")
 
         current_mac_addresses_colored, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_addresses)
 
     logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_addresses}, {current_mac_addresses_colored}, {port_errors}")
-    saved_vlan = 0
     return port_condition, saved_mac_addresses, current_mac_addresses_colored, port_errors, write_mac_address_button_status, saved_vlan
 
 
