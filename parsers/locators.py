@@ -21,6 +21,8 @@ class NetstoreClientPageLocators():
     MANAGER_2 = (By.XPATH, "/html/body/table/tbody/tr[2]/td[2]/table/tbody/tr[2]/td[2]/table/tbody/tr[2]/td[2]/select/option[@selected='']")
     NOTES = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(10) > td:nth-child(2) > textarea:nth-child(1)')
     IP_ADDRESSES = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(2) > tr > td:nth-child(2)')
+    CLIENT_TURN_OFF_BUTTON = (By.CSS_SELECTOR, '.button_red')
+    CLIENT_TURN_ON_BUTTON = (By.CSS_SELECTOR, '.button_green')
 
 class CactiLocators():
     LOGIN = (By.CSS_SELECTOR, '#user_row > td:nth-child(2) > input:nth-child(1)')
@@ -34,3 +36,7 @@ class CactiLocators():
     NBI_DROPDOWN_BC_BUTTON = (By.CSS_SELECTOR, '#node2_19 > i:nth-child(2)')
     NBI_DROPDOWN_BG_BUTTON = (By.CSS_SELECTOR, '#node2_179 > i:nth-child(2)')
     SWITCH_NAME_AND_IP = (By.TAG_NAME, 'a')
+
+class NetstoreDebtorClient():
+    ZVITU_BUTTON = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(4) > a:nth-child(1)')
+    MIN_SALDO_BUTTON = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(14) > td:nth-child(1) > a:nth-child(1)')

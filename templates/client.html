@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block body %}
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" xmlns="http://www.w3.org/1999/html"></script>
 <script type=text/javascript>
         $(function() {
           $('button#port_reboot').on('click', function(e) {
@@ -118,11 +118,22 @@ function copy(text) {
               <td class="center">{{ client_email }}</td>
             </tr>
             <tr>
-                <th scope="row" class="center">Состояние: </th>
+                <th scope="row" class="center align-self-center">Состояние: </th>
                 {% if client_is_active == "Активний" %}
                     <td class="center"><font color="green"> {{ client_is_active }} </font></td>
                 {% else %}
-                    <td class="center"><font color="red"> {{ client_is_active }} </font><button type="button" class="btn btn-outline-success btn-sm" id="client_turn_on">Включить</button></td>
+                    <td class="center">
+                        <div class="row justify-content-center">
+                            <div class="col-2 align-self-center">
+                                <font color="red">{{ client_is_active }}</font>
+                            </div>
+                            <div class="col-2 align-self-center">
+                                <form action="/client_turn_on" method="post">
+                                    <button type="submit" class="btn btn-success form-control btn-sm" name="client_turn_on" value="{{ client_name }}+{{ client_url }}">Включить</button>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
                 {% endif %}
             </tr>
             <tr>
@@ -160,19 +171,19 @@ function copy(text) {
 
               {% if client_connection_data[ip][13] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
-                        <td class="center col-4">
+                        <td class="center col-4 align-self-center">
                             <button class="align-middle center btn btn-outline-success btn-sm" onclick="copy('{{ client_connection_data[ip][1] }}')">
                                 {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}
                             </button>
                         </td>
                     {% else %}
-                        <td class="center col-4">
+                        <td class="center col-4 align-self-center">
                             <a class="align-middle center btn btn-outline-success btn-sm" href="http://{{ client_connection_data[ip][1] }}">
                                 {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
                         </td>
                     {% endif %}
               {% else %}
-                <td class="center col-4">
+                <td class="center col-4 align-self-center">
                     <a class="align-middle center btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">
                         {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
 <!--                    <br>-->

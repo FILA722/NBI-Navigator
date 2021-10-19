@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, url_for, flash, redirect
 from search_engine import search_engine
 from switch_operations import write_mac_address, reboot_client_port
+from client_managment.client_turn_on import turn_on
 from parsers.confidential import KEYS
 import json
 import re
@@ -19,7 +20,17 @@ def get_suspended_clients():
     return suspended_clients
 
 
-@app.route('/port_reboot', methods=['GET', 'POST'])
+def add_client_data_to_cash(client_name, client_data):
+    with open('search_engine/clients_cash.json', 'r') as clients_cash:
+        clients = json.loads(clients_cash.read())
+        if client_name not in clients.keys():
+            clients[client_name] = client_data
+            client_cash = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
+            with open('search_engine/clients_cash.json', 'w') as clients_cash:
+                clients_cash.write(client_cash)
+
+
+@app.route('/port_reboot', methods=['POST'])
 def port_reboot():
     if request.method == 'POST':
         port_reboot_data = request.form['port_reboot']
@@ -28,16 +39,14 @@ def port_reboot():
         return redirect(f'/client/{client_name}')
 
 
-@app.route('/write_mac', methods=['GET', 'POST'])
+@app.route('/write_mac', methods=['POST'])
 def write_mac():
     if request.method == 'POST':
         write_mac_data = request.form['write_mac_address']
-        print('write_mac_data: ', write_mac_data)
         write_mac_data_list = write_mac_data.split('+')
-        print(write_mac_data_list)
         if write_mac_data_list[4] == 'zyxel':
             mac_address_pattern = r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w'
-        elif write_mac_data_list[4] == 'huawei':
+        else:
             mac_address_pattern = r'\w{4}-\w{4}-\w{4}'
 
         saved_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[0])
@@ -49,9 +58,7 @@ def write_mac():
         client_ip = write_mac_data_list[5]
         client_name = write_mac_data_list[6]
         client_vlan = write_mac_data_list[7]
-        print('http_app saved_mac_addresses: ', saved_mac_addresses)
-        print('http_app current_mac_addresses: ', current_mac_addresses)
-        print('==========')
+
         ans = write_mac_address(saved_mac_addresses,
                                 current_mac_addresses,
                                 switch_ip,
@@ -64,14 +71,36 @@ def write_mac():
         return redirect(f'/client/{client_name}')
 
 
-@app.route('/test')
-def test():
-    return redirect('/')
-
-@app.route('/client_turn_on')
+@app.route('/client_turn_on', methods=['POST'])
 def client_turn_on():
-    print('client_turn_on')
-    return 'nothing'
+    client_name, client_url = request.form['client_turn_on'].split('+')
+    turn_on_operation = turn_on(client_url)
+    with open('search_engine/clients_cash.json', 'r') as clients_cash:
+        clients = json.loads(clients_cash.read())
+        client_data = clients[client_name]
+
+    client_tel = client_data[0]
+    client_email = client_data[1]
+    client_address = client_data[2]
+    client_address_notes = client_data[3].split('\n')
+    client_is_active = 'Активний'
+    client_converter = client_data[5]
+    client_manager = client_data[6]
+    client_notes = client_data[7].split('\n')
+    client_connection_data = client_data[8]
+
+    return render_template('client.html',
+                           client_name=client_name,
+                           client_tel=client_tel,
+                           client_email=client_email,
+                           client_address=client_address,
+                           client_address_notes=client_address_notes,
+                           client_is_active=client_is_active,
+                           client_converter=client_converter,
+                           client_manager=client_manager,
+                           client_notes=client_notes,
+                           client_connection_data=client_connection_data,
+                           client_url=client_url) if turn_on_operation else redirect('/')
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -95,7 +124,7 @@ def search():
 def show_client_page(client_name):
     if request.method == 'GET':
         client_name, client_data = search_engine.get_full_client_data(client_name)
-
+        add_client_data_to_cash(client_name, client_data)
         # client_name = 'кармазіна ірина юрївна'
         # client_data = ['0675075036,0442273438',
         #                'i.dronova@nbi.ua, i.dronova@unitex.od.ua',
@@ -118,7 +147,6 @@ def show_client_page(client_name):
         client_notes = client_data[7].split('\n')
         client_connection_data = client_data[8]
         client_url = client_data[9]
-
         return render_template('client.html',
                                client_name=client_name,
                                client_tel=client_tel,
