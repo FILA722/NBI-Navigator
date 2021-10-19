@@ -21,86 +21,99 @@ def get_suspended_clients():
 
 
 def add_client_data_to_cash(client_name, client_data):
-    with open('search_engine/clients_cash.json', 'r') as clients_cash:
-        clients = json.loads(clients_cash.read())
-        if client_name not in clients.keys():
-            clients[client_name] = client_data
-            client_cash = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
-            with open('search_engine/clients_cash.json', 'w') as clients_cash:
-                clients_cash.write(client_cash)
+    with open('search_engine/clients_cash.json', 'w') as client_cash:
+        clients = dict()
+        clients[client_name] = client_data
+        client_cash_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
+        client_cash.write(client_cash_json)
+
+
+def edit_client_parameter_is_active_in_db(client_name):
+    with open('search_engine/clients.json', 'r') as open_clients_db:
+        clients = json.loads(open_clients_db.read())
+        clients[client_name][4] = 'Активний'
+    with open('search_engine/clients.json', 'w') as save_clients_db:
+        clients_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
+        save_clients_db.write(clients_json)
 
 
 @app.route('/port_reboot', methods=['POST'])
 def port_reboot():
-    if request.method == 'POST':
-        port_reboot_data = request.form['port_reboot']
-        switch_ip, switch_port, switch_model, client_name = port_reboot_data.split('+')
-        reboot_client_port(switch_ip, switch_port[1:], switch_model)
-        return redirect(f'/client/{client_name}')
+    port_reboot_data = request.form['port_reboot']
+    switch_ip, switch_port, switch_model, client_name = port_reboot_data.split('+')
+    reboot_client_port(switch_ip, switch_port[1:], switch_model)
+    return redirect(f'/client/{client_name}')
 
 
 @app.route('/write_mac', methods=['POST'])
 def write_mac():
-    if request.method == 'POST':
-        write_mac_data = request.form['write_mac_address']
-        write_mac_data_list = write_mac_data.split('+')
-        if write_mac_data_list[4] == 'zyxel':
-            mac_address_pattern = r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w'
-        else:
-            mac_address_pattern = r'\w{4}-\w{4}-\w{4}'
+    write_mac_data = request.form['write_mac_address']
+    write_mac_data_list = write_mac_data.split('+')
 
-        saved_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[0])
-        current_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[1])
+    if write_mac_data_list[4] == 'zyxel':
+        mac_address_pattern = r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w'
+    else:
+        mac_address_pattern = r'\w{4}-\w{4}-\w{4}'
 
-        switch_ip = write_mac_data_list[2]
-        client_port = write_mac_data_list[3][1:]
-        switch_model = write_mac_data_list[4]
-        client_ip = write_mac_data_list[5]
-        client_name = write_mac_data_list[6]
-        client_vlan = write_mac_data_list[7]
+    saved_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[0])
+    current_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[1])
 
-        ans = write_mac_address(saved_mac_addresses,
-                                current_mac_addresses,
-                                switch_ip,
-                                client_port,
-                                switch_model,
-                                client_ip,
-                                client_vlan,
-                                client_name)
+    switch_ip = write_mac_data_list[2]
+    client_port = write_mac_data_list[3][1:]
+    switch_model = write_mac_data_list[4]
+    client_ip = write_mac_data_list[5]
+    client_name = write_mac_data_list[6]
+    client_vlan = write_mac_data_list[7]
 
-        return redirect(f'/client/{client_name}')
+    ans = write_mac_address(saved_mac_addresses,
+                            current_mac_addresses,
+                            switch_ip,
+                            client_port,
+                            switch_model,
+                            client_ip,
+                            client_vlan,
+                            client_name)
+
+    return redirect(f'/client/{client_name}')
 
 
 @app.route('/client_turn_on', methods=['POST'])
 def client_turn_on():
     client_name, client_url = request.form['client_turn_on'].split('+')
     turn_on_operation = turn_on(client_url)
-    with open('search_engine/clients_cash.json', 'r') as clients_cash:
-        clients = json.loads(clients_cash.read())
-        client_data = clients[client_name]
+    if turn_on_operation:
+        edit_client_parameter_is_active_in_db(client_name)
+        with open('search_engine/clients_cash.json', 'r') as clients_cash:
+            clients = json.loads(clients_cash.read())
+            try:
+                client_data = clients[client_name]
+            except KeyError:
+                return redirect(f'/client/{client_name}')
 
-    client_tel = client_data[0]
-    client_email = client_data[1]
-    client_address = client_data[2]
-    client_address_notes = client_data[3].split('\n')
-    client_is_active = 'Активний'
-    client_converter = client_data[5]
-    client_manager = client_data[6]
-    client_notes = client_data[7].split('\n')
-    client_connection_data = client_data[8]
+        client_tel = client_data[0]
+        client_email = client_data[1]
+        client_address = client_data[2]
+        client_address_notes = client_data[3].split('\n')
+        client_is_active = 'Активний'
+        client_converter = client_data[5]
+        client_manager = client_data[6]
+        client_notes = client_data[7].split('\n')
+        client_connection_data = client_data[8]
 
-    return render_template('client.html',
-                           client_name=client_name,
-                           client_tel=client_tel,
-                           client_email=client_email,
-                           client_address=client_address,
-                           client_address_notes=client_address_notes,
-                           client_is_active=client_is_active,
-                           client_converter=client_converter,
-                           client_manager=client_manager,
-                           client_notes=client_notes,
-                           client_connection_data=client_connection_data,
-                           client_url=client_url) if turn_on_operation else redirect('/')
+        return render_template('client.html',
+                               client_name=client_name,
+                               client_tel=client_tel,
+                               client_email=client_email,
+                               client_address=client_address,
+                               client_address_notes=client_address_notes,
+                               client_is_active=client_is_active,
+                               client_converter=client_converter,
+                               client_manager=client_manager,
+                               client_notes=client_notes,
+                               client_connection_data=client_connection_data,
+                               client_url=client_url)
+    else:
+        return redirect('/')
 
 
 @app.route('/', methods=['POST', 'GET'])
