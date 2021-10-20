@@ -38,10 +38,17 @@ NBI-Navigator
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
           {% for sus_client in suspended_clients %}
-          <li><a class="dropdown-item" href="/client/{{ sus_client }}">
-                {{ sus_client.upper() }}
-                <button type="button" class="btn btn-outline-success btn-sm col-md-push-2">Включить</button>
-              </a>
+          <li>
+              <div class="container">
+                  <div class="row justify-content-between">
+                      <div class="col-10 align-self-start">
+                          <a class="dropdown-item" href="/client_turn_on/{{ sus_client }}">{{ sus_client.upper() }}</a>
+                      </div>
+                      <div class="col-2 align-self-start">
+                          <a class="btn btn-success btn-sm" href="/update_db_waiter">Включить</a>
+                      </div>
+                  </div>
+              </div>
           </li>
           {% endfor %}
         </ul>

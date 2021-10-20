@@ -7,46 +7,8 @@
 
 {% block body %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" xmlns="http://www.w3.org/1999/html"></script>
-<script type=text/javascript>
-        $(function() {
-          $('button#port_reboot').on('click', function(e) {
-            e.preventDefault()
-            alert( 'ПОРТ ПЕРЕДЁРНУТ' );
-            $.getJSON('/port_reboot',
-                function(data) {
-              //do nothing
-            });
-            return false;
-          });
-        });
-
-        $(function() {
-          $('button#write_mac').on('click', function(e) {
-            e.preventDefault()
-            alert( 'МАК ПРОПИСАН' );
-            $.getJSON('/write_mac',
-                function(data) {
-              //do nothing
-            });
-            return false;
-          });
-        });
-
-        $(function() {
-          $('button#client_turn_on').on('click', function(e) {
-            e.preventDefault()
-            $.getJSON('/client_turn_on',
-                function(data) {
-              //do nothing
-            });
-            return false;
-          });
-        });
-
-</script>
 
 <script>
-
     function openCity(evt, cityName) {
     // Declare all variables
     var i, tabcontent, tablinks;
@@ -129,7 +91,7 @@ function copy(text) {
                             </div>
                             <div class="col-2 align-self-center">
                                 <form action="/client_turn_on" method="post">
-                                    <button type="submit" class="btn btn-success form-control btn-sm" name="client_turn_on" value="{{ client_name }}+{{ client_url }}">Включить</button>
+                                    <button type="submit" class="btn btn-success form-control btn-sm" name="client_turn_on_from_search_page" value="{{ client_name }}+{{ client_url }}">Включить</button>
                                 </form>
                             </div>
                         </div>

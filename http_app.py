@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Flask, render_template, request, redirect
 from search_engine import search_engine
 from switch_operations import write_mac_address, reboot_client_port
 from client_managment.client_turn_on import turn_on
@@ -32,9 +32,11 @@ def edit_client_parameter_is_active_in_db(client_name):
     with open('search_engine/clients.json', 'r') as open_clients_db:
         clients = json.loads(open_clients_db.read())
         clients[client_name][4] = 'Активний'
+        client_url = clients[client_name][9]
     with open('search_engine/clients.json', 'w') as save_clients_db:
         clients_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
         save_clients_db.write(clients_json)
+    return client_url
 
 
 @app.route('/port_reboot', methods=['POST'])
@@ -116,6 +118,13 @@ def client_turn_on():
         return redirect('/')
 
 
+@app.route('/client_turn_on/<client_name>')
+def client_turn_on_from_search_page(client_name):
+    client_url = edit_client_parameter_is_active_in_db(client_name)
+    turn_on(client_url)
+    return redirect('/')
+
+
 @app.route('/', methods=['POST', 'GET'])
 def search():
     suspended_clients = get_suspended_clients()
@@ -138,17 +147,6 @@ def show_client_page(client_name):
     if request.method == 'GET':
         client_name, client_data = search_engine.get_full_client_data(client_name)
         add_client_data_to_cash(client_name, client_data)
-        # client_name = 'кармазіна ірина юрївна'
-        # client_data = ['0675075036,0442273438',
-        #                'i.dronova@nbi.ua, i.dronova@unitex.od.ua',
-        #                'Бизнес-центр Євгена Сверстюка, 11A',
-        #                'ВНДІХІМПРОЕКТ - хозяин здания\n516-8478 Александр Владимирович - нач.тех.отдела\n\nсвязист Константин 095 4456484 (работает только по понедельникам)\n\nОборудование стоит в НОВИЙ БЦ ТОВ, знает где стоит - Артем гл. инж.\n050 1520558 (ребутнет если чего, категорически не приветствует)\n!!! Шлюз 80.78.40.17 !!!\nПодключено конверторами с МР17. Конвертор МР11-МР17 FOXGATE EC-23721-1SM-20 #EC20110252670\nSwitch Zyxel MES-35000-24\nS/N: S120H27009921\n(АТС подвал)\nSwitch2 Quidway  S2326TP-EI \n12(пов.)',
-        #                'Активний',
-        #                'НЕТ',
-        #                '(050)383-06-91 Николай Дмитриевич',
-        #                '==Sverstyuka 11A sw2#5==\nНеобмежений:\nсвіт - 10М\nУкраїна - до 100М\n\nМАС-адрес:\n50ff-204a-eb4e\n\nзміна прізвища з Дронова на Кармазіна Ірина Юріївна',
-        #                {'80.78.40.13': ['Sverstyuka 11A sw2', '10.10.16.8', '#5', '80.78.40.17', '255.255.255.224', 'huawei', 'up', ['50ff-204a-eb4e'], [('50ff-204a-eb4e', 'green')], '0', False, '5', False, True]},
-        #                'https://netstore2.nbi.com.ua/show_client.php?client_id=124']
 
         client_tel = client_data[0]
         client_email = client_data[1]
@@ -160,6 +158,7 @@ def show_client_page(client_name):
         client_notes = client_data[7].split('\n')
         client_connection_data = client_data[8]
         client_url = client_data[9]
+
         return render_template('client.html',
                                client_name=client_name,
                                client_tel=client_tel,
