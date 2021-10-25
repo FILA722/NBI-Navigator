@@ -1,8 +1,11 @@
+import time
 from flask import Flask, render_template, request, redirect
+from multiprocessing import Process
 from search_engine import search_engine
 from switch_operations import write_mac_address, reboot_client_port
 from client_managment.client_turn_on import turn_on
 from parsers.confidential import KEYS
+from parsers.update_clients_database import update_clients_data
 import json
 import re
 
@@ -24,9 +27,9 @@ def add_client_data_to_cash(client_name, client_data):
     with open('search_engine/clients_cash.json', 'w') as client_cash:
         clients = dict()
         clients[client_name] = client_data
-        client_cash_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
-        client_cash.write(client_cash_json)
-
+        # client_cash_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
+        # client_cash.write(client_cash_json)
+        json.dump(clients, client_cash, indent=2, sort_keys=True, ensure_ascii=False)
 
 def edit_client_parameter_is_active_in_db(client_name):
     with open('search_engine/clients.json', 'r') as open_clients_db:
@@ -34,9 +37,19 @@ def edit_client_parameter_is_active_in_db(client_name):
         clients[client_name][4] = 'Активний'
         client_url = clients[client_name][9]
     with open('search_engine/clients.json', 'w') as save_clients_db:
-        clients_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
-        save_clients_db.write(clients_json)
+        # clients_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
+        # save_clients_db.write(clients_json)
+        json.dump(clients, save_clients_db, indent=2, sort_keys=True, ensure_ascii=False)
     return client_url
+
+
+def start_background_processes():
+    update_main_db = Process(target=update_clients_data('total'))
+    update_client_url_db = Process(target=update_clients_data('local'))
+
+    update_main_db.start()
+    time.sleep(120)
+    update_client_url_db.start()
 
 
 @app.route('/port_reboot', methods=['POST'])
@@ -182,4 +195,5 @@ def show_client_page(client_name):
             return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
 
 if __name__ == '__main__':
+    start_background_processes()
     app.run(debug=True)

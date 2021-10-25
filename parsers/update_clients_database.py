@@ -90,10 +90,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
     return client_connection_data
 
 
-def collect_clients_data(url, login_, password):
-    switch_name_ip_dict = parse_cacti.main()
-    clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
-
+def collect_clients_data(url, login_, password, parse_level):
     try:
         logging.info("Запуск браузера")
         browser = driver(url)
@@ -116,6 +113,26 @@ def collect_clients_data(url, login_, password):
         client_objects = active_clients + terminated_clients
         logging.info("Сбор клиент-объектов прошел успешно")
 
+        if parse_level == 'local':
+            active_client_name_url_dict = {}
+            for active_client in active_clients:
+                active_client_object = active_client.find_element_by_tag_name('a')
+                active_client_name = active_client_object.text
+                active_client_netstore_url = active_client_object.get_attribute("href").replace('_properties', '_client')
+                active_client_name_url_dict[active_client_name] = active_client_netstore_url
+
+            terminated_client_name_url_dict = {}
+            for terminate_client in terminated_clients:
+                terminate_client_object = terminate_client.find_element_by_tag_name('a')
+                terminate_client_name = terminate_client_object.text
+                terminate_client_netstore_url = terminate_client_object.get_attribute("href").replace('_properties', '_client')
+                terminated_client_name_url_dict[terminate_client_name] = terminate_client_netstore_url
+
+            return active_client_name_url_dict, terminated_client_name_url_dict
+
+        switch_name_ip_dict = parse_cacti.main()
+        clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
+
         clients_netstore_name_url_list = []
 
         for client in client_objects:
@@ -129,9 +146,6 @@ def collect_clients_data(url, login_, password):
         for client in clients_netstore_name_url_list:
             client_name = ((client[0].lower()).replace('(', '')).replace(')', '')
             client_netstore_url = client[1]
-
-            # if client_name in confidential.UnprocessedNames.not_processed_clients:
-            #     continue
 
             browser.get(client_netstore_url)
 
@@ -149,7 +163,6 @@ def collect_clients_data(url, login_, password):
             client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
             client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
             client_is_converter = 'НЕТ' if browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked") == None else 'ЕСТЬ'
-            #client_speed = browser.find_element(*NetstoreClientPageLocators.SPEED).get_attribute("value")
 
             try:
                 client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER).get_attribute("value"))
@@ -177,32 +190,60 @@ def collect_clients_data(url, login_, password):
     return clients_database
 
 
-def update_clients_data():
-    clients_data = {}
+def update_clients_data(parse_level):
 
-    logging.info("Обновление нетсторе 1")
-    if not ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]):
-        print('!!!Нет соединения с Нетсторе 1!!!')
-        logging.info("!!!Нет соединения с Нетсторе 1!!!")
+    if not ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) or not ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+        print('Нет соединения с Нетсторе!')
+        logging.info("Нет соединения с Нетсторе!")
+        return 0
+
     else:
-        clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
-                                            confidential.NetstoreLoginData.netstore1_login,
-                                            confidential.NetstoreLoginData.netstore_passwd))
-        logging.info("Обновление нетсторе 1 прошел успешно")
+        if parse_level == 'local':
+            active_client_name_url_dict, terminated_client_name_url_dict = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
+                                                confidential.NetstoreLoginData.netstore1_login,
+                                                confidential.NetstoreLoginData.netstore_passwd,
+                                                parse_level)
 
-    if not ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
-        print('!!!Нет соединения с Нетсторе 2!!!')
-        logging.info("!!!Нет соединения с Нетсторе 2!!!")
-    else:
-        logging.info("Обновление нетсторе 2")
-        clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
-                                                 confidential.NetstoreLoginData.netstore2_login,
-                                                 confidential.NetstoreLoginData.netstore_passwd))
-        logging.info("Обновление нетсторе 2 прошел успешно")
+            active_client_name_url_dict_from_netstore2, terminated_client_name_url_dict_from_netstore2 = collect_clients_data(
+                confidential.NetstoreLoginData.netstore2_url,
+                confidential.NetstoreLoginData.netstore2_login,
+                confidential.NetstoreLoginData.netstore_passwd,
+                parse_level)
 
-    logging.info("Запись БД в clients.json")
-    json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)
-    with open('search_engine/clients.json', 'w') as dict_with_clients:
-        dict_with_clients.write(json_clients_dict)
-    logging.info("*************** БД обновлена успешно ***************")
+            active_client_name_url_dict.update(active_client_name_url_dict_from_netstore2)
+            terminated_client_name_url_dict.update(terminated_client_name_url_dict_from_netstore2)
+
+            with open('active_clients_name_url_data.json', 'r') as active_client_name_url_data:
+                active_client_name_url_dict_old = json.load(active_client_name_url_data)
+                if active_client_name_url_dict_old !=  active_client_name_url_dict:
+                    active_client_name_url_dict = active_client_name_url_dict_old
+
+            with open('terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
+                terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
+                if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
+                    turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
+                    for turned_on_client in turned_on_clients:
+                        #active_client_name_url_dict[turned_on_client]
+                        #add to balance watching list
+                        pass
+
+
+
+        elif parse_level == 'total':
+            clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
+                                                confidential.NetstoreLoginData.netstore1_login,
+                                                confidential.NetstoreLoginData.netstore_passwd,
+                                                parse_level)
+
+            clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
+                                                     confidential.NetstoreLoginData.netstore2_login,
+                                                     confidential.NetstoreLoginData.netstore_passwd,
+                                                     parse_level))
+
+            # json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)
+            with open('search_engine/clients.json', 'w') as dict_with_clients:
+                # dict_with_clients.write(json_clients_dict)
+                json.dump(clients_data, dict_with_clients, indent=2, sort_keys=True, ensure_ascii=False)
+
+
 
