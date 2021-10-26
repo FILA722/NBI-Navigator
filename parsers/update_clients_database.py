@@ -1,9 +1,9 @@
 from parsers import parse_cacti, parse_zones
 from parsers import confidential
 from start_browser import driver
-from debugers.check_ping_status import ping_status
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
 from selenium.common.exceptions import NoSuchElementException
+from datetime import datetime, timedelta
 import logging
 import json
 import re
@@ -192,58 +192,64 @@ def collect_clients_data(url, login_, password, parse_level):
 
 def update_clients_data(parse_level):
 
-    if not ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) or not ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
-        print('Нет соединения с Нетсторе!')
-        logging.info("Нет соединения с Нетсторе!")
-        return 0
+    if parse_level == 'local':
+        start = datetime.now()
+        print(f'Updating local DB started at {start}')
+        active_client_name_url_dict, terminated_client_name_url_dict = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
+                                            confidential.NetstoreLoginData.netstore1_login,
+                                            confidential.NetstoreLoginData.netstore_passwd,
+                                            parse_level)
 
-    else:
-        if parse_level == 'local':
-            active_client_name_url_dict, terminated_client_name_url_dict = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
-                                                confidential.NetstoreLoginData.netstore1_login,
-                                                confidential.NetstoreLoginData.netstore_passwd,
-                                                parse_level)
+        active_client_name_url_dict_from_netstore2, terminated_client_name_url_dict_from_netstore2 = collect_clients_data(
+            confidential.NetstoreLoginData.netstore2_url,
+            confidential.NetstoreLoginData.netstore2_login,
+            confidential.NetstoreLoginData.netstore_passwd,
+            parse_level)
 
-            active_client_name_url_dict_from_netstore2, terminated_client_name_url_dict_from_netstore2 = collect_clients_data(
-                confidential.NetstoreLoginData.netstore2_url,
-                confidential.NetstoreLoginData.netstore2_login,
-                confidential.NetstoreLoginData.netstore_passwd,
-                parse_level)
+        active_client_name_url_dict.update(active_client_name_url_dict_from_netstore2)
+        terminated_client_name_url_dict.update(terminated_client_name_url_dict_from_netstore2)
 
-            active_client_name_url_dict.update(active_client_name_url_dict_from_netstore2)
-            terminated_client_name_url_dict.update(terminated_client_name_url_dict_from_netstore2)
+        with open('search_engine/active_clients_name_url_data.json', 'r') as active_client_name_url_data:
+            active_client_name_url_dict_old = json.load(active_client_name_url_data)
 
-            with open('active_clients_name_url_data.json', 'r') as active_client_name_url_data:
-                active_client_name_url_dict_old = json.load(active_client_name_url_data)
-                if active_client_name_url_dict_old !=  active_client_name_url_dict:
-                    active_client_name_url_dict = active_client_name_url_dict_old
+        if active_client_name_url_dict_old != active_client_name_url_dict:
+            with open('search_engine/active_clients_name_url_data.json', 'w') as active_client_name_url_data:
+                json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
-            with open('terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
+            with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
                 terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
-                if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
-                    turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
+
+            if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
+                turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
+
+                check_client_balance_date = str(datetime.now() + timedelta(days=3))
+
+                with open('search_engine/check_client_balance.txt', 'a') as check_clients:
                     for turned_on_client in turned_on_clients:
-                        #active_client_name_url_dict[turned_on_client]
-                        #add to balance watching list
-                        pass
+                        check_clients.write(f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]}')
 
+                with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
+                    json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+        print(f'Local DB updated within {str(datetime.now() - start)}')
 
+    elif parse_level == 'total':
+        start = datetime.now()
+        print(f'Updating global DB started at {str(datetime.now())}')
+        clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
+                                            confidential.NetstoreLoginData.netstore1_login,
+                                            confidential.NetstoreLoginData.netstore_passwd,
+                                            parse_level)
 
-        elif parse_level == 'total':
-            clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
-                                                confidential.NetstoreLoginData.netstore1_login,
-                                                confidential.NetstoreLoginData.netstore_passwd,
-                                                parse_level)
+        clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
+                                                 confidential.NetstoreLoginData.netstore2_login,
+                                                 confidential.NetstoreLoginData.netstore_passwd,
+                                                 parse_level))
 
-            clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
-                                                     confidential.NetstoreLoginData.netstore2_login,
-                                                     confidential.NetstoreLoginData.netstore_passwd,
-                                                     parse_level))
+        # json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)
+        with open('search_engine/clients.json', 'w') as dict_with_clients:
+            # dict_with_clients.write(json_clients_dict)
+            json.dump(clients_data, dict_with_clients, indent=2, sort_keys=True, ensure_ascii=False)
 
-            # json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)
-            with open('search_engine/clients.json', 'w') as dict_with_clients:
-                # dict_with_clients.write(json_clients_dict)
-                json.dump(clients_data, dict_with_clients, indent=2, sort_keys=True, ensure_ascii=False)
-
+        print(f'Global DB updated within {str(datetime.now() - start)}')
 
 

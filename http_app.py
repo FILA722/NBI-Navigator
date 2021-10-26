@@ -6,6 +6,8 @@ from switch_operations import write_mac_address, reboot_client_port
 from client_managment.client_turn_on import turn_on
 from parsers.confidential import KEYS
 from parsers.update_clients_database import update_clients_data
+from debugers.check_ping_status import ping_status
+from parsers import confidential
 import json
 import re
 
@@ -27,29 +29,38 @@ def add_client_data_to_cash(client_name, client_data):
     with open('search_engine/clients_cash.json', 'w') as client_cash:
         clients = dict()
         clients[client_name] = client_data
-        # client_cash_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
-        # client_cash.write(client_cash_json)
         json.dump(clients, client_cash, indent=2, sort_keys=True, ensure_ascii=False)
 
 def edit_client_parameter_is_active_in_db(client_name):
+
     with open('search_engine/clients.json', 'r') as open_clients_db:
         clients = json.loads(open_clients_db.read())
         clients[client_name][4] = 'Активний'
         client_url = clients[client_name][9]
+
     with open('search_engine/clients.json', 'w') as save_clients_db:
-        # clients_json = json.dumps(clients, indent=2, sort_keys=True, ensure_ascii=False)
-        # save_clients_db.write(clients_json)
         json.dump(clients, save_clients_db, indent=2, sort_keys=True, ensure_ascii=False)
+
     return client_url
+
+def update_main_db():
+    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+        update_clients_data('total')
+        time.sleep(21600)
+
+
+def update_name_url_db():
+    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+        update_clients_data('local')
+        time.sleep(300)
 
 
 def start_background_processes():
-    update_main_db = Process(target=update_clients_data('total'))
-    update_client_url_db = Process(target=update_clients_data('local'))
+    update_client_url_db_operation = Process(target=update_name_url_db)
+    update_main_db_operation = Process(target=update_main_db)
 
-    update_main_db.start()
-    time.sleep(120)
-    update_client_url_db.start()
+    update_client_url_db_operation.start()
+    update_main_db_operation.start()
 
 
 @app.route('/port_reboot', methods=['POST'])
@@ -194,6 +205,7 @@ def show_client_page(client_name):
         else:
             return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
 
+
 if __name__ == '__main__':
-    start_background_processes()
     app.run(debug=True)
+    # start_background_processes()
