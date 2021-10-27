@@ -23,6 +23,8 @@ class NetstoreClientPageLocators():
     IP_ADDRESSES = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(2) > tr > td:nth-child(2)')
     CLIENT_TURN_OFF_BUTTON = (By.CSS_SELECTOR, '.button_red')
     CLIENT_TURN_ON_BUTTON = (By.CSS_SELECTOR, '.button_green')
+    CLIENT_PERSONAL_ACCOUNT = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(13) > td:nth-child(1) > a:nth-child(1)')
+    CLIENT_DEBT = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(4) > td:nth-child(2)')
 
 class CactiLocators():
     LOGIN = (By.CSS_SELECTOR, '#user_row > td:nth-child(2) > input:nth-child(1)')

@@ -193,8 +193,6 @@ def collect_clients_data(url, login_, password, parse_level):
 def update_clients_data(parse_level):
 
     if parse_level == 'local':
-        start = datetime.now()
-        print(f'Updating local DB started at {start}')
         active_client_name_url_dict, terminated_client_name_url_dict = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,
                                             confidential.NetstoreLoginData.netstore_passwd,
@@ -226,15 +224,12 @@ def update_clients_data(parse_level):
 
                 with open('search_engine/check_client_balance.txt', 'a') as check_clients:
                     for turned_on_client in turned_on_clients:
-                        check_clients.write(f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]}')
+                        check_clients.write(f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]} \n')
 
                 with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
                     json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
-        print(f'Local DB updated within {str(datetime.now() - start)}')
 
     elif parse_level == 'total':
-        start = datetime.now()
-        print(f'Updating global DB started at {str(datetime.now())}')
         clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,
                                             confidential.NetstoreLoginData.netstore_passwd,
@@ -245,11 +240,6 @@ def update_clients_data(parse_level):
                                                  confidential.NetstoreLoginData.netstore_passwd,
                                                  parse_level))
 
-        # json_clients_dict = json.dumps(clients_data, indent=2, sort_keys=True, ensure_ascii=False)
         with open('search_engine/clients.json', 'w') as dict_with_clients:
-            # dict_with_clients.write(json_clients_dict)
             json.dump(clients_data, dict_with_clients, indent=2, sort_keys=True, ensure_ascii=False)
-
-        print(f'Global DB updated within {str(datetime.now() - start)}')
-
 

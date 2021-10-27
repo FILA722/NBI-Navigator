@@ -4,6 +4,7 @@ from multiprocessing import Process
 from search_engine import search_engine
 from switch_operations import write_mac_address, reboot_client_port
 from client_managment.client_turn_on import turn_on
+from client_managment.client_turn_off import turn_off_clients
 from parsers.confidential import KEYS
 from parsers.update_clients_database import update_clients_data
 from debugers.check_ping_status import ping_status
@@ -43,16 +44,18 @@ def edit_client_parameter_is_active_in_db(client_name):
 
     return client_url
 
+
 def update_main_db():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
         update_clients_data('total')
-        time.sleep(21600)
+        turn_off_clients()
+        time.sleep(600)
 
 
 def update_name_url_db():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
         update_clients_data('local')
-        time.sleep(300)
+        time.sleep(180)
 
 
 def start_background_processes():
@@ -207,5 +210,5 @@ def show_client_page(client_name):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    # start_background_processes()
+    # app.run(debug=True)
+    start_background_processes()

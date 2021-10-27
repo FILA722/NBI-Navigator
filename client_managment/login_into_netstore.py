@@ -3,6 +3,7 @@ from parsers.locators import NetstoreLocators
 from parsers.confidential import NetstoreLoginData
 import re
 
+
 def netstore_authorisation(client_url):
 
     is_this_netstore2 = re.search('netstore2', client_url)
