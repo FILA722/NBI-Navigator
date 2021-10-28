@@ -12,7 +12,7 @@ def update_main_db():
     print('Обновление базы данных, это может занять около 4-х минут...')
     start = time.time()
     logging.info("Вызов ф-ции update_db")
-    update_clients_database.update_clients_data('total')
+    update_clients_database.update_clients_data('local')
     print(f'-=База данных обновлена=-\nВремя обновления: {time.time() - start} сек.')
 
 

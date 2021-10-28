@@ -32,6 +32,7 @@ def add_client_data_to_cash(client_name, client_data):
         clients[client_name] = client_data
         json.dump(clients, client_cash, indent=2, sort_keys=True, ensure_ascii=False)
 
+
 def edit_client_parameter_is_active_in_db(client_name):
 
     with open('search_engine/clients.json', 'r') as open_clients_db:
@@ -47,14 +48,21 @@ def edit_client_parameter_is_active_in_db(client_name):
 
 def update_main_db():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+        start = time.time()
+        print(f'Start update GLOBAL DB at {start}')
         update_clients_data('total')
+        print(f'End of update GLOBAL DB, spended time {start - time.time()}')
         turn_off_clients()
         time.sleep(600)
 
 
 def update_name_url_db():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+        start = time.time()
+        print(f'Start update LOCAL DB at {start}')
         update_clients_data('local')
+        print(f'End of update LOCAL DB, spended time: {time.time() - start}')
+
         time.sleep(180)
 
 
@@ -172,7 +180,10 @@ def search():
 @app.route('/client/<client_name>', methods=['POST', 'GET'])
 def show_client_page(client_name):
     if request.method == 'GET':
+        start = time.time()
         client_name, client_data = search_engine.get_full_client_data(client_name)
+        end = time.time()
+        print(f'search time = {end - start}')
         add_client_data_to_cash(client_name, client_data)
 
         client_tel = client_data[0]
@@ -211,4 +222,6 @@ def show_client_page(client_name):
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    start_background_processes()
+    # start_background_processes()
+    # update_main_db()
+    update_name_url_db()

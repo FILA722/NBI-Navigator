@@ -2,7 +2,7 @@ from parsers import parse_cacti, parse_zones
 from parsers import confidential
 from start_browser import driver
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from datetime import datetime, timedelta
 import logging
 import json
@@ -10,8 +10,40 @@ import re
 
 logging.basicConfig(filename="logs.txt", level=logging.INFO)
 
+
+def update_switch_name_ip_file():
+    switch_name_ip_dict = parse_cacti.main()
+    with open('search_engine/switch_name_ip_dict.json', 'w') as switch_name_ip_data:
+        json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
+
+
+def update_clients_ip_gateway_mask_file():
+    clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
+    clients_ip_gateway_mask_dict_json = {}
+    for key in clients_ip_gateway_mask_dict.keys():
+        value = clients_ip_gateway_mask_dict[key]
+        key_json = str(key).replace(r"'", '').strip('()')
+        clients_ip_gateway_mask_dict_json[key_json.replace(' ', '')] = value
+    with open('search_engine/clients_ip_gateway_mask_dict.json', 'w') as clients_ip_gateway_mask_data:
+        json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
+
+
+def load_clients_ip_gateway_mask_file():
+    with open('search_engine/clients_ip_gateway_mask_dict.json', 'r') as clients_ip_gateway_mask_str_dict_json:
+        clients_ip_gateway_mask_str_dict = json.load(clients_ip_gateway_mask_str_dict_json)
+
+        clients_ip_gateway_mask_dict = {}
+        for key in clients_ip_gateway_mask_str_dict.keys():
+            value = clients_ip_gateway_mask_str_dict[key]
+            tuple_key = tuple(key.split(','))
+            clients_ip_gateway_mask_dict[tuple_key] = value
+
+        return clients_ip_gateway_mask_dict
+
+
 def get_manager_info(name):
     return confidential.MANAGERS.manager_dictionary[name]
+
 
 def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
     client_connection_preferences = {}
@@ -29,7 +61,34 @@ def get_switch_name(client_switch_ip):
     return 'Модель свича не найдена'
 
 
-def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_name_ip_dict, ip_mask_dictionary):
+def process_turned_on_clients(active_client_name_url_dict, terminated_client_name_url_dict):
+    with open('search_engine/active_clients_name_url_data.json', 'r') as active_client_name_url_data:
+        active_client_name_url_dict_old = json.load(active_client_name_url_data)
+
+    if active_client_name_url_dict_old != active_client_name_url_dict:
+        with open('search_engine/active_clients_name_url_data.json', 'w') as active_client_name_url_data:
+            json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True,
+                      ensure_ascii=False)
+
+        with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
+            terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
+
+        if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
+            turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
+
+            check_client_balance_date = str(datetime.now() + timedelta(days=3))
+
+            with open('search_engine/check_client_balance.txt', 'a') as check_clients:
+                for turned_on_client in turned_on_clients:
+                    check_clients.write(
+                        f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]} \n')
+
+            with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
+                json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True,
+                          ensure_ascii=False)
+
+
+def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
     client_ip_addresses = tuple(ip_address.text for ip_address in browser.find_elements(*NetstoreClientPageLocators.IP_ADDRESSES))
     switches = re.findall(r'==[A-Za-z0-9-_\/. #]+==', note)
     switches = tuple(switch.strip('==') for switch in switches)
@@ -40,8 +99,15 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note, switch_n
         client_connection_data['IP не указан'] = 'Пожалуйста заполните анкету клиента в нетсторе'
         return client_connection_data
 
-    for i in range(len(client_ip_addresses)):
+    with open('search_engine/switch_name_ip_dict.json', 'r') as switch_name_ip_data:
+        switch_name_ip_dict = json.load(switch_name_ip_data)
 
+    ip_mask_dictionary = load_clients_ip_gateway_mask_file()
+
+    # with open('search_engine/clients_ip_gateway_mask_dict.json', 'r') as clients_ip_gateway_mask_data:
+    #     ip_mask_dictionary = json.load(clients_ip_gateway_mask_data)
+
+    for i in range(len(client_ip_addresses)):
         for ip_zone in ip_mask_dictionary.keys():
             if client_ip_addresses[i] in ip_zone:
                 try:
@@ -106,14 +172,13 @@ def collect_clients_data(url, login_, password, parse_level):
 
         open_all_clients_button = browser.find_element(*NetstoreLocators.GET_ALL_CLIENTS_PAGE)
         open_all_clients_button.click()
-        logging.info("Авторизация в нетсторе прошла успешно")
 
         active_clients = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
         terminated_clients = browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
         client_objects = active_clients + terminated_clients
-        logging.info("Сбор клиент-объектов прошел успешно")
 
         if parse_level == 'local':
+
             active_client_name_url_dict = {}
             for active_client in active_clients:
                 active_client_object = active_client.find_element_by_tag_name('a')
@@ -130,69 +195,94 @@ def collect_clients_data(url, login_, password, parse_level):
 
             return active_client_name_url_dict, terminated_client_name_url_dict
 
-        switch_name_ip_dict = parse_cacti.main()
-        clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
-
-        clients_netstore_name_url_list = []
-
-        for client in client_objects:
-            client_object = client.find_element_by_tag_name('a')
-            client_name = client_object.text
-            client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
-            clients_netstore_name_url_list.append((client_name, client_netstore_url))
 
         clients_database = {}
-        logging.info("Начало сбора данных всех клиентов с нетсторе")
-        for client in clients_netstore_name_url_list:
-            client_name = ((client[0].lower()).replace('(', '')).replace(')', '')
-            client_netstore_url = client[1]
+        for client in client_objects:
 
-            browser.get(client_netstore_url)
+            client_object = client.find_element_by_tag_name('a')
 
-            try:
-                client_physical_address = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS).text
-                client_physical_address_notes = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS_NOTES).text
-            except NoSuchElementException:
-                client_physical_address = None
-                client_physical_address_notes = None
+            client_name = client_object.text
+            client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
 
-            if client_physical_address in confidential.UnprocessedNames.not_processed_bussines_centres:
-                continue
+            client_data = get_client_data(browser, client_netstore_url)
 
-            client_tel = browser.find_element(*NetstoreClientPageLocators.TEL).get_attribute("value")
-            client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
-            client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
-            client_is_converter = 'НЕТ' if browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked") == None else 'ЕСТЬ'
-
-            try:
-                client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER).get_attribute("value"))
-            except NoSuchElementException:
-                client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER_2).get_attribute("value"))
-
-            client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
-            client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes, switch_name_ip_dict,  clients_ip_gateway_mask_dict)
+            client_tel = client_data[0]
+            client_email = client_data[1]
+            client_physical_address = client_data[2]
+            client_physical_address_notes = client_data[3]
+            client_is_active = client_data[4]
+            client_is_converter = client_data[5]
+            client_manager = client_data[6]
+            client_notes = client_data[7]
+            client_connection_data = client_data[8]
 
             clients_database[client_name] = (
-                    client_tel,
-                    client_email,
-                    client_physical_address,
-                    client_physical_address_notes,
-                    client_is_active,
-                    client_is_converter,
-                    # client_speed,
-                    client_manager,
-                    client_notes,
-                    client_connection_data,
-                    client_netstore_url)
+                client_tel,
+                client_email,
+                client_physical_address,
+                client_physical_address_notes,
+                client_is_active,
+                client_is_converter,
+                client_manager,
+                client_notes,
+                client_connection_data,
+                client_netstore_url)
+
     finally:
         browser.quit()
-    logging.info("Конец сбора данных с нетсторе")
+
     return clients_database
+
+
+def get_client_data(browser, client_netstore_url):
+
+    browser.get(client_netstore_url)
+
+    try:
+        client_physical_address = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS).text
+        client_physical_address_notes = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS_NOTES).text
+    except NoSuchElementException:
+        client_physical_address = None
+        client_physical_address_notes = None
+
+    if client_physical_address in confidential.UnprocessedNames.not_processed_bussines_centres:
+        # Обработать этот сценарий
+        pass
+
+    client_tel = browser.find_element(*NetstoreClientPageLocators.TEL).get_attribute("value")
+    client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
+    client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
+    client_is_converter = 'НЕТ' if browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked") == None else 'ЕСТЬ'
+
+    try:
+        client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER).get_attribute("value"))
+    except NoSuchElementException:
+        client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER_2).get_attribute("value"))
+
+    client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
+
+    client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes)
+
+    client_data = (
+            client_tel,
+            client_email,
+            client_physical_address,
+            client_physical_address_notes,
+            client_is_active,
+            client_is_converter,
+            client_manager,
+            client_notes,
+            client_connection_data,
+            client_netstore_url)
+
+    return client_data
 
 
 def update_clients_data(parse_level):
 
     if parse_level == 'local':
+        update_clients_ip_gateway_mask_file()
+
         active_client_name_url_dict, terminated_client_name_url_dict = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,
                                             confidential.NetstoreLoginData.netstore_passwd,
@@ -207,29 +297,12 @@ def update_clients_data(parse_level):
         active_client_name_url_dict.update(active_client_name_url_dict_from_netstore2)
         terminated_client_name_url_dict.update(terminated_client_name_url_dict_from_netstore2)
 
-        with open('search_engine/active_clients_name_url_data.json', 'r') as active_client_name_url_data:
-            active_client_name_url_dict_old = json.load(active_client_name_url_data)
-
-        if active_client_name_url_dict_old != active_client_name_url_dict:
-            with open('search_engine/active_clients_name_url_data.json', 'w') as active_client_name_url_data:
-                json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
-
-            with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
-                terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
-
-            if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
-                turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
-
-                check_client_balance_date = str(datetime.now() + timedelta(days=3))
-
-                with open('search_engine/check_client_balance.txt', 'a') as check_clients:
-                    for turned_on_client in turned_on_clients:
-                        check_clients.write(f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]} \n')
-
-                with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
-                    json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+        process_turned_on_clients(active_client_name_url_dict, terminated_client_name_url_dict)
 
     elif parse_level == 'total':
+        update_clients_ip_gateway_mask_file()
+        update_switch_name_ip_file()
+
         clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,
                                             confidential.NetstoreLoginData.netstore_passwd,

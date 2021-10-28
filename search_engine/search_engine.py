@@ -1,15 +1,34 @@
 from search_engine.transliterations import Transliterations
 from debugers.check_ping_status import ping_status
 from parsers import switch_parse
+from parsers.confidential import NetstoreLoginData
+from parsers.update_clients_database import get_client_data
+from client_managment.login_into_netstore import netstore_authorisation
 import logging
 import json
 import re
 
 
+def concatenate_local_db():
+    with open('search_engine/active_clients_name_url_data.json') as active_clients:
+        active_clients_dict = json.loads(active_clients.read())
+
+    with open('search_engine/terminated_clients_name_url_data.json') as terminated_clients:
+        terminated_clients_dict = json.loads(terminated_clients.read())
+
+    active_clients_dict.update(terminated_clients_dict)
+
+    return active_clients_dict.keys()
+
+
 def request_to_db(request):
-    with open('search_engine/clients.json', 'r') as dict_with_clients:
-        clients = json.loads(dict_with_clients.read())
-        clients_names = clients.keys()
+    if not ping_status(NetstoreLoginData.netstore1_url[8:27]) and not ping_status(NetstoreLoginData.netstore2_url[8:28]):
+        with open('search_engine/clients.json', 'r') as dict_with_clients:
+            clients = json.loads(dict_with_clients.read())
+            clients_names = clients.keys()
+    else:
+        clients_names = concatenate_local_db()
+
     if request == 'get_clients_names':
         return clients_names
     else:
@@ -34,14 +53,14 @@ def transliteration(client):
 
 def get_coincidence_names(client):
     search_names = transliteration(f'{client}')
+    clients_names = request_to_db('get_clients_names')
 
     coincidence_names = []
-    clients_names = request_to_db('get_clients_names')
     for client_name in clients_names:
         for search_name in search_names:
-            pattern = f'{search_name}[  \-\'\w]*'
+            pattern = f'{search_name.lower()}[  \-\'\w]*'
 
-            if re.match(pattern, client_name):
+            if re.match(pattern, client_name.lower()):
                 coincidence_names.append(client_name)
 
     if not coincidence_names:
@@ -54,6 +73,11 @@ def get_coincidence_names(client):
 def get_full_client_data(client_name):
     client_data = request_to_db(client_name)
     logging.info(f'Найден клиент: {client_name}')
+
+    if str(type(client_data)) == "<class 'str'>":
+        client_url = client_data
+        browser = netstore_authorisation(client_url)
+        client_data = get_client_data(browser, client_url)
 
     client_connection_data = client_data[8]
     logging.info(f'Сбор данных о подключении клиента {client_name.upper()}')
@@ -83,7 +107,7 @@ def get_full_client_data(client_name):
                 client_connection_data[client_ip_address] += data_from_switch
             logging.info('Данные со свича успешно добавлены в данные по клиенту')
 
-        client_connection_data[client_ip_address] += [ping_status(client_ip_address), ping_status(switch_ip_address)]
+        client_connection_data[client_ip_address] += (ping_status(client_ip_address), ping_status(switch_ip_address))
 
     return client_name, client_data
 
