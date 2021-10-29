@@ -1,4 +1,4 @@
-import time
+import times
 from flask import Flask, render_template, request, redirect
 from multiprocessing import Process
 from search_engine import search_engine
@@ -17,12 +17,9 @@ app.config['SECRET_KEY'] = KEYS.flask_key
 
 
 def get_suspended_clients():
-    suspended_clients = []
-    with open('search_engine/clients.json', 'r') as dict_with_clients:
-        clients = json.loads(dict_with_clients.read())
-        for client in clients:
-            if clients[client][4] == "Неактивний":
-                suspended_clients.append(client)
+    with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_clients:
+        clients = json.loads(terminated_clients.read())
+        suspended_clients = clients.keys()
     return suspended_clients
 
 
@@ -34,7 +31,6 @@ def add_client_data_to_cash(client_name, client_data):
 
 
 def edit_client_parameter_is_active_in_db(client_name):
-
     with open('search_engine/clients.json', 'r') as open_clients_db:
         clients = json.loads(open_clients_db.read())
         clients[client_name][4] = 'Активний'
@@ -53,7 +49,7 @@ def update_main_db():
         update_clients_data('total')
         print(f'End of update GLOBAL DB, spended time {start - time.time()}')
         turn_off_clients()
-        time.sleep(600)
+        time.sleep(1800)
 
 
 def update_name_url_db():
@@ -221,7 +217,7 @@ def show_client_page(client_name):
 
 
 if __name__ == '__main__':
-    # app.run(debug=True)
+    app.run(debug=True)
     # start_background_processes()
     # update_main_db()
-    update_name_url_db()
+    # update_name_url_db()

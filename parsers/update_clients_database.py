@@ -300,7 +300,6 @@ def update_clients_data(parse_level):
         process_turned_on_clients(active_client_name_url_dict, terminated_client_name_url_dict)
 
     elif parse_level == 'total':
-        update_clients_ip_gateway_mask_file()
         update_switch_name_ip_file()
 
         clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,

@@ -1,7 +1,6 @@
 from search_engine.transliterations import Transliterations
 from debugers.check_ping_status import ping_status
 from parsers import switch_parse
-from parsers.confidential import NetstoreLoginData
 from parsers.update_clients_database import get_client_data
 from client_managment.login_into_netstore import netstore_authorisation
 import logging
@@ -22,17 +21,17 @@ def concatenate_local_db():
 
 
 def request_to_db(request):
-    if not ping_status(NetstoreLoginData.netstore1_url[8:27]) and not ping_status(NetstoreLoginData.netstore2_url[8:28]):
-        with open('search_engine/clients.json', 'r') as dict_with_clients:
-            clients = json.loads(dict_with_clients.read())
-            clients_names = clients.keys()
-    else:
-        clients_names = concatenate_local_db()
-
     if request == 'get_clients_names':
+        clients_names = concatenate_local_db()
         return clients_names
     else:
-        return clients[request]
+        with open('search_engine/clients.json', 'r') as dict_with_clients:
+            clients = json.loads(dict_with_clients.read())
+            try:
+                return clients[request]
+            except KeyError:
+                clients_names = concatenate_local_db()
+                return clients_names[request]
 
 
 def transliteration(client):
@@ -47,7 +46,6 @@ def transliteration(client):
                     word += letter
             if word not in translations and word != client:
                 translations.append(word)
-    logging.info(f'Составлен список для поиска в БД: {translations}')
     return translations
 
 
@@ -64,7 +62,6 @@ def get_coincidence_names(client):
                 coincidence_names.append(client_name)
 
     if not coincidence_names:
-        logging.info(f'Клиент не найден')
         return False
     else:
         return coincidence_names
