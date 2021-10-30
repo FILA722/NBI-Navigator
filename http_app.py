@@ -1,4 +1,5 @@
-import times
+import time
+from datetime import datetime
 from flask import Flask, render_template, request, redirect
 from multiprocessing import Process
 from search_engine import search_engine
@@ -44,10 +45,11 @@ def edit_client_parameter_is_active_in_db(client_name):
 
 def update_main_db():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+
+        print(f'Start update GLOBAL DB at {datetime.now()}')
         start = time.time()
-        print(f'Start update GLOBAL DB at {start}')
         update_clients_data('total')
-        print(f'End of update GLOBAL DB, spended time {start - time.time()}')
+        print(f'End of update GLOBAL DB, spended time {time.time() - start}')
         turn_off_clients()
         time.sleep(1800)
 
@@ -55,7 +57,7 @@ def update_main_db():
 def update_name_url_db():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
         start = time.time()
-        print(f'Start update LOCAL DB at {start}')
+        print(f'Start update LOCAL DB at {datetime.now()}')
         update_clients_data('local')
         print(f'End of update LOCAL DB, spended time: {time.time() - start}')
 

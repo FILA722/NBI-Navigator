@@ -178,60 +178,66 @@ def collect_clients_data(url, login_, password, parse_level):
         client_objects = active_clients + terminated_clients
 
         if parse_level == 'local':
-
             active_client_name_url_dict = {}
             for active_client in active_clients:
                 active_client_object = active_client.find_element_by_tag_name('a')
-                active_client_name = active_client_object.text
+                active_client_name = active_client_object.text.lower()
                 active_client_netstore_url = active_client_object.get_attribute("href").replace('_properties', '_client')
                 active_client_name_url_dict[active_client_name] = active_client_netstore_url
 
             terminated_client_name_url_dict = {}
             for terminate_client in terminated_clients:
                 terminate_client_object = terminate_client.find_element_by_tag_name('a')
-                terminate_client_name = terminate_client_object.text
+                terminate_client_name = terminate_client_object.text.lower()
                 terminate_client_netstore_url = terminate_client_object.get_attribute("href").replace('_properties', '_client')
                 terminated_client_name_url_dict[terminate_client_name] = terminate_client_netstore_url
 
             return active_client_name_url_dict, terminated_client_name_url_dict
 
+        elif parse_level == 'total':
 
-        clients_database = {}
-        for client in client_objects:
+            clients_netstore_name_url_list = []
+            for client in client_objects:
+                client_object = client.find_element_by_tag_name('a')
 
-            client_object = client.find_element_by_tag_name('a')
+                client_name = client_object.text
+                client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
+                clients_netstore_name_url_list.append((client_name, client_netstore_url))
+                #Если объеденить этот цикл со следующим, то не работает client.find_element_by_tag_name('a')
 
-            client_name = client_object.text
-            client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
+            clients_database = {}
+            for client in clients_netstore_name_url_list:
+                client_data = get_client_data(browser, client[1])
 
-            client_data = get_client_data(browser, client_netstore_url)
+                client_name = ((client[0].lower()).replace('(', '')).replace(')', '')
+                client_tel = client_data[0]
+                client_email = client_data[1]
+                client_physical_address = client_data[2]
+                client_physical_address_notes = client_data[3]
+                client_is_active = client_data[4]
+                client_is_converter = client_data[5]
+                client_manager = client_data[6]
+                client_notes = client_data[7]
+                client_connection_data = client_data[8]
+                client_netstore_url = client[1]
 
-            client_tel = client_data[0]
-            client_email = client_data[1]
-            client_physical_address = client_data[2]
-            client_physical_address_notes = client_data[3]
-            client_is_active = client_data[4]
-            client_is_converter = client_data[5]
-            client_manager = client_data[6]
-            client_notes = client_data[7]
-            client_connection_data = client_data[8]
-
-            clients_database[client_name] = (
-                client_tel,
-                client_email,
-                client_physical_address,
-                client_physical_address_notes,
-                client_is_active,
-                client_is_converter,
-                client_manager,
-                client_notes,
-                client_connection_data,
-                client_netstore_url)
+                clients_database[client_name] = (
+                    client_tel,
+                    client_email,
+                    client_physical_address,
+                    client_physical_address_notes,
+                    client_is_active,
+                    client_is_converter,
+                    client_manager,
+                    client_notes,
+                    client_connection_data,
+                    client_netstore_url)
+            return clients_database
 
     finally:
         browser.quit()
 
-    return clients_database
+
 
 
 def get_client_data(browser, client_netstore_url):
