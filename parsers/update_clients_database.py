@@ -3,6 +3,7 @@ from parsers import confidential
 from start_browser import driver
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+from client_managment.login_into_netstore import netstore_authorisation
 from datetime import datetime, timedelta
 import logging
 import json
@@ -27,6 +28,34 @@ def update_clients_ip_gateway_mask_file():
     with open('search_engine/clients_ip_gateway_mask_dict.json', 'w') as clients_ip_gateway_mask_data:
         json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
 
+
+def add_client_into_global_db(client_name, client_url, client_data):
+    client_name = ((client_name.lower()).replace('(', '')).replace(')', '')
+    client_tel = client_data[0]
+    client_email = client_data[1]
+    client_physical_address = client_data[2]
+    client_physical_address_notes = client_data[3]
+    client_is_active = client_data[4]
+    client_is_converter = client_data[5]
+    client_manager = client_data[6]
+    client_notes = client_data[7]
+    client_connection_data = client_data[8]
+
+    new_client = {}
+    new_client[client_name] = (
+        client_tel,
+        client_email,
+        client_physical_address,
+        client_physical_address_notes,
+        client_is_active,
+        client_is_converter,
+        client_manager,
+        client_notes,
+        client_connection_data,
+        client_url)
+
+    with open('search_engine/clients.json', 'a') as clients:
+        clients.write(new_client, clients)
 
 def load_clients_ip_gateway_mask_file():
     with open('search_engine/clients_ip_gateway_mask_dict.json', 'r') as clients_ip_gateway_mask_str_dict_json:
@@ -70,6 +99,14 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
             json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True,
                       ensure_ascii=False)
 
+        new_clients = active_client_name_url_dict.keys() - active_client_name_url_dict_old.keys()
+        for new_client in new_clients:
+            client_name, client_url = new_client, active_client_name_url_dict[new_client]
+            browser = netstore_authorisation(client_url)
+            client_data = get_client_data(browser, client_url)
+
+            #тут добавить данные в глобалуню БД
+
         with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
             terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
 
@@ -80,8 +117,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
 
             with open('search_engine/check_client_balance.txt', 'a') as check_clients:
                 for turned_on_client in turned_on_clients:
-                    check_clients.write(
-                        f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]} \n')
+                    check_clients.write(f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]} \n')
 
             with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
                 json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True,
@@ -198,12 +234,12 @@ def collect_clients_data(url, login_, password, parse_level):
 
             clients_netstore_name_url_list = []
             for client in client_objects:
+                #Если объеденить этот цикл со следующим, то не работает client.find_element_by_tag_name('a')
                 client_object = client.find_element_by_tag_name('a')
 
                 client_name = client_object.text
                 client_netstore_url = client_object.get_attribute("href").replace('_properties', '_client')
                 clients_netstore_name_url_list.append((client_name, client_netstore_url))
-                #Если объеденить этот цикл со следующим, то не работает client.find_element_by_tag_name('a')
 
             clients_database = {}
             for client in clients_netstore_name_url_list:

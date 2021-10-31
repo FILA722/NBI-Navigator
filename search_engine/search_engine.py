@@ -27,7 +27,6 @@ def request_to_db(request):
     else:
         with open('search_engine/clients.json', 'r') as dict_with_clients:
             clients = json.loads(dict_with_clients.read())
-            print(clients[request])
             try:
                 return clients[request]
             except KeyError:
