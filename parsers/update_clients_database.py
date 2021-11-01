@@ -118,14 +118,16 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
         with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
             terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
 
+        print(terminated_client_name_url_dict)
         if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
             turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
 
             check_client_balance_date = str(datetime.now() + timedelta(days=3))
 
-            with open('search_engine/check_client_balance.txt', 'a') as check_clients:
-                for turned_on_client in turned_on_clients:
-                    check_clients.write(f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]} \n')
+            if turned_on_clients:
+                with open('search_engine/check_client_balance.txt', 'a') as check_clients:
+                    for turned_on_client in turned_on_clients:
+                        check_clients.write(f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]} \n')
 
             with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
                 json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
@@ -305,8 +307,6 @@ def get_client_data(browser, client_netstore_url):
 
     client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes)
 
-    # browser.quit()
-
     client_data = (
             client_tel,
             client_email,
@@ -321,6 +321,7 @@ def get_client_data(browser, client_netstore_url):
 
 
     return client_data
+
 
 def update_clients_data(parse_level):
 

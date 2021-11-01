@@ -1,6 +1,5 @@
 from parsers.confidential import SwitchLoginData
 import telnetlib
-import logging
 import re
 import time
 
@@ -57,41 +56,29 @@ def find_real_net_vlan(vlan_nums):
 
 def parse_huawei(switch_ip_address, client_ip_address, client_port):
     with telnetlib.Telnet(switch_ip_address) as telnet:
-        session = telnet.read_until(b"Password:")
-
-        if session:
-            logging.info("Телнет сессия установлена")
-        else:
-            logging.info("Телнет НЕ сессия установлена")
-            raise EOFError
+        telnet.read_until(b"Password:")
 
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
-        logging.info("Авторизация админа на свиче прошла успешно")
 
         telnet.write(to_bytes('su'))
         telnet.expect([b"Password:", b">"], timeout=2)
 
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.read_until(b">")
-        logging.info("Авторизация рут на свиче прошла успешно")
 
         telnet.write(to_bytes('system-view'))
         telnet.read_until(b"]")
-        logging.info("команда system-view выполнена")
 
         telnet.write(to_bytes(f'display interface brief'))
         telnet.write(to_bytes(' '))
         display_interface_brief_search_pattern = r'Ethernet\d\/\d\/\d+ +\**\w+ +\w+ +\d+\.*\d*% +\d+\.*\d*% +\d+ +\d+'
         display_interface_brief = re.findall(display_interface_brief_search_pattern, str(telnet.read_until(b'NULL')))
-        logging.info("команда display interface brief выполнена")
         port_condition, port_errors = parse_current_configuration(display_interface_brief, client_port)
-        logging.info(f"данные port_condition и port_errors получены: {port_condition}, {port_errors}")
 
         telnet.write(to_bytes('display current-configuration'))
         telnet.write(to_bytes(' '))
         display_current_configuration_output = str(telnet.read_until(b"http"))
-        logging.info("команда display current-configuration выполнена")
 
         if client_port == '25':
             interface_name = 'GigabitEthernet0/0/1'
@@ -115,17 +102,15 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
             vlan_nums = [i.strip('vlan ') for i in vlan_list]
             saved_vlan = find_real_net_vlan(vlan_nums)
 
-        logging.info(f"данные saved_ip_address и saved_mac_address получены: {saved_ip_address}, {saved_mac_address}")
         telnet.write(to_bytes('p'))
 
         telnet.write(to_bytes(f'display mac-address {interface_name}'))
-        logging.info(f"команда display mac-address выполнена")
 
         current_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', str(telnet.read_until(b"Total")))
-        logging.info(f"На порт приходят mac-адреса: {current_mac_address}")
         if not current_mac_address:
             current_mac_address = ['Не приходит']
-            logging.info("На порт не приходит мак-адрес")
+        else:
+            port_condition = 'up'
 
         telnet.write(to_bytes('q'))
         telnet.read_until(b">")
@@ -133,7 +118,6 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
 
         current_mac_addresses, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_address)
 
-        logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_address}, {current_mac_addresses}, {port_errors}")
         telnet.close()
 
     return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan
@@ -142,11 +126,6 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
     with telnetlib.Telnet(switch_ip_address) as telnet:
         start_question = telnet.expect([b":"], timeout=2)
-        if start_question:
-            logging.info("Телнет сессия установлена")
-        else:
-            logging.info("Телнет сессия НЕ установлена")
-            raise EOFError
 
         telnet.write(to_bytes(SwitchLoginData.sw_login))
 
@@ -154,11 +133,9 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
 
         telnet.expect([b"#"])
-        logging.info("Авторизация админа на свиче прошла успешно")
 
         telnet.write(to_bytes(f'show interfaces {switch_port}'))
         time.sleep(1)
-        logging.info(f"Выполнить команду show interfaces {switch_port}")
         show_interfaces_answer = str(telnet.expect([b"quit"], timeout=2))
 
         show_interfaces_config = re.findall(r'\\t\\tLink\\t\\t\\t:\w+', show_interfaces_answer)
@@ -167,16 +144,10 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             port_condition = 'DOWN' if show_interfaces_config[0].split(':')[1].strip() == 'Down' else 'up'
         else:
             port_condition = 'Не определён'
-        logging.info(f"Команда show interfaces {switch_port} выполнена, вернула значение port_condition: {port_condition}")
 
     with telnetlib.Telnet(switch_ip_address) as telnet:
 
         start_question = telnet.expect([b"User name:"], timeout=2)
-        if start_question:
-            logging.info("Телнет сессия установлена")
-        else:
-            logging.info("Телнет сессия НЕ установлена")
-            raise EOFError
 
         telnet.write(to_bytes(SwitchLoginData.sw_login))
 
@@ -184,15 +155,15 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
 
         telnet.expect([b"#"])
-        logging.info("Авторизация админа на свиче прошла успешно")
 
         telnet.write(to_bytes(f'show mac address-table port {switch_port}'))
-        logging.info(f"Выполнить команду show mac address-table port {switch_port}")
         current_mac_addresses = re.findall('\w+:\w+:\w+:\w+:\w+:\w+', str(telnet.read_until(b'#')))
 
         if not current_mac_addresses:
             current_mac_addresses = ['Не приходит']
-        logging.info(f"Команда show mac address-table port {switch_port} выполнена, вернула значение current_mac_addresses: {current_mac_addresses}")
+        else:
+            port_condition = 'up'
+
     time.sleep(2)
 
     with telnetlib.Telnet(switch_ip_address) as telnet:
@@ -204,10 +175,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         telnet.write(to_bytes(SwitchLoginData.sw_passwd))
         telnet.expect([b"#"])
 
-        logging.info("Авторизация админа на свиче прошла успешно")
-
         telnet.write(to_bytes('show ip source binding'))
-        logging.info("Выполнить команду show ip source binding")
 
         time.sleep(1)
 
@@ -241,11 +209,8 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         else:
             port_errors = '0'
 
-        logging.info(f"Команда show ip source binding выполнена, вернула значение saved_mac_addresses: {saved_mac_addresses}, и port_errors: {port_errors}")
-
         current_mac_addresses_colored, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_addresses)
 
-    logging.info(f"Сбор данных со свича выполнен успешно:{port_condition}, {saved_mac_addresses}, {current_mac_addresses_colored}, {port_errors}")
     return port_condition, saved_mac_addresses, current_mac_addresses_colored, port_errors, write_mac_address_button_status, saved_vlan
 
 
