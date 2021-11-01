@@ -45,11 +45,12 @@ function copy(text) {
 </script>
 
 <br>
+<div class="container">
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
       <ul class="nav col-12 col-md-auto mb-3 justify-content-center mb-md-0">
         <a class="btn btn-outline-secondary" href="/">NBI-Navigator</a>
       </ul>
-      <div class="col-8">
+      <div class="col-10">
           <form method="post">
               <div class="input-group">
                 <input type="text" name="client" class="form-control" value="{{ request.form['client'] }}" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
@@ -57,7 +58,8 @@ function copy(text) {
               </div>
             </form>
     </header>
-
+</div>
+<br>
 <div class="container">
 <table class="table table-bordered client-table border border-2 ip">
     <tbody>

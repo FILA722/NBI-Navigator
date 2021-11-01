@@ -58,9 +58,10 @@ def get_coincidence_names(client):
     for client_name in clients_names:
         for search_name in search_names:
             pattern = f'{search_name.lower()}[  \-\'\w]*'
-
-            if re.match(pattern, client_name.lower()):
-                coincidence_names.append(client_name)
+            client_name_parts = client_name.split(' ')
+            for client_name_part in client_name_parts:
+                if re.match(pattern, client_name_part):
+                    coincidence_names.append(client_name)
 
     if not coincidence_names:
         return False
