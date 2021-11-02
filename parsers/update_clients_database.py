@@ -2,6 +2,7 @@ from parsers import parse_cacti, parse_zones
 from parsers import confidential
 from start_browser import driver
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
+from parsers import parse_cacti
 from selenium.common.exceptions import NoSuchElementException
 from client_managment.login_into_netstore import netstore_authorisation
 from datetime import datetime, timedelta

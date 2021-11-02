@@ -79,7 +79,6 @@ def get_full_client_data(client_name):
         client_data = get_client_data(browser, client_url)
 
     client_connection_data = client_data[8]
-    logging.info(f'Сбор данных о подключении клиента {client_name.upper()}')
 
     for client_ip_address in client_connection_data.keys():
         if client_ip_address == 'IP не указан' or client_connection_data[client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе' :
