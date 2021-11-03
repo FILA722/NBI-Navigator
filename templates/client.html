@@ -109,7 +109,7 @@ function copy(text) {
 </table>
 <br>
 {% for ip in client_connection_data %}
-    {% if client_connection_data[ip][12] == True %}
+    {% if client_connection_data[ip][14] == True %}
         <button class="tab btn btn-outline-success btn-lg tablinks"  onclick="openCity(event, '{{ ip }}')">{{ ip }}</button>
     {% else %}
         <button class="tab btn btn-outline-danger btn-lg tablinks" onclick="openCity(event, '{{ ip }}')">{{ ip }}</button>
@@ -130,7 +130,7 @@ function copy(text) {
                     <td class="align-middle center col-1"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
                   {% endif %}
 
-              {% if client_connection_data[ip][13] == True %}
+              {% if client_connection_data[ip][15] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
                         <td class="center col-4 align-self-center">
                             <button class="align-middle center btn btn-outline-success btn-sm" onclick="copy('{{ client_connection_data[ip][1] }}')">
@@ -152,10 +152,10 @@ function copy(text) {
                 </td>
               {% endif %}
 
-              {% if client_connection_data[ip][9] == '0' %}
-                <td class="align-middle center col-3">Ошибки: <font color="green">{{ client_connection_data[ip][9] }}</font></td>
+              {% if client_connection_data[ip][11] == '0' %}
+                <td class="align-middle center col-3">Ошибки: <font color="green">{{ client_connection_data[ip][11] }}</font></td>
               {% else %}
-                <td class="align-middle center col-3">Ошибки: <font color="red">{{ client_connection_data[ip][9] }}</font></td>
+                <td class="align-middle center col-3">Ошибки: <font color="red">{{ client_connection_data[ip][11] }}</font></td>
               {% endif %}
 
               <div class="align-middle center col-2">
@@ -182,7 +182,7 @@ function copy(text) {
               </td>
               <td class="center col-4">
                 Приходит:
-                  {% for mac_in in client_connection_data[ip][8] %}
+                  {% for mac_in in client_connection_data[ip][10] %}
                     <br>
                     {% if mac_in[1] == 'green' %}
                       <font color="green">{{ mac_in[0] }}</font>
@@ -191,14 +191,30 @@ function copy(text) {
                     {% endif %}
                   {% endfor %}
               </td>
-                  {% if client_connection_data[ip][10] == False %}
+                  {% if client_connection_data[ip][12] == False %}
                       <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
                   {% else %}
                       <form action="/write_mac" method="post">
-                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][8] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][11] }}">Прописать</button></td>
+                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][10] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][13] }}">Прописать</button></td>
                       </form>
                   {% endif %}
               </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-bordered client-table border border-2 ip">
+        <tbody>
+            <tr>
+                <td class="container center col-6">
+                    <div class="card" style="width: 36rem;">
+                        <img src="{{ client_connection_data[ip][8] }}" class="card-img-top" alt="...">
+                    </div>
+                </td>
+                <td class="container center col-6">
+                    <div class="card" style="width: 36rem;">
+                        <img src="{{ client_connection_data[ip][9] }}" class="card-img-top" alt="...">
+                    </div>
+                </td>
             </tr>
         </tbody>
     </table>

@@ -12,17 +12,24 @@ import re
 
 def update_switch_name_ip_file():
     switch_name_ip_dict = parse_cacti.main()
-    with open('search_engine/switch_name_ip_dict.json', 'w') as switch_name_ip_data:
-        json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
+    with open('search_engine/switch_name_ip_dict.json', 'r') as switch_name_ip_data_old:
+        switch_name_ip_dict_old = json.load(switch_name_ip_data_old)
+
+    if switch_name_ip_dict != switch_name_ip_dict_old:
+        parse_cacti.update_clients_cacti_image_db()
+        with open('search_engine/switch_name_ip_dict.json', 'w') as switch_name_ip_data:
+            json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def update_clients_ip_gateway_mask_file():
     clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
+
     clients_ip_gateway_mask_dict_json = {}
     for key in clients_ip_gateway_mask_dict.keys():
         value = clients_ip_gateway_mask_dict[key]
         key_json = str(key).replace(r"'", '').strip('()')
         clients_ip_gateway_mask_dict_json[key_json.replace(' ', '')] = value
+
     with open('search_engine/clients_ip_gateway_mask_dict.json', 'w') as clients_ip_gateway_mask_data:
         json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
 
@@ -54,7 +61,6 @@ def add_client_into_global_db(client_name, client_url, client_data):
 
     with open('search_engine/clients.json', 'w') as clients_data:
         json.dump(clients_dict, clients_data, indent=2, sort_keys=True, ensure_ascii=False)
-    print(f'client {client_name} added to global DB' )
 
 
 def load_clients_ip_gateway_mask_file():
@@ -72,6 +78,16 @@ def load_clients_ip_gateway_mask_file():
 
 def get_manager_info(name):
     return confidential.MANAGERS.manager_dictionary[name]
+
+
+def remake_client_port_for_cacti_urls_dict(port):
+    client_port = int(port.strip('#'))
+    if client_port < 10:
+        cacti_port = f'Port 0{client_port}'
+    else:
+        cacti_port = f'Port {client_port}'
+
+    return cacti_port
 
 
 def strip_symbols_from_client_name(name):
@@ -113,13 +129,13 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 browser = netstore_authorisation(client_url)
                 client_data = get_client_data(browser, client_url)
                 add_client_into_global_db(client_name, client_url, client_data)
+
         with open('search_engine/active_clients_name_url_data.json', 'w') as active_client_name_url_data:
             json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
         with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
             terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
 
-        print(terminated_client_name_url_dict)
         if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
             turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
 
@@ -186,12 +202,31 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
 
         client_switch_model = get_switch_name(client_switch_ip)
 
+        cacti_client_port = remake_client_port_for_cacti_urls_dict(client_port[0])
+        with open('search_engine/cacti_urls.json', 'r') as cacti_urls:
+            cacti_urls_dict = json.load(cacti_urls)
+
+        try:
+            client_cacti_ulr = cacti_urls_dict[client_switch_ip][cacti_client_port]
+        except (KeyError, IndexError):
+            #вставить ссылку на дефолтную страницу
+            client_cacti_ulr = 1
+
+        try:
+            uplink_cacti_url = cacti_urls_dict[client_switch_ip]["Port Uplink"]
+        except (KeyError, IndexError):
+            # вставить ссылку на дефолтную страницу
+            uplink_cacti_url = 1
+
         client_connection_data[client_ip_addresses[i]] = (client_switch_name,
                                                           client_switch_ip,
                                                           client_port[0],
                                                           client_gateway,
                                                           client_mask,
-                                                          client_switch_model)
+                                                          client_switch_model,
+                                                          client_cacti_ulr,
+                                                          uplink_cacti_url
+                                                          )
 
     return client_connection_data
 

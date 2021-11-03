@@ -219,7 +219,7 @@ def show_client_page(client_name):
 
 
 if __name__ == '__main__':
-    # app.run(debug=True)
+    app.run(debug=True)
     # start_background_processes()
     # update_name_url_db()
-    update_main_db()
+    # update_main_db()
