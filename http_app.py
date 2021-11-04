@@ -8,6 +8,7 @@ from client_managment.client_turn_on import turn_on
 from client_managment.client_turn_off import turn_off_clients
 from parsers.confidential import KEYS
 from parsers.update_clients_database import update_clients_data
+from parsers.parse_cacti import get_to_the_switches_page
 from debugers.check_ping_status import ping_status
 from parsers import confidential
 import json
@@ -71,6 +72,14 @@ def start_background_processes():
     update_client_url_db_operation.start()
     update_main_db_operation.start()
 
+
+@app.route('/test')
+def test():
+    try:
+        browser = get_to_the_switches_page()
+        return render_template('test.html')
+    finally:
+        browser.quit()
 
 @app.route('/port_reboot', methods=['POST'])
 def port_reboot():
@@ -177,45 +186,49 @@ def search():
 
 @app.route('/client/<client_name>', methods=['POST', 'GET'])
 def show_client_page(client_name):
-    if request.method == 'GET':
-        start = time.time()
-        client_name, client_data = search_engine.get_full_client_data(client_name)
-        end = time.time()
-        print(f'search time = {end - start}')
-        add_client_data_to_cash(client_name, client_data)
+        if request.method == 'GET':
+            try:
+                cacti_browser = get_to_the_switches_page()
+                start = time.time()
+                client_name, client_data = search_engine.get_full_client_data(client_name)
+                end = time.time()
+                print(f'search time = {end - start}')
+                add_client_data_to_cash(client_name, client_data)
 
-        client_tel = client_data[0]
-        client_email = client_data[1]
-        client_address = client_data[2]
-        client_address_notes = client_data[3].split('\n')
-        client_is_active = client_data[4]
-        client_converter = client_data[5]
-        client_manager = client_data[6]
-        client_notes = client_data[7].split('\n')
-        client_connection_data = client_data[8]
-        client_url = client_data[9]
+                client_tel = client_data[0]
+                client_email = client_data[1]
+                client_address = client_data[2]
+                client_address_notes = client_data[3].split('\n')
+                client_is_active = client_data[4]
+                client_converter = client_data[5]
+                client_manager = client_data[6]
+                client_notes = client_data[7].split('\n')
+                client_connection_data = client_data[8]
+                client_url = client_data[9]
+            finally:
+                cacti_browser.quit()
 
-        return render_template('client.html',
-                               client_name=client_name,
-                               client_tel=client_tel,
-                               client_email=client_email,
-                               client_address=client_address,
-                               client_address_notes=client_address_notes,
-                               client_is_active=client_is_active,
-                               client_converter=client_converter,
-                               client_manager=client_manager,
-                               client_notes=client_notes,
-                               client_connection_data=client_connection_data,
-                               client_url=client_url)
-    else:
-        suspended_clients = get_suspended_clients()
-        clients = search_engine.get_coincidence_names(request.form['client'])
-        if clients == False:
-            return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients)
-        elif len(clients) == 1:
-            return redirect(f'/client/{clients[0]}')
+            return render_template('client.html',
+                                   client_name=client_name,
+                                   client_tel=client_tel,
+                                   client_email=client_email,
+                                   client_address=client_address,
+                                   client_address_notes=client_address_notes,
+                                   client_is_active=client_is_active,
+                                   client_converter=client_converter,
+                                   client_manager=client_manager,
+                                   client_notes=client_notes,
+                                   client_connection_data=client_connection_data,
+                                   client_url=client_url)
         else:
-            return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
+            suspended_clients = get_suspended_clients()
+            clients = search_engine.get_coincidence_names(request.form['client'])
+            if clients == False:
+                return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients)
+            elif len(clients) == 1:
+                return redirect(f'/client/{clients[0]}')
+            else:
+                return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
 
 
 if __name__ == '__main__':

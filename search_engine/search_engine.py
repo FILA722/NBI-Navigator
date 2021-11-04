@@ -1,11 +1,13 @@
 from search_engine.transliterations import Transliterations
 from debugers.check_ping_status import ping_status
 from parsers import switch_parse
-from parsers.update_clients_database import get_client_data
+from parsers.parse_cacti import save_cacti_client_image_to_file
+from parsers.update_clients_database import get_client_data, remake_client_port_for_cacti_urls_dict
 from client_managment.login_into_netstore import netstore_authorisation
 import logging
 import json
 import re
+import os
 
 
 def concatenate_local_db():
@@ -18,6 +20,13 @@ def concatenate_local_db():
     active_clients_dict.update(terminated_clients_dict)
 
     return active_clients_dict.keys()
+
+
+def remove_previous_cacti_images():
+    path = 'static/images'
+    old_cacti_images = os.listdir(path)
+    for image in old_cacti_images:
+        os.remove(f'{path}/{image}')
 
 
 def request_to_db(request):
@@ -73,6 +82,8 @@ def get_full_client_data(client_name):
     client_data = request_to_db(client_name)
     logging.info(f'Найден клиент: {client_name}')
 
+    remove_previous_cacti_images()
+
     if str(type(client_data)) == "<class 'str'>":
         client_url = client_data
         browser = netstore_authorisation(client_url)
@@ -105,7 +116,14 @@ def get_full_client_data(client_name):
                 client_connection_data[client_ip_address] += data_from_switch
             logging.info('Данные со свича успешно добавлены в данные по клиенту')
 
+        client_cacti_port = remake_client_port_for_cacti_urls_dict(client_connection_data[client_ip_address][2])
+        save_cacti_client_image_to_file(client_ip_address, client_connection_data[client_ip_address][1], client_cacti_port)
+
         client_connection_data[client_ip_address] += (ping_status(client_ip_address), ping_status(switch_ip_address))
 
     return client_name, client_data
+
+
+
+
 

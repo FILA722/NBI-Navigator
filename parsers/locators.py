@@ -39,6 +39,7 @@ class CactiLocators():
     NBI_DROPDOWN_BG_BUTTON = (By.CSS_SELECTOR, '#node2_179 > i:nth-child(2)')
     SWITCH_NAME_AND_IP = (By.TAG_NAME, 'a')
     CLIENT_IMAGE = (By.CSS_SELECTOR, '#main')
+    IMAGE_FILE = (By.XPATH, '/html/body/img')
 
 class NetstoreDebtorClient():
     ZVITU_BUTTON = (By.CSS_SELECTOR, 'body > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(4) > a:nth-child(1)')

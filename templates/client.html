@@ -121,13 +121,11 @@ function copy(text) {
     <table class="table table-bordered client-table border border-2 ip">
         <tbody>
             <tr>
-
               <th scope="row" class="align-middle center col-2">Порт:</th>
-
-                  {% if client_connection_data[ip][6] == 'up' %}
-                    <td class="align-middle center col-1"><font color="green">{{ client_connection_data[ip][6].upper() }}</font></td>
+                  {% if client_connection_data[ip][8] == 'up' %}
+                    <td class="align-middle center col-1"><font color="green">{{ client_connection_data[ip][8].upper() }}</font></td>
                   {% else %}
-                    <td class="align-middle center col-1"><font color="red">{{ client_connection_data[ip][6].upper() }}</font></td>
+                    <td class="align-middle center col-1"><font color="red">{{ client_connection_data[ip][8].upper() }}</font></td>
                   {% endif %}
 
               {% if client_connection_data[ip][15] == True %}
@@ -175,7 +173,7 @@ function copy(text) {
 
               <td class="center col-4">
                   Прописан:
-                  {% for mac_on in client_connection_data[ip][7] %}
+                  {% for mac_on in client_connection_data[ip][9] %}
                     <br>
                     <font color="green">{{ mac_on }}</font>
                   {% endfor %}
@@ -205,15 +203,11 @@ function copy(text) {
     <table class="table table-bordered client-table border border-2 ip">
         <tbody>
             <tr>
-                <td class="container center col-6">
-                    <div class="card" style="width: 36rem;">
-                        <img src="{{ client_connection_data[ip][8] }}" class="card-img-top" alt="...">
-                    </div>
+                <td class="center col-6">
+                    <img src="/static/images/{{ ip }}_image_url.png" class="rounded img-fluid">
                 </td>
-                <td class="container center col-6">
-                    <div class="card" style="width: 36rem;">
-                        <img src="{{ client_connection_data[ip][9] }}" class="card-img-top" alt="...">
-                    </div>
+                <td class="center col-6">
+                    <img src="/static/images/{{ ip }}_image_uplink.png" class="rounded img-fluid">
                 </td>
             </tr>
         </tbody>
