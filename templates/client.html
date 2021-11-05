@@ -204,10 +204,10 @@ function copy(text) {
         <tbody>
             <tr>
                 <td class="center col-6">
-                    <img src="/static/images/{{ ip }}_image_url.png" class="rounded img-fluid">
+                    <a class="btn btn-outline-secondary" href="{{ client_connection_data[ip][6] }}">График подключения в кактусе</a>
                 </td>
                 <td class="center col-6">
-                    <img src="/static/images/{{ ip }}_image_uplink.png" class="rounded img-fluid">
+                    <a class="btn btn-outline-secondary" href="{{ client_connection_data[ip][7] }}">График аплинка в кактусе</a>
                 </td>
             </tr>
         </tbody>

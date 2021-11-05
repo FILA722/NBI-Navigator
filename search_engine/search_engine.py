@@ -1,13 +1,13 @@
 from search_engine.transliterations import Transliterations
 from debugers.check_ping_status import ping_status
 from parsers import switch_parse
-from parsers.parse_cacti import save_cacti_client_image_to_file
+# from parsers.parse_cacti import save_cacti_client_image_to_file
 from parsers.update_clients_database import get_client_data, remake_client_port_for_cacti_urls_dict
 from client_managment.login_into_netstore import netstore_authorisation
 import logging
 import json
 import re
-import os
+import time
 
 
 def concatenate_local_db():
@@ -22,11 +22,17 @@ def concatenate_local_db():
     return active_clients_dict.keys()
 
 
-def remove_previous_cacti_images():
-    path = 'static/images'
-    old_cacti_images = os.listdir(path)
-    for image in old_cacti_images:
-        os.remove(f'{path}/{image}')
+def get_cacti_links(switch_client_cacti_id, switch_client_uplink_id):
+    graph_end = int(time.time())
+    graph_start = graph_end - 86400
+
+    client_id = switch_client_cacti_id[6:]
+    uplink_id = switch_client_uplink_id[6:]
+
+    switch_client_cacti_link = f'http://cacti.nbi.com.ua/cacti/graph_image.php?local_graph_id={client_id}&rra_id=0&graph_height=120&graph_width=500&title_font_size=10&view_type=tree&graph_start={graph_start}&graph_end={graph_end}'
+    switch_uplink_cacti_link = f'http://cacti.nbi.com.ua/cacti/graph_image.php?local_graph_id={uplink_id}&rra_id=0&graph_height=120&graph_width=500&title_font_size=10&view_type=tree&graph_start={graph_start}&graph_end={graph_end}'
+
+    return switch_client_cacti_link, switch_uplink_cacti_link
 
 
 def request_to_db(request):
@@ -82,8 +88,6 @@ def get_full_client_data(client_name):
     client_data = request_to_db(client_name)
     logging.info(f'Найден клиент: {client_name}')
 
-    remove_previous_cacti_images()
-
     if str(type(client_data)) == "<class 'str'>":
         client_url = client_data
         browser = netstore_authorisation(client_url)
@@ -95,6 +99,14 @@ def get_full_client_data(client_name):
         if client_ip_address == 'IP не указан' or client_connection_data[client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе' :
             return client_name, client_data
         else:
+            switch_client_cacti_id = client_connection_data[client_ip_address][6]
+            switch_client_uplink_id = client_connection_data[client_ip_address][7]
+
+            switch_client_cacti_link, switch_uplink_cacti_link = get_cacti_links(switch_client_cacti_id, switch_client_uplink_id)
+
+            client_connection_data[client_ip_address][6] = switch_client_cacti_link
+            client_connection_data[client_ip_address][7] = switch_uplink_cacti_link
+
             switch_ip_address = client_connection_data[client_ip_address][1]
             if not ping_status(switch_ip_address):
                 data_from_switch = ['НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ']
@@ -115,9 +127,6 @@ def get_full_client_data(client_name):
             else:
                 client_connection_data[client_ip_address] += data_from_switch
             logging.info('Данные со свича успешно добавлены в данные по клиенту')
-
-        client_cacti_port = remake_client_port_for_cacti_urls_dict(client_connection_data[client_ip_address][2])
-        save_cacti_client_image_to_file(client_ip_address, client_connection_data[client_ip_address][1], client_cacti_port)
 
         client_connection_data[client_ip_address] += (ping_status(client_ip_address), ping_status(switch_ip_address))
 
