@@ -121,6 +121,31 @@ function copy(text) {
     <table class="table table-bordered client-table border border-2 ip">
         <tbody>
             <tr>
+              <td class="align-middle center col-3">
+                  Шлюз: {{ client_connection_data[ip][3] }}
+                  <br>
+                  M: {{ client_connection_data[ip][4] }}
+              </td>
+                <td class="align-middle center col-5">
+                    {% if client_connection_data[ip][6] == 'None'  %}
+                        <a class="btn btn-outline-secondary disabled">График подключения в кактусе</a>
+                    {% else %}
+                        <a class="btn btn-outline-secondary" href="{{ client_connection_data[ip][6] }}">График подключения в кактусе</a>
+                    {% endif %}
+                </td>
+                <td class="align-middle center col-4">
+                    {% if client_connection_data[ip][7] == 'None'  %}
+                        <a class="btn btn-outline-secondary disabled">График аплинка в кактусе</a>
+                    {% else %}
+                        <a class="btn btn-outline-secondary" href="{{ client_connection_data[ip][7] }}">График аплинка в кактусе</a>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-bordered client-table border border-2 ip">
+        <tbody>
+            <tr>
               <th scope="row" class="align-middle center col-2">Порт:</th>
                   {% if client_connection_data[ip][8] == 'up' %}
                     <td class="align-middle center col-1"><font color="green">{{ client_connection_data[ip][8].upper() }}</font></td>
@@ -130,19 +155,19 @@ function copy(text) {
 
               {% if client_connection_data[ip][15] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
-                        <td class="center col-4 align-self-center">
+                        <td class="align-middle center col-4 align-self-center">
                             <button class="align-middle center btn btn-outline-success btn-sm" onclick="copy('{{ client_connection_data[ip][1] }}')">
                                 {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}
                             </button>
                         </td>
                     {% else %}
-                        <td class="center col-4 align-self-center">
+                        <td class="align-middle center col-4 align-self-center">
                             <a class="align-middle center btn btn-outline-success btn-sm" href="http://{{ client_connection_data[ip][1] }}">
                                 {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
                         </td>
                     {% endif %}
               {% else %}
-                <td class="center col-4 align-self-center">
+                <td class="align-middle center col-4 align-self-center">
                     <a class="align-middle center btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">
                         {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
 <!--                    <br>-->
@@ -158,7 +183,11 @@ function copy(text) {
 
               <div class="align-middle center col-2">
                   <form action="/port_reboot" method="post">
-                    <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="port_reboot" value="{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ client_name }}">Дернуть порт</button></td>
+                    {% if client_connection_data[ip][8] == 'up' %}
+                      <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="port_reboot" value="{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ client_name }}">Дёрнуть порт</button></td>
+                    {% else %}
+                      <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Дёрнуть порт</button>
+                    {% endif %}
                   </form>
               </div>
 
@@ -200,33 +229,6 @@ function copy(text) {
             </tr>
         </tbody>
     </table>
-    <table class="table table-bordered client-table border border-2 ip">
-        <tbody>
-            <tr>
-                <td class="center col-6">
-                    <a class="btn btn-outline-secondary" href="{{ client_connection_data[ip][6] }}">График подключения в кактусе</a>
-                </td>
-                <td class="center col-6">
-                    <a class="btn btn-outline-secondary" href="{{ client_connection_data[ip][7] }}">График аплинка в кактусе</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <div class="col-10">
-      <table class="table table-bordered client-table border border-2 ip">
-            <tbody>
-                <tr>
-                  <th scope="row" class="align-middle center col-2">Настройки:</th>
-                  <td class="center col-4">
-                      Шлюз: {{ client_connection_data[ip][3] }}
-                  </td>
-                  <td class="center col-4">
-                      Маска: {{ client_connection_data[ip][4] }}
-                  </td>
-                </tr>
-            </tbody>
-      </table>
-    </div>
   </div>
 {% endfor %}
 <br>

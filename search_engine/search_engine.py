@@ -1,10 +1,8 @@
 from search_engine.transliterations import Transliterations
 from debugers.check_ping_status import ping_status
 from parsers import switch_parse
-# from parsers.parse_cacti import save_cacti_client_image_to_file
 from parsers.update_clients_database import get_client_data, remake_client_port_for_cacti_urls_dict
 from client_managment.login_into_netstore import netstore_authorisation
-import logging
 import json
 import re
 import time
@@ -84,9 +82,17 @@ def get_coincidence_names(client):
         return coincidence_names
 
 
+def create_empty_client_connection_card():
+    client_data = {"IP не указан": ["None", "None", "None", "None", "None", "None", "None", "None", "None", ["None"], [["None", 'red']], "None", False, "None", False, False]}
+    return client_data
+
+
+def return_none_switch_data():
+    return 'None', ['None'], [('None', 'red')], 'None', False, 'None'
+
+
 def get_full_client_data(client_name):
     client_data = request_to_db(client_name)
-    logging.info(f'Найден клиент: {client_name}')
 
     if str(type(client_data)) == "<class 'str'>":
         client_url = client_data
@@ -96,40 +102,39 @@ def get_full_client_data(client_name):
     client_connection_data = client_data[8]
 
     for client_ip_address in client_connection_data.keys():
+
         if client_ip_address == 'IP не указан' or client_connection_data[client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе' :
+            client_data[8] = create_empty_client_connection_card()
             return client_name, client_data
+
         else:
-            switch_client_cacti_id = client_connection_data[client_ip_address][6]
-            switch_client_uplink_id = client_connection_data[client_ip_address][7]
+            cacti_client_id = client_connection_data[client_ip_address][6]
+            cacti_uplink_id = client_connection_data[client_ip_address][7]
 
-            switch_client_cacti_link, switch_uplink_cacti_link = get_cacti_links(switch_client_cacti_id, switch_client_uplink_id)
-
-            client_connection_data[client_ip_address][6] = switch_client_cacti_link
-            client_connection_data[client_ip_address][7] = switch_uplink_cacti_link
+            if cacti_client_id != 'None' and cacti_uplink_id != 'None':
+                switch_client_cacti_link, switch_uplink_cacti_link = get_cacti_links(cacti_client_id, cacti_uplink_id)
+                client_connection_data[client_ip_address][6] = switch_client_cacti_link
+                client_connection_data[client_ip_address][7] = switch_uplink_cacti_link
 
             switch_ip_address = client_connection_data[client_ip_address][1]
-            if not ping_status(switch_ip_address):
-                data_from_switch = ['НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ']
+            switch_name = client_connection_data[client_ip_address][0]
+            switch_port = client_connection_data[client_ip_address][2]
+
+            if not ping_status(switch_ip_address) or switch_name == 'None' or switch_port == 'None':
+                data_from_switch = return_none_switch_data()
             else:
                 switch_port = client_connection_data[client_ip_address][2][1:]
-                data_from_switch = []
 
                 if client_connection_data[client_ip_address][5] == 'huawei':
-                    logging.info(f'Установка телнет-сессии с huawei {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
-                    data_from_switch = switch_parse.parse_huawei(switch_ip_address, client_ip_address, switch_port)
+                    data_from_switch = switch_parse.parse_huawei(switch_ip_address, switch_port)
                 elif client_connection_data[client_ip_address][5] == 'zyxel':
-                    logging.info(f'Установка телнет-сессии с zyxel {switch_ip_address}, Порт: {switch_port}, Клиент: {client_ip_address}')
                     data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
+                else:
+                    data_from_switch = return_none_switch_data()
 
-        if data_from_switch:
-            if data_from_switch[0] == 'НЕТ СОЕДИНЕНИЯ СО СВИЧЕМ':
-                client_connection_data[client_ip_address].append(data_from_switch[0])
-            else:
-                client_connection_data[client_ip_address] += data_from_switch
-            logging.info('Данные со свича успешно добавлены в данные по клиенту')
+            client_connection_data[client_ip_address] += data_from_switch
 
-        client_connection_data[client_ip_address] += (ping_status(client_ip_address), ping_status(switch_ip_address))
-
+        client_connection_data[client_ip_address] += (ping_status(client_ip_address), True)
     return client_name, client_data
 
 

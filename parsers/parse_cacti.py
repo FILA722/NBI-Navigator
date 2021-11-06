@@ -73,6 +73,7 @@ def update_clients_cacti_image_db(update_times=0):
         for switch in switches:
             switch_text = switch.text
             switch_ip = re.findall(r'\d+\.\d+\.\d+\.\d+', switch_text)
+
             if switch_ip:
                 switch_ip = switch_ip[0]
                 switch.click()
@@ -87,11 +88,11 @@ def update_clients_cacti_image_db(update_times=0):
                     if re.findall('[Uu]plink', alt_image):
                         port = ['Port Uplink']
                     else:
-                        port = re.findall('Port \d\d', alt_image)
-
+                        port = re.findall('[Pp]ort \d\d', alt_image)
                     if port:
+                        port = port[0].capitalize()
                         client_image_id = object.get_attribute('id')
-                        port_url_dict[port[0]] = client_image_id
+                        port_url_dict[port] = client_image_id
 
                 switch_ip_port_id_dict[switch_ip] = port_url_dict
 
@@ -105,3 +106,5 @@ def update_clients_cacti_image_db(update_times=0):
         update_clients_cacti_image_db(update_times)
     finally:
         cacti_browser.quit()
+
+# update_clients_cacti_image_db()

@@ -112,7 +112,7 @@ def get_switch_name(client_switch_ip):
     for switch_model_ips in confidential.SwitchModels.switches:
         if client_switch_ip in switch_model_ips:
             return switch_model_ips[0]
-    return 'Модель свича не найдена'
+    return 'None'
 
 
 def process_turned_on_clients(active_client_name_url_dict, terminated_client_name_url_dict):
@@ -156,7 +156,6 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
     switches = tuple(switch.strip('==') for switch in switches)
 
     client_connection_data = {}
-
     if not client_ip_addresses:
         client_connection_data['IP не указан'] = 'Пожалуйста заполните анкету клиента в нетсторе'
         return client_connection_data
@@ -174,19 +173,27 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
                 client_mask = client_connection_preferences[1]
                 break
             else:
-                client_gateway = 'не найден'
-                client_mask = 'не найден'
+                client_gateway = 'None'
+                client_mask = 'None'
 
         if not switches:
-            client_connection_data[client_ip_addresses[i]] = ['Пожалуйста пропишите имя свича и порт клиента в Нетсторе',
-                                                              client_gateway,
-                                                              client_mask]
+            client_connection_data[client_ip_addresses[i]] = ('None',
+                                                          'None',
+                                                          'None',
+                                                          client_gateway,
+                                                          client_mask,
+                                                          'None',
+                                                          'None',
+                                                          'None'
+                                                          )
             continue
 
         try:
             client_port = re.findall(r'#\d+', switches[i])
         except IndexError:
             client_port = re.findall(r'#\d+', switches[0])
+            if not client_port:
+                client_port = 'None'
 
         try:
             client_switch_name = switches[i][:switches[i].index('#')].strip()
@@ -194,11 +201,13 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
             client_switch_name = switches[0][:switches[0].index('#')].strip()
         except ValueError:
             client_switch_name = switches[0].strip()
+        if not client_switch_name:
+            client_switch_name = 'None'
 
         try:
             client_switch_ip = switch_name_ip_dict[client_switch_name]
         except KeyError:
-            client_switch_ip = 'ip адресс свича не найден'
+            client_switch_ip = 'None'
 
         client_switch_model = get_switch_name(client_switch_ip)
 
@@ -209,14 +218,12 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
         try:
             client_cacti_ulr = cacti_urls_dict[client_switch_ip][cacti_client_port]
         except (KeyError, IndexError):
-            #вставить ссылку на дефолтную страницу
-            client_cacti_ulr = 1
+            client_cacti_ulr = 'None'
 
         try:
-            uplink_cacti_url = cacti_urls_dict[client_switch_ip]["Port Uplink"]
+            uplink_cacti_url = cacti_urls_dict[client_switch_ip]["Port uplink"]
         except (KeyError, IndexError):
-            # вставить ссылку на дефолтную страницу
-            uplink_cacti_url = 1
+            uplink_cacti_url = 'None'
 
         client_connection_data[client_ip_addresses[i]] = (client_switch_name,
                                                           client_switch_ip,

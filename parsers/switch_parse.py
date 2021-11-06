@@ -8,13 +8,13 @@ def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 
 
-def current_mac_address_color_marker(saved_mac_address, current_mac_address):
+def current_mac_address_color_marker(saved_mac_addresses, current_mac_address):
     current_mac_address_colored = []
     write_mac_address_button_status = False
     for mac_address in current_mac_address:
         if mac_address == 'Не приходит':
             current_mac_address_colored.append((mac_address, 'red'))
-        elif mac_address in saved_mac_address:
+        elif mac_address in saved_mac_addresses:
             current_mac_address_colored.append((mac_address, 'green'))
         else:
             current_mac_address_colored.append((mac_address, 'red'))
@@ -41,6 +41,7 @@ def parse_current_configuration(display_interface_brief, switch_port):
             connection_status_list.append(word)
             port_condition = connection_status_list[1]
             port_errors = int(connection_status_list[-1]) + int(connection_status_list[-2])
+
             return port_condition, str(port_errors)
 
 
@@ -54,7 +55,7 @@ def find_real_net_vlan(vlan_nums):
     return vlan_max[0]
 
 
-def parse_huawei(switch_ip_address, client_ip_address, client_port):
+def parse_huawei(switch_ip_address, client_port):
     with telnetlib.Telnet(switch_ip_address) as telnet:
         telnet.read_until(b"Password:")
 
@@ -90,14 +91,18 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
         current_configuration_pattern = f'user-bind static ip-address \d+\.\d+\.\d+.\d+ mac-address \w+-\w+-\w+ interface {interface_name} vlan \d+'
         current_configuration_of_search_port = re.findall(current_configuration_pattern, display_current_configuration_output)
 
+        if current_configuration_of_search_port:
+            saved_mac_address = []
+            for mac_address_string in current_configuration_of_search_port:
+                current_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', mac_address_string)
+                if current_mac_address:
+                    saved_mac_address.append(current_mac_address[0])
+        else:
+            saved_mac_address = ['None']
+
         try:
-            saved_ip_address = re.findall(r'\d+\.\d+\.\d+\.\d+', current_configuration_of_search_port[0])
-            saved_mac_address = re.findall(r'\w{4}-\w{4}-\w{4}', current_configuration_of_search_port[0])
             saved_vlan = re.findall(r'vlan \d+', current_configuration_of_search_port[0])[0].strip('vlan ')
         except IndexError:
-            saved_ip_address = ''
-            saved_mac_address = ''
-
             vlan_list = re.findall(r'vlan \d+', display_current_configuration_output)
             vlan_nums = [i.strip('vlan ') for i in vlan_list]
             saved_vlan = find_real_net_vlan(vlan_nums)
@@ -125,7 +130,7 @@ def parse_huawei(switch_ip_address, client_ip_address, client_port):
 
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
     with telnetlib.Telnet(switch_ip_address) as telnet:
-        start_question = telnet.expect([b":"], timeout=2)
+        telnet.expect([b":"], timeout=2)
 
         telnet.write(to_bytes(SwitchLoginData.sw_login))
 
@@ -139,15 +144,11 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         show_interfaces_answer = str(telnet.expect([b"quit"], timeout=2))
 
         show_interfaces_config = re.findall(r'\\t\\tLink\\t\\t\\t:\w+', show_interfaces_answer)
-
-        if show_interfaces_config:
-            port_condition = 'DOWN' if show_interfaces_config[0].split(':')[1].strip() == 'Down' else 'up'
-        else:
-            port_condition = 'Не определён'
+        port_condition = 'up' if show_interfaces_config[0].split(':')[1].strip() in ('1000M', '100M') else 'down'
 
     with telnetlib.Telnet(switch_ip_address) as telnet:
 
-        start_question = telnet.expect([b"User name:"], timeout=2)
+        telnet.expect([b"User name:"], timeout=2)
 
         telnet.write(to_bytes(SwitchLoginData.sw_login))
 
@@ -184,11 +185,11 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
         show_ip_source_binding_pattern = f'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w +{client_ip_address} + \w+ + \w+ +\d+ +{switch_port}'
         show_ip_source_binding = re.findall(show_ip_source_binding_pattern,  show_ip_source_binding_return)
 
-        if len(show_ip_source_binding) == 0:
-            saved_mac_addresses = []
+        if not show_ip_source_binding:
             vlan_list = re.findall('static +\d+', show_ip_source_binding_return)
             vlan_nums = [i.strip('static ') for i in vlan_list]
             saved_vlan = find_real_net_vlan(vlan_nums)
+            saved_mac_addresses = ['None']
 
         else:
             saved_vlan = re.findall(r'static +\d+', show_ip_source_binding[0])[0].strip('static ')
@@ -208,8 +209,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             port_errors = [show_loopguard[0].split("  ")[-1].strip()]
         else:
             port_errors = '0'
-
-        current_mac_addresses_colored, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_addresses)
+        current_mac_addresses_colored, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_addresses, current_mac_addresses)
 
     return port_condition, saved_mac_addresses, current_mac_addresses_colored, port_errors, write_mac_address_button_status, saved_vlan
 
