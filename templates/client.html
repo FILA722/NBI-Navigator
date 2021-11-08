@@ -64,7 +64,7 @@ function copy(text) {
 <table class="table table-bordered client-table border border-2 ip">
     <tbody>
         <tr>
-            <th scope="row" class="align-middle center"><h5>{{ client_name.upper() }} | <a class="btn btn-outline-primary btn-sm" href="{{ client_url }}">Netsore</a></h5></th>
+            <th scope="row" class="align-middle center"><h5>{{ client_name.upper() }} | <a class="btn btn-outline-primary btn-sm" target="_blank" href="{{ client_url }}">Netsore</a></h5></th>
         </tr>
     </tbody>
 </table>
@@ -162,7 +162,7 @@ function copy(text) {
                         </td>
                     {% else %}
                         <td class="align-middle center col-4 align-self-center">
-                            <a class="align-middle center btn btn-outline-success btn-sm" href="http://{{ client_connection_data[ip][1] }}">
+                            <a class="align-middle center btn btn-outline-success btn-sm" target="_blank" href="http://{{ client_connection_data[ip][1] }}">
                                 {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
                         </td>
                     {% endif %}
