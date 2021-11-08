@@ -1,8 +1,7 @@
-from parsers import parse_cacti, parse_zones
-from parsers import confidential
 from start_browser import driver
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
-from parsers import parse_cacti
+from parsers import parse_cacti, parse_zones, confidential
+from parsers.parse_cacti import update_clients_cacti_image_db
 from selenium.common.exceptions import NoSuchElementException
 from client_managment.login_into_netstore import netstore_authorisation
 from datetime import datetime, timedelta
@@ -389,6 +388,7 @@ def update_clients_data(parse_level):
 
     elif parse_level == 'total':
         update_switch_name_ip_file()
+        update_clients_cacti_image_db()
 
         clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,

@@ -44,6 +44,14 @@ def edit_client_parameter_is_active_in_db(client_name):
     return client_url
 
 
+def work_time():
+    time_now = time.localtime(time.time())
+    if ((0 >= time_now.tm_wday <= 5) and (9 <= time_now.tm_hour >= 17)):
+        return False
+    else:
+        return True
+
+
 def update_main_db():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
 
@@ -52,7 +60,11 @@ def update_main_db():
         update_clients_data('total')
         print(f'End of update GLOBAL DB, spended time {time.time() - start}')
         turn_off_clients()
-        time.sleep(1800)
+
+        if work_time():
+            time.sleep(1800)
+        else:
+            time.sleep(5400)
 
 
 def update_name_url_db():
@@ -62,7 +74,10 @@ def update_name_url_db():
         update_clients_data('local')
         print(f'End of update LOCAL DB, spended time: {time.time() - start}')
 
-        time.sleep(180)
+        if work_time():
+            time.sleep(180)
+        else:
+            time.sleep(5400)
 
 
 def start_background_processes():

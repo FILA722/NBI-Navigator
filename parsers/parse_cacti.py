@@ -88,15 +88,19 @@ def update_clients_cacti_image_db(update_times=0):
                     if re.findall('[Uu]plink', alt_image):
                         port = ['Port Uplink']
                     else:
-                        port = re.findall('[Pp]ort \d\d', alt_image)
+                        # port = re.findall('[Pp]ort \d\d', alt_image)
+                        port = re.findall('[Pp]ort.\d+', alt_image)
                     if port:
-                        port = port[0].capitalize()
+                        if port[0][4] != ' ':
+                            port = f'Port {port[0][4:]}'
+                        else:
+                            port = port[0].capitalize()
                         client_image_id = object.get_attribute('id')
                         port_url_dict[port] = client_image_id
 
                 switch_ip_port_id_dict[switch_ip] = port_url_dict
 
-        with open('../search_engine/cacti_urls.json', 'w') as cacti_urls:
+        with open('search_engine/cacti_urls.json', 'w') as cacti_urls:
             json.dump(switch_ip_port_id_dict, cacti_urls, indent=2, sort_keys=True, ensure_ascii=False)
 
     except StaleElementReferenceException:
@@ -107,4 +111,3 @@ def update_clients_cacti_image_db(update_times=0):
     finally:
         cacti_browser.quit()
 
-# update_clients_cacti_image_db()
