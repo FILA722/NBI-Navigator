@@ -8,7 +8,6 @@ from client_managment.client_turn_on import turn_on
 from client_managment.client_turn_off import turn_off_clients
 from parsers.confidential import KEYS
 from parsers.update_clients_database import update_clients_data
-from parsers.parse_cacti import get_to_the_switches_page
 from debugers.check_ping_status import ping_status
 from parsers import confidential
 import json
@@ -90,11 +89,8 @@ def start_background_processes():
 
 @app.route('/test')
 def test():
-    try:
-        browser = get_to_the_switches_page()
-        return render_template('test.html')
-    finally:
-        browser.quit()
+    return render_template('test.html')
+
 
 @app.route('/port_reboot', methods=['POST'])
 def port_reboot():

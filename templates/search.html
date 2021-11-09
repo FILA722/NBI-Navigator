@@ -5,6 +5,19 @@ NBI-Navigator
 {% endblock %}
 
 {% block body %}
+<script>
+    function search_spinner(client_name) {
+        document.getElementById(client_name).classList.remove("d-none");
+    }
+</script>
+
+<script>
+    function show_spinner(spinner_id, btn_id) {
+        document.getElementById(spinner_id).classList.remove('d-none');
+        document.getElementById(btn_id).classList.add('disabled');
+    }
+</script>
+
 <br>
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
 
@@ -23,30 +36,29 @@ NBI-Navigator
     <div class="col-6">
         <div class="list-group">
           {% for client in clients %}
-              <a href="/client/{{ client }}" class="list-group-item list-group-item-action list-group-item-light">{{ client.upper() }}</a>
+              <a href="/client/{{ client }}" class="list-group-item list-group-item-action list-group-item-light" onclick="search_spinner('{{ client }}')">{{ client.upper() }} <div class="spinner-grow text-secondary spinner-grow-sm d-none" role="status" id="{{ client }}"></div></a>
           {% endfor %}
         </div>
-
     </div>
     <div class="col-6">
       <div class="col-md-1 dropdown">
         <button class="btn btn-secondary dropdown-toggle b1" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
           Отключенные за неуплату
         </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <ul class="dropdown-menu term_window" aria-labelledby="dropdownMenuButton1">
           {% for sus_client in suspended_clients %}
-          <li>
-              <div class="container">
-                  <div class="row justify-content-between">
-                      <div class="col-10 align-self-start">
-                          <a class="dropdown-item" href="/client/{{ sus_client }}">{{ sus_client.upper() }}</a>
-                      </div>
-                      <div class="col-2 align-self-start">
-                          <a class="btn btn-success btn-sm" href="/client_turn_on/{{ sus_client }}">Включить</a>
-                      </div>
+            <li>
+             <div class="container">
+              <div class="row justify-content-between">
+                  <div class="col-10 align-self-start">
+                      <a class="dropdown-item" href="/client/{{ sus_client }}">{{ sus_client.upper() }}</a>
+                  </div>
+                  <div class="col-2 align-self-end">
+                      <a class="btn btn-success btn-sm" href="/client_turn_on/{{ sus_client }}" id="turn_on_btn{{ sus_client }}" onclick="show_spinner('client_turn_on_spinner{{ sus_client }}', 'turn_on_btn{{ sus_client }}')" value="{{ sus_client }}+{{ client_url }}">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner{{ sus_client }}"></div></a>
                   </div>
               </div>
-          </li>
+             </div>
+            </li>
           {% endfor %}
         </ul>
       </div>

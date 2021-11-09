@@ -9,6 +9,13 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" xmlns="http://www.w3.org/1999/html"></script>
 
 <script>
+    function show_spinner(spinner_id, btn_id) {
+        document.getElementById(spinner_id).classList.remove('d-none');
+        document.getElementById(btn_id).classList.add('disabled');
+    }
+</script>
+
+<script>
     function openCity(evt, cityName) {
     // Declare all variables
     var i, tabcontent, tablinks;
@@ -89,9 +96,7 @@ function copy(text) {
                                 <font color="red">{{ client_is_active }}</font>
                             </div>
                             <div class="col-2 align-self-center">
-                                <form action="/client_turn_on" method="post">
-                                    <button type="submit" class="btn btn-success form-control btn-sm" name="client_turn_on_from_search_page" value="{{ client_name }}+{{ client_url }}">Включить</button>
-                                </form>
+                                 <a class="btn btn-success btn-sm" href="/client_turn_on/{{ client_name }}" id="turn_on_btn" onclick="show_spinner('client_turn_on_spinner', 'turn_on_btn')" value="{{ client_name }}+{{ client_url }}">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner"></div></a>
                             </div>
                         </div>
                     </td>
@@ -184,7 +189,7 @@ function copy(text) {
               <div class="align-middle center col-2">
                   <form action="/port_reboot" method="post">
                     {% if client_connection_data[ip][8] == 'up' %}
-                      <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="port_reboot" value="{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ client_name }}">Дёрнуть порт</button></td>
+                      <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" id="reboot_btn_{{ ip }}" name="port_reboot" onclick="show_spinner('portreboot_spinner_{{ ip }}', 'reboot_btn_{{ ip }}')" value="{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ client_name }}">Дёрнуть порт<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="portreboot_spinner_{{ ip }}"></div></button></td>
                     {% else %}
                       <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Дёрнуть порт</button>
                     {% endif %}
@@ -222,7 +227,7 @@ function copy(text) {
                       <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
                   {% else %}
                       <form action="/write_mac" method="post">
-                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][10] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][13] }}">Прописать</button></td>
+                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" id="write_mac_btn" onclick="write_mac()" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][10] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][13] }}">Прописать<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="write_mac_spinner"></div></button></td>
                       </form>
                   {% endif %}
               </td>
@@ -270,4 +275,5 @@ function copy(text) {
   </div>
 </div>
 <br>
+
 {% endblock %}

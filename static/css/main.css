@@ -11,6 +11,12 @@ body {
     background-color: white;
 }
 
+.term_window {
+    width: 500px; /* Ширина слоя */
+    margin: 10px; /* Значение отступов */
+    padding: 10px; /* Поля вокруг текста */
+}
+
 .dropdown {
   left: 25%;
 }
