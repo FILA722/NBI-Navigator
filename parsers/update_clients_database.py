@@ -181,12 +181,18 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
         if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
             turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
 
-            check_client_balance_date = str(datetime.now() + timedelta(days=3))
-
             if turned_on_clients:
-                with open('search_engine/check_client_balance.txt', 'a') as check_clients:
-                    for turned_on_client in turned_on_clients:
-                        check_clients.write(f'{turned_on_client} | {check_client_balance_date} | {terminated_client_name_url_dict_old[turned_on_client]} \n')
+                credit_clients = {}
+                check_client_balance_date = str(datetime.now() + timedelta(days=3))
+                active_clients = active_client_name_url_dict.keys()
+                for client in turned_on_clients.keys():
+                    if client in active_clients:
+                        credit_clients[client] = [check_client_balance_date, turned_on_clients[client]]
+
+                with open('search_engine/check_client_balance.json', 'a') as check_clients:
+                    check_clients_dict = json.load(check_clients)
+                    check_clients_dict += credit_clients
+                    json.dump(check_clients_dict, check_clients, indent=2, sort_keys=True, ensure_ascii=False)
 
             with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
                 json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
@@ -355,7 +361,8 @@ def collect_clients_data(url, login_, password, parse_level):
                     client_manager,
                     client_notes,
                     client_connection_data,
-                    client_netstore_url)
+                    client_netstore_url
+                )
 
             return clients_database
 

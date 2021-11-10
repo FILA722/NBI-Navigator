@@ -110,7 +110,16 @@ function copy(text) {
             <tr>
                 <th scope="row" class="center align-self-center">Состояние: </th>
                 {% if client_is_active == "Активний" %}
-                    <td class="center"><font color="green"> {{ client_is_active }} </font></td>
+                    <td class="center">
+                        <div class="align-self-center">
+<!--                            <div class="alert alert-success is_active" role="alert">-->
+                                <font color="green">{{ client_is_active }}</font>
+<!--                            </div>-->
+                                {% if client_debt != "False" %}
+                                    <font color="blue">{{ client_debt }}</font>
+                                {% endif %}
+                        </div>
+                    </td>
                 {% else %}
                     <td class="center">
                         <div class="row justify-content-center">
@@ -119,6 +128,7 @@ function copy(text) {
                             </div>
                             <div class="col-2 align-self-center">
                                  <a class="btn btn-success btn-sm" href="/client_turn_on/{{ client_name }}" id="turn_on_btn" onclick="show_spinner('client_turn_on_spinner', 'turn_on_btn')" value="{{ client_name }}+{{ client_url }}">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner"></div></a>
+                                 <font color="yellow">{{ client_debt }}</font>
                             </div>
                         </div>
                     </td>
