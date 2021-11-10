@@ -7,7 +7,7 @@ from switch_operations import write_mac_address, reboot_client_port
 from client_managment.client_turn_on import turn_on
 from client_managment.client_turn_off import turn_off_clients
 from parsers.confidential import KEYS
-from parsers.update_clients_database import update_clients_data
+from parsers.update_clients_database import update_clients_data, edit_client_status_parameter_in_db
 from debugers.check_ping_status import ping_status
 from parsers import confidential
 import json
@@ -31,17 +31,10 @@ def add_client_data_to_cash(client_name, client_data):
         json.dump(clients, client_cash, indent=2, sort_keys=True, ensure_ascii=False)
 
 
-def edit_client_parameter_is_active_in_db(client_name):
-    with open('search_engine/clients.json', 'r') as open_clients_db:
-        clients = json.loads(open_clients_db.read())
-        clients[client_name][4] = 'Активний'
-        client_url = clients[client_name][9]
-
-    with open('search_engine/clients.json', 'w') as save_clients_db:
-        json.dump(clients, save_clients_db, indent=2, sort_keys=True, ensure_ascii=False)
-
-    return client_url
-
+def get_client_data_from_cash():
+    with open('search_engine/clients_cash.json', 'r') as client_cash:
+        client_data = json.load(client_cash)
+    return client_data
 
 def work_time():
     time_now = time.localtime(time.time())
@@ -97,7 +90,40 @@ def port_reboot():
     port_reboot_data = request.form['port_reboot']
     switch_ip, switch_port, switch_model, client_name = port_reboot_data.split('+')
     reboot_client_port(switch_ip, switch_port[1:], switch_model)
-    return redirect(f'/client/{client_name}')
+
+    client_dict = get_client_data_from_cash()
+
+    client_name = tuple(client_dict.keys())[0]
+    client_data = client_dict[client_name]
+
+    client_tel = client_data[0]
+    client_email = client_data[1]
+    client_address = client_data[2]
+    client_address_notes = client_data[3].split('\n')
+    client_is_active = client_data[4]
+    client_converter = client_data[5]
+    client_manager = client_data[6]
+    client_notes = client_data[7].split('\n')
+    client_connection_data = client_data[8]
+    client_url = client_data[9]
+    toast_alert = 'Порт передёрнут'
+
+    return render_template('client.html',
+                           client_name=client_name,
+                           client_tel=client_tel,
+                           client_email=client_email,
+                           client_address=client_address,
+                           client_address_notes=client_address_notes,
+                           client_is_active=client_is_active,
+                           client_converter=client_converter,
+                           client_manager=client_manager,
+                           client_notes=client_notes,
+                           client_connection_data=client_connection_data,
+                           client_url=client_url,
+                           toast_alert=toast_alert)
+
+
+    # return redirect(f'/client/{client_name}')
 
 
 @app.route('/write_mac', methods=['POST'])
@@ -137,7 +163,7 @@ def client_turn_on():
     client_name, client_url = request.form['client_turn_on'].split('+')
     turn_on_operation = turn_on(client_url)
     if turn_on_operation:
-        edit_client_parameter_is_active_in_db(client_name)
+        edit_client_status_parameter_in_db(client_name, "Активний")
         with open('search_engine/clients_cash.json', 'r') as clients_cash:
             clients = json.loads(clients_cash.read())
             try:
@@ -173,7 +199,7 @@ def client_turn_on():
 
 @app.route('/client_turn_on/<client_name>')
 def client_turn_on_from_search_page(client_name):
-    client_url = edit_client_parameter_is_active_in_db(client_name)
+    client_url = edit_client_status_parameter_in_db(client_name, "Активний")
     turn_on(client_url)
     return redirect('/')
 
@@ -213,6 +239,7 @@ def show_client_page(client_name):
         client_notes = client_data[7].split('\n')
         client_connection_data = client_data[8]
         client_url = client_data[9]
+        toast_alert = ' '
 
         end = time.time()
         print(f'search time = {end - start}')
@@ -228,7 +255,8 @@ def show_client_page(client_name):
                                client_manager=client_manager,
                                client_notes=client_notes,
                                client_connection_data=client_connection_data,
-                               client_url=client_url)
+                               client_url=client_url,
+                               toast_alert=toast_alert)
     else:
         suspended_clients = get_suspended_clients()
         clients = search_engine.get_coincidence_names(request.form['client'])

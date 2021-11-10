@@ -33,6 +33,46 @@ def update_clients_ip_gateway_mask_file():
         json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 
+def edit_client_status_parameter_in_db(client_name, client_status):
+    with open('search_engine/clients.json', 'r') as open_clients_db:
+        clients = json.loads(open_clients_db.read())
+        clients[client_name][4] = client_status
+        client_url = clients[client_name][9]
+
+    with open('search_engine/clients.json', 'w') as save_clients_db:
+        json.dump(clients, save_clients_db, indent=2, sort_keys=True, ensure_ascii=False)
+
+    if client_status == 'Активний':
+
+        with open('search_engine/terminated_clients_name_url_data.json', 'a') as terminated_clients_name_url_data:
+            terminated_clients_name_url_dict = json.load(terminated_clients_name_url_data)
+            if client_name in terminated_clients_name_url_dict.keys():
+                client_url = terminated_clients_name_url_dict[client_name]
+                del terminated_clients_name_url_dict[client_name]
+                json.dump(terminated_clients_name_url_dict, terminated_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+
+        with open('search_engine/active_clients_name_url_data.json', 'a') as active_clients_name_url_data:
+            active_clients_name_url_dict = json.load(active_clients_name_url_data)
+            active_clients_name_url_dict[client_name] = client_url
+            json.dump(active_clients_name_url_dict, active_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+
+    elif client_status == 'Неактивний':
+
+        with open('search_engine/active_clients_name_url_data.json', 'a') as active_clients_name_url_data:
+            active_clients_name_url_dict = json.load(active_clients_name_url_data)
+            if client_name in active_clients_name_url_dict:
+                client_url = active_clients_name_url_dict[client_name]
+                del active_clients_name_url_dict[client_name]
+                json.dump(active_clients_name_url_dict, active_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+
+        with open('search_engine/terminated_clients_name_url_data.json', 'a') as terminated_clients_name_url_data:
+            terminated_clients_name_url_dict = json.load(terminated_clients_name_url_data)
+            terminated_clients_name_url_dict[client_name] = client_url
+            json.dump(terminated_clients_name_url_dict, terminated_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+
+    return client_url
+
+
 def add_client_into_global_db(client_name, client_url, client_data):
     client_tel = client_data[0]
     client_email = client_data[1]
@@ -128,6 +168,9 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 browser = netstore_authorisation(client_url)
                 client_data = get_client_data(browser, client_url)
                 add_client_into_global_db(client_name, client_url, client_data)
+            else:
+                edit_client_status_parameter_in_db(client_name, 'Неактивний')
+
 
         with open('search_engine/active_clients_name_url_data.json', 'w') as active_client_name_url_data:
             json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)

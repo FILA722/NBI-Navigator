@@ -64,3 +64,9 @@ body {
 .tabcontent {
     display: none;
 }
+
+.toast {
+    position: absolute;
+    top: 30px;
+    right: 100px;
+}
