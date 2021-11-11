@@ -43,32 +43,35 @@ def edit_client_status_parameter_in_db(client_name, client_status):
         json.dump(clients, save_clients_db, indent=2, sort_keys=True, ensure_ascii=False)
 
     if client_status == 'Активний':
+        with open('search_engine/active_clients_name_url_data.json', 'r') as active_clients_name_url_data_to_read:
+            active_clients_name_url_dict = json.load(active_clients_name_url_data_to_read)
 
-        with open('search_engine/terminated_clients_name_url_data.json', 'a') as terminated_clients_name_url_data:
+        with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_clients_name_url_data:
             terminated_clients_name_url_dict = json.load(terminated_clients_name_url_data)
+
             if client_name in terminated_clients_name_url_dict.keys():
                 client_url = terminated_clients_name_url_dict[client_name]
-                del terminated_clients_name_url_dict[client_name]
-                json.dump(terminated_clients_name_url_dict, terminated_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
-        with open('search_engine/active_clients_name_url_data.json', 'a') as active_clients_name_url_data:
-            active_clients_name_url_dict = json.load(active_clients_name_url_data)
-            active_clients_name_url_dict[client_name] = client_url
-            json.dump(active_clients_name_url_dict, active_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+                del terminated_clients_name_url_dict[client_name]
+                active_clients_name_url_dict[client_name] = client_url
+
+                process_turned_on_clients(active_clients_name_url_dict, terminated_clients_name_url_dict)
 
     elif client_status == 'Неактивний':
 
-        with open('search_engine/active_clients_name_url_data.json', 'a') as active_clients_name_url_data:
+        with open('search_engine/active_clients_name_url_data.json', 'r') as active_clients_name_url_data:
             active_clients_name_url_dict = json.load(active_clients_name_url_data)
+
+        with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_clients_name_url_data:
+            terminated_clients_name_url_dict = json.load(terminated_clients_name_url_data)
+
             if client_name in active_clients_name_url_dict:
                 client_url = active_clients_name_url_dict[client_name]
-                del active_clients_name_url_dict[client_name]
-                json.dump(active_clients_name_url_dict, active_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
-        with open('search_engine/terminated_clients_name_url_data.json', 'a') as terminated_clients_name_url_data:
-            terminated_clients_name_url_dict = json.load(terminated_clients_name_url_data)
-            terminated_clients_name_url_dict[client_name] = client_url
-            json.dump(terminated_clients_name_url_dict, terminated_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+                del active_clients_name_url_dict[client_name]
+                terminated_clients_name_url_dict[client_name] = client_url
+
+                process_turned_on_clients(active_clients_name_url_dict, terminated_clients_name_url_dict)
 
     return client_url
 
@@ -158,44 +161,47 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
     with open('search_engine/active_clients_name_url_data.json', 'r') as active_client_name_url_data:
         active_client_name_url_dict_old = json.load(active_client_name_url_data)
 
+    with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
+        terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
+
     if active_client_name_url_dict_old != active_client_name_url_dict:
         new_clients = active_client_name_url_dict.keys() - active_client_name_url_dict_old.keys()
 
+        credit_clients = {}
         for new_client in new_clients:
             client_name, client_url = new_client, active_client_name_url_dict[new_client]
 
-            if client_name not in terminated_client_name_url_dict.keys():
+            if client_name not in terminated_client_name_url_dict_old.keys():
                 browser = netstore_authorisation(client_url)
                 client_data = get_client_data(browser, client_url)
                 add_client_into_global_db(client_name, client_url, client_data)
             else:
-                edit_client_status_parameter_in_db(client_name, 'Неактивний')
+                edit_client_status_parameter_in_db(client_name, 'Активний')
+
+                check_client_balance_date = str(datetime.now() + timedelta(days=3))
+                credit_clients[client_name] = [check_client_balance_date, client_url]
+
+        if credit_clients:
+            with open('search_engine/check_client_balance.json', 'r') as check_clients:
+                check_clients_dict = json.load(check_clients)
+            with open('search_engine/check_client_balance.json', 'w') as check_clients_to_write:
+                check_clients_dict.update(credit_clients)
+                json.dump(check_clients_dict, check_clients_to_write, indent=2, sort_keys=True, ensure_ascii=False)
 
 
         with open('search_engine/active_clients_name_url_data.json', 'w') as active_client_name_url_data:
             json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
-        with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
-            terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
 
-        if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
-            turned_on_clients = terminated_client_name_url_dict_old.keys() - terminated_client_name_url_dict.keys()
+    if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
+        turned_off_clients = terminated_client_name_url_dict.keys() - terminated_client_name_url_dict_old.keys()
 
-            if turned_on_clients:
-                credit_clients = {}
-                check_client_balance_date = str(datetime.now() + timedelta(days=3))
-                active_clients = active_client_name_url_dict.keys()
-                for client in turned_on_clients.keys():
-                    if client in active_clients:
-                        credit_clients[client] = [check_client_balance_date, turned_on_clients[client]]
+        if turned_off_clients:
+            for client_name in turned_off_clients:
+                edit_client_status_parameter_in_db(client_name, 'Неактивний')
 
-                with open('search_engine/check_client_balance.json', 'a') as check_clients:
-                    check_clients_dict = json.load(check_clients)
-                    check_clients_dict += credit_clients
-                    json.dump(check_clients_dict, check_clients, indent=2, sort_keys=True, ensure_ascii=False)
-
-            with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
-                json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
+        with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
+            json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
@@ -430,7 +436,6 @@ def update_clients_data(parse_level):
             confidential.NetstoreLoginData.netstore2_login,
             confidential.NetstoreLoginData.netstore_passwd,
             parse_level)
-
         active_client_name_url_dict.update(active_client_name_url_dict_from_netstore2)
         terminated_client_name_url_dict.update(terminated_client_name_url_dict_from_netstore2)
 

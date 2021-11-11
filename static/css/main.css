@@ -72,13 +72,9 @@ body {
 }
 
 .is_active{
-    text-align: center;
-    padding: 3px;
+    display: block;
+    margin: 0 auto;
+    padding: 1px;
     width: 120px;
-    bottom: 3px;
-}
 
-.small_field{
-    padding: 3px;
-    bottom: 3px;
 }

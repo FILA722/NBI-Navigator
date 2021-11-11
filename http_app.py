@@ -40,7 +40,7 @@ def get_client_data_from_cash():
 def work_time():
     time_now = time.localtime(time.time())
 
-    if ((0 >= time_now.tm_wday <= 5) and (9 <= time_now.tm_hour >= 17)):
+    if ((0 <= time_now.tm_wday <= 5) and (9 <= time_now.tm_hour <= 17)):
         return True
     else:
         return False

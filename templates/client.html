@@ -111,26 +111,35 @@ function copy(text) {
                 <th scope="row" class="center align-self-center">Состояние: </th>
                 {% if client_is_active == "Активний" %}
                     <td class="center">
-                        <div class="align-self-center">
-<!--                            <div class="alert alert-success is_active" role="alert">-->
+                            <div class="alert align-self-center alert-success is_active" role="alert">
                                 <font color="green">{{ client_is_active }}</font>
-<!--                            </div>-->
-                                {% if client_debt != "False" %}
-                                    <font color="blue">{{ client_debt }}</font>
-                                {% endif %}
-                        </div>
+                            </div>
+                            {% if client_debt != "False" %}
+                                <div class="alert align-self-center alert-warning is_active" role="alert">
+                                    {{ client_debt }}
+                                </div>
+                            {% endif %}
                     </td>
                 {% else %}
                     <td class="center">
-                        <div class="row justify-content-center">
-                            <div class="col-2 align-self-center">
-                                <font color="red">{{ client_is_active }}</font>
+<!--                        <div class="row justify-content-center">-->
+<!--                            <div class="col-2 align-self-center">-->
+<!--                                <font color="red">{{ client_is_active }}</font>-->
+<!--                            </div>-->
+                                <div class="alert align-self-center alert-danger is_active" role="alert">
+                                    {{ client_is_active }}
+                                </div>
+<!--                            <div class="col-2 align-self-center">-->
+                                <form action="/port_reboot" method="post">
+                                    <button type="submit" class="col-2 btn btn-success btn-sm is_active" id="turn_on_btn" onclick="show_spinner('client_turn_on_spinner', 'turn_on_btn')" value="{{ client_name }}+{{ client_url }}">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner"></div></button>
+                                </form>
+                                {% if client_debt != "False" %}
+                                    <div class="alert align-self-center alert-warning is_active" role="alert">
+                                        <font color="red">{{ client_debt }}</font>
+                                    </div>
+                                 {% endif %}
                             </div>
-                            <div class="col-2 align-self-center">
-                                 <a class="btn btn-success btn-sm" href="/client_turn_on/{{ client_name }}" id="turn_on_btn" onclick="show_spinner('client_turn_on_spinner', 'turn_on_btn')" value="{{ client_name }}+{{ client_url }}">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner"></div></a>
-                                 <font color="yellow">{{ client_debt }}</font>
-                            </div>
-                        </div>
+<!--                        </div>-->
                     </td>
                 {% endif %}
             </tr>
@@ -259,7 +268,7 @@ function copy(text) {
                       <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
                   {% else %}
                       <form action="/write_mac" method="post">
-                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" id="write_mac_btn" onclick="write_mac()" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][10] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][13] }}">Прописать<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="write_mac_spinner"></div></button></td>
+                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" id="write_mac_btn_{{ ip }}" onclick="show_spinner('write_mac_spinner_{{ ip }}', 'write_mac_btn_{{ ip }}')" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][10] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][13] }}">Прописать<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="write_mac_spinner_{{ ip }}"></div></button></td>
                       </form>
                   {% endif %}
               </td>
