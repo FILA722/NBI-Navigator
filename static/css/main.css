@@ -30,9 +30,6 @@ body {
     background-color: white;
 }
 
-
-
-
 .tab {
     overflow: hidden;
     border: 1px solid #ccc;
@@ -76,5 +73,23 @@ body {
     margin: 0 auto;
     padding: 1px;
     width: 120px;
+}
+
+.is_active_alert{
+    margin: 0 auto;
+    padding: 1px;
+    width: 200px;
+}
+
+.is_active_btn{
+    display: block;
+    margin: 0 auto;
+    padding: 1px;
+    width: 120px;
+}
+
+.row_elements{
+    margin: 0 auto;
+    width: 800px;
 
 }

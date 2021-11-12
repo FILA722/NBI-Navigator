@@ -111,35 +111,46 @@ function copy(text) {
                 <th scope="row" class="center align-self-center">Состояние: </th>
                 {% if client_is_active == "Активний" %}
                     <td class="center">
-                            <div class="alert align-self-center alert-success is_active" role="alert">
-                                <font color="green">{{ client_is_active }}</font>
-                            </div>
+                        <div class="row">
                             {% if client_debt != "False" %}
-                                <div class="alert align-self-center alert-warning is_active" role="alert">
+                                <div class="alert align-self-center alert-warning is_active_alert" role="alert">
                                     {{ client_debt }}
                                 </div>
+                            {% else %}
+                                <div class="alert align-self-center alert-success is_active" role="alert">
+                                    <font color="green">{{ client_is_active }}</font>
+                                </div>
                             {% endif %}
+                        </div>
                     </td>
                 {% else %}
                     <td class="center">
+                        <div class="row">
 <!--                        <div class="row justify-content-center">-->
 <!--                            <div class="col-2 align-self-center">-->
 <!--                                <font color="red">{{ client_is_active }}</font>-->
 <!--                            </div>-->
-                                <div class="alert align-self-center alert-danger is_active" role="alert">
-                                    {{ client_is_active }}
+                                <div class="col-3"></div>
+                                <div class="col-2">
+                                    <div class="alert align-self-center alert-danger is_active" role="alert">
+                                        {{ client_is_active }}
+                                    </div>
                                 </div>
 <!--                            <div class="col-2 align-self-center">-->
-                                <form action="/port_reboot" method="post">
-                                    <button type="submit" class="col-2 btn btn-success btn-sm is_active" id="turn_on_btn" onclick="show_spinner('client_turn_on_spinner', 'turn_on_btn')" value="{{ client_name }}+{{ client_url }}">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner"></div></button>
-                                </form>
+                                <div class="col-2">
+                                    <form action="/client_turn_on" method="post">
+                                        <button type="submit" class="btn btn-success is_active_btn" id="turn_on_btn" name="client_turn_on" onclick="show_spinner('client_turn_on_spinner', 'turn_on_btn')" value="{{ client_name }}+{{ client_url }}">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner"></div></button>
+                                    </form>
+                                </div>
                                 {% if client_debt != "False" %}
-                                    <div class="alert align-self-center alert-warning is_active" role="alert">
-                                        <font color="red">{{ client_debt }}</font>
+                                    <div class="col-2">
+                                        <div class="alert align-self-center alert-danger is_active_alert" role="alert">
+                                            <font color="red">{{ client_debt }}</font>
+                                        </div>
                                     </div>
-                                 {% endif %}
+                                {% endif %}
+
                             </div>
-<!--                        </div>-->
                     </td>
                 {% endif %}
             </tr>

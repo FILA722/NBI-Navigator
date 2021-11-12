@@ -7,7 +7,7 @@ from switch_operations import write_mac_address, reboot_client_port
 from client_managment.client_turn_on import turn_on
 from client_managment.client_turn_off import turn_off_clients, check_client_debt_status
 from parsers.confidential import KEYS
-from parsers.update_clients_database import update_clients_data, edit_client_status_parameter_in_db
+from parsers.update_clients_database import update_clients_data, edit_client_status_parameter_in_db, migrate_client_from_terminated_to_active, remove_client_from_check_client_balance_data,  add_client_to_check_client_balance_data
 from debugers.check_ping_status import ping_status
 from parsers import confidential
 import json
@@ -58,7 +58,8 @@ def update_main_db():
         if work_time():
             time.sleep(1800)
         else:
-            time.sleep(10800)
+            time.sleep(700)
+            # time.sleep(10800)
 
 
 def update_name_url_db():
@@ -71,7 +72,8 @@ def update_name_url_db():
         if work_time():
             time.sleep(180)
         else:
-            time.sleep(10800)
+            time.sleep(180)
+            # time.sleep(10800)
 
 
 def start_background_processes():
@@ -166,6 +168,9 @@ def client_turn_on():
     turn_on_operation = turn_on(client_url)
     if turn_on_operation:
         edit_client_status_parameter_in_db(client_name, "Активний")
+        migrate_client_from_terminated_to_active(client_name)
+        remove_client_from_check_client_balance_data(client_name)
+        add_client_to_check_client_balance_data(client_name, client_url)
         with open('search_engine/clients_cash.json', 'r') as clients_cash:
             clients = json.loads(clients_cash.read())
             try:
@@ -205,7 +210,14 @@ def client_turn_on():
 @app.route('/client_turn_on/<client_name>')
 def client_turn_on_from_search_page(client_name):
     client_url = edit_client_status_parameter_in_db(client_name, "Активний")
-    if turn_on(client_url):
+    turn_on_operation = turn_on(client_url)
+    print(client_name)
+    print(client_url)
+    if turn_on_operation:
+        print('turn on operation returned true')
+        migrate_client_from_terminated_to_active(client_name)
+        remove_client_from_check_client_balance_data(client_name)
+        add_client_to_check_client_balance_data(client_name, client_url)
         return redirect('/')
     else:
         #вывести тоаст-сообщение Включить не удалось

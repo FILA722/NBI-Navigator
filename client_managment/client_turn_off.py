@@ -57,7 +57,7 @@ def check_client_debt_status(client_name):
             return 'Только после оплаты!'
         else:
             date_time_close_obj = datetime.fromisoformat(client_object[0])
-            date_time_close = f'Включен до {date_time_close_obj.strftime("%H:%M %d.%M.%Y")}'
+            date_time_close = f'Включен до {date_time_close_obj.strftime("%d.%m.%Y")}'
 
             return date_time_close
     else:
