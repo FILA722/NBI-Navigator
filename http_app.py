@@ -211,10 +211,7 @@ def client_turn_on():
 def client_turn_on_from_search_page(client_name):
     client_url = edit_client_status_parameter_in_db(client_name, "Активний")
     turn_on_operation = turn_on(client_url)
-    print(client_name)
-    print(client_url)
     if turn_on_operation:
-        print('turn on operation returned true')
         migrate_client_from_terminated_to_active(client_name)
         remove_client_from_check_client_balance_data(client_name)
         add_client_to_check_client_balance_data(client_name, client_url)

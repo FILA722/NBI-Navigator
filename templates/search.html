@@ -36,7 +36,11 @@ NBI-Navigator
     <div class="col-6">
         <div class="list-group">
           {% for client in clients %}
+            {% if client == 'Клиент не найден' %}
+              <a class="list-group-item list-group-item-action list-group-item-light disabled">{{ client.upper() }}</a>
+            {% else %}
               <a href="/client/{{ client }}" class="list-group-item list-group-item-action list-group-item-light" onclick="search_spinner('{{ client }}')">{{ client.upper() }} <div class="spinner-grow text-secondary spinner-grow-sm d-none" role="status" id="{{ client }}"></div></a>
+            {% endif %}
           {% endfor %}
         </div>
     </div>
