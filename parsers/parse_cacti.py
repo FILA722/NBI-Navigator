@@ -6,6 +6,7 @@ import json
 import re
 import time
 
+
 def get_to_the_switches_page():
     browser = driver(CactiLoginData.cacti_url)
 
@@ -88,7 +89,6 @@ def update_clients_cacti_image_db(update_times=0):
                     if re.findall('[Uu]plink', alt_image):
                         port = ['Port Uplink']
                     else:
-                        # port = re.findall('[Pp]ort \d\d', alt_image)
                         port = re.findall('[Pp]ort.\d+', alt_image)
                     if port:
                         if port[0][4] != ' ':

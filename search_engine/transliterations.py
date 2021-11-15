@@ -3,5 +3,6 @@ class Transliterations:
     dictionary2 = {'t': 'є', 's': 'е', 'и': 'і'}
     dictionary3 = {'е': 'є', 'ы': 'і', 'і': 'е'}
     dictionary4 = {'і': 'и'}
-    dictionary5 = {'й': 'yi', 'ц': 'z', 'у': 'u', 'к': 'k', 'е': 'e', 'н': 'n', 'г': 'g', 'ш': 'sh', 'щ': 'sh', 'з': 'z', 'х': 'h', 'ф': 'f', 'ы': 'u', 'в': 'v', 'а': 'a', 'п': 'p', 'р': 'r',  'о': 'o', 'л': 'l', 'д': 'd', 'ж': 'j', 'э': 'e', 'я': 'ya', 'ч': 'ch', 'с': 'c', 'м': 'm', 'и': 'ea', 'т': 't', 'б': 'b', 'ю': 'yu'}
-    dictionaries = [dictionary1, dictionary2, dictionary3, dictionary4, dictionary5]
+    dictionary5 = {'й': 'yi', 'ц': 'z', 'у': 'u', 'к': 'k', 'е': 'e', 'н': 'n', 'г': 'g', 'ш': 'sh', 'щ': 'sh', 'з': 'z', 'х': 'h', 'ф': 'f', 'ы': 'u', 'в': 'v', 'а': 'a', 'п': 'p', 'р': 'r',  'о': 'o', 'л': 'l', 'д': 'd', 'ж': 'j', 'э': 'e', 'я': 'ya', 'ч': 'ch', 'с': 's', 'м': 'm', 'и': 'ea', 'т': 't', 'б': 'b', 'ю': 'yu'}
+    dictionary6 = {'ай': 'i', 'джей': 'j', 'кей': 'k', 'к': 'c'}
+    dictionaries = [dictionary1, dictionary2, dictionary3, dictionary4, dictionary5, dictionary6]

@@ -58,8 +58,8 @@ def update_main_db():
         if work_time():
             time.sleep(1800)
         else:
-            time.sleep(700)
-            # time.sleep(10800)
+            # time.sleep(700)
+            time.sleep(10800)
 
 
 def update_name_url_db():
@@ -72,8 +72,8 @@ def update_name_url_db():
         if work_time():
             time.sleep(180)
         else:
-            time.sleep(180)
-            # time.sleep(10800)
+            # time.sleep(180)
+            time.sleep(10800)
 
 
 def start_background_processes():

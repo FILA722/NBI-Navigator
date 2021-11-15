@@ -59,4 +59,15 @@ def get_zone_data():
     client.connect(**login_data)
     stdin, stdout, stderr = client.exec_command(ZonesLoginData.zones_get_command)
 
-    return parse_zone_data(list(stdout))
+    zones = list(stdout)
+    zones_code_new = zones[2].strip()
+
+    with open('search_engine/zones_code.txt', 'r') as zones_code_data_to_read:
+        zones_code_old = zones_code_data_to_read.read()
+
+    if zones_code_old != zones_code_new:
+        with open('search_engine/zones_code.txt', 'w') as zones_code_data_to_write:
+            zones_code_data_to_write.write(zones_code_new)
+        return parse_zone_data(zones)
+    else:
+        return False

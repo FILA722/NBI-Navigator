@@ -15,7 +15,7 @@ def update_switch_name_ip_file():
         switch_name_ip_dict_old = json.load(switch_name_ip_data_old)
 
     if switch_name_ip_dict != switch_name_ip_dict_old:
-        parse_cacti.update_clients_cacti_image_db()
+        update_clients_cacti_image_db()
         with open('search_engine/switch_name_ip_dict.json', 'w') as switch_name_ip_data:
             json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
 
@@ -23,14 +23,15 @@ def update_switch_name_ip_file():
 def update_clients_ip_gateway_mask_file():
     clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
 
-    clients_ip_gateway_mask_dict_json = {}
-    for key in clients_ip_gateway_mask_dict.keys():
-        value = clients_ip_gateway_mask_dict[key]
-        key_json = str(key).replace(r"'", '').strip('()')
-        clients_ip_gateway_mask_dict_json[key_json.replace(' ', '')] = value
+    if clients_ip_gateway_mask_dict:
+        clients_ip_gateway_mask_dict_json = {}
+        for key in clients_ip_gateway_mask_dict.keys():
+            value = clients_ip_gateway_mask_dict[key]
+            key_json = str(key).replace(r"'", '').strip('()')
+            clients_ip_gateway_mask_dict_json[key_json.replace(' ', '')] = value
 
-    with open('search_engine/clients_ip_gateway_mask_dict.json', 'w') as clients_ip_gateway_mask_data:
-        json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
+        with open('search_engine/clients_ip_gateway_mask_dict.json', 'w') as clients_ip_gateway_mask_data:
+            json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def edit_client_status_parameter_in_db(client_name, client_status):
@@ -454,7 +455,6 @@ def update_clients_data(parse_level):
 
     elif parse_level == 'total':
         update_switch_name_ip_file()
-        update_clients_cacti_image_db()
 
         clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,
