@@ -168,6 +168,18 @@ def get_switch_name(client_switch_ip):
     return 'None'
 
 
+def set_client_balance_check_date():
+    #исключаем выходные дни
+    date_now = datetime.now()
+    check_date = date_now + timedelta(days=3)
+
+    if check_date.weekday() in (5, 6, 0):
+        check_date = date_now + timedelta(days=5)
+
+    client_balance_check_date = str(datetime.fromisoformat(f'{check_date.year}-{check_date.month}-{check_date.day} 14:00:00'))
+    return client_balance_check_date
+
+
 def process_turned_on_clients(active_client_name_url_dict, terminated_client_name_url_dict):
     with open('search_engine/active_clients_name_url_data.json', 'r') as active_client_name_url_data:
         active_client_name_url_dict_old = json.load(active_client_name_url_data)
@@ -176,21 +188,22 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
         terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
 
     if active_client_name_url_dict_old != active_client_name_url_dict:
+        with open('search_engine/clients.json', 'r') as clients_data:
+            clients_names = json.load(clients_data).keys()
+
         new_clients = active_client_name_url_dict.keys() - active_client_name_url_dict_old.keys()
 
         credit_clients = {}
         for new_client in new_clients:
             client_name, client_url = new_client, active_client_name_url_dict[new_client]
 
-            if client_name not in terminated_client_name_url_dict_old.keys():
+            if client_name not in terminated_client_name_url_dict_old.keys() and client_name not in clients_names:
                 browser = netstore_authorisation(client_url)
                 client_data = get_client_data(browser, client_url)
                 add_client_into_global_db(client_name, client_url, client_data)
             else:
                 edit_client_status_parameter_in_db(client_name, 'Активний')
-
-                date_now = datetime.now()
-                check_client_balance_date = str(datetime.fromisoformat(f'{date_now.year}-{date_now.month}-{date_now.day} 14:00:00') + timedelta(days=3))
+                check_client_balance_date = set_client_balance_check_date()
                 credit_clients[client_name] = [check_client_balance_date, client_url]
 
         if credit_clients:
@@ -448,9 +461,9 @@ def update_clients_data(parse_level):
             confidential.NetstoreLoginData.netstore2_login,
             confidential.NetstoreLoginData.netstore_passwd,
             parse_level)
+
         active_client_name_url_dict.update(active_client_name_url_dict_from_netstore2)
         terminated_client_name_url_dict.update(terminated_client_name_url_dict_from_netstore2)
-
         process_turned_on_clients(active_client_name_url_dict, terminated_client_name_url_dict)
 
     elif parse_level == 'total':
