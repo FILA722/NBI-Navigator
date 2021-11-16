@@ -120,7 +120,7 @@ def get_full_client_data(client_name):
             switch_name = client_connection_data[client_ip_address][0]
             switch_port = client_connection_data[client_ip_address][2]
 
-            if not ping_status(switch_ip_address) or switch_name == 'None' or switch_port == 'None':
+            if not ping_status(switch_ip_address) or switch_name == 'None' or switch_port == 'None' :
                 data_from_switch = return_none_switch_data()
             else:
                 switch_port = client_connection_data[client_ip_address][2][1:]
@@ -130,6 +130,9 @@ def get_full_client_data(client_name):
                 elif client_connection_data[client_ip_address][5] == 'zyxel':
                     data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
                 else:
+                    data_from_switch = return_none_switch_data()
+
+                if not data_from_switch:
                     data_from_switch = return_none_switch_data()
 
             client_connection_data[client_ip_address] += data_from_switch

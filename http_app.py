@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect
 from multiprocessing import Process
 from search_engine import search_engine
@@ -46,42 +46,38 @@ def work_time():
         return False
 
 
-def update_main_db():
+def update_dbs():
+    next_time_local_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
+    next_time_total_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
+
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+        datetime_now = datetime.now()
 
-        print(f'Start update GLOBAL DB at {datetime.now()}')
-        start = time.time()
-        update_clients_data('total')
-        print(f'End of update GLOBAL DB, spended time {time.time() - start}')
-        turn_off_clients()
-
-        if work_time():
-            time.sleep(1800)
+        if ((0 <= datetime_now.weekday() <= 5) and (9 <= datetime_now.hour <= 17)):
+            sleeptime_seconds = 10
+            local_db_timedelta_minutes = 3
+            total_db_timedelta_minutes = 30
         else:
-            # time.sleep(700)
-            time.sleep(10800)
+            sleeptime_seconds = 60
+            local_db_timedelta_minutes = 30
+            total_db_timedelta_minutes = 120
 
+        if datetime_now >= next_time_local_update:
+            print(f'Start update LOCAL DB at {datetime_now}')
+            update_clients_data('local')
+            end_time = datetime.now()
+            print(f'End of update LOCAL DB, spended time: {end_time - datetime_now}')
+            next_time_local_update = end_time + timedelta(minutes=local_db_timedelta_minutes)
 
-def update_name_url_db():
-    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
-        start = time.time()
-        print(f'Start update LOCAL DB at {datetime.now()}')
-        update_clients_data('local')
-        print(f'End of update LOCAL DB, spended time: {time.time() - start}')
+        if datetime_now >= next_time_total_update:
+            datetime_now = datetime.now()
+            print(f'Start update TOTAL DB at {datetime_now}')
+            update_clients_data('total')
+            end_time = datetime.now()
+            print(f'End of update TOTAL DB, spended time: {end_time - datetime_now}')
+            next_time_total_update = end_time + timedelta(minutes=total_db_timedelta_minutes)
 
-        if work_time():
-            time.sleep(180)
-        else:
-            # time.sleep(180)
-            time.sleep(10800)
-
-
-def start_background_processes():
-    update_client_url_db_operation = Process(target=update_name_url_db)
-    update_main_db_operation = Process(target=update_main_db)
-
-    update_client_url_db_operation.start()
-    update_main_db_operation.start()
+        time.sleep(sleeptime_seconds)
 
 
 @app.route('/test')
@@ -286,6 +282,36 @@ def show_client_page(client_name):
             return redirect(f'/client/{clients[0]}')
         else:
             return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
+
+
+def update_main_db():
+    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(
+            confidential.NetstoreLoginData.netstore2_url[8:28]):
+
+        print(f'Start update GLOBAL DB at {datetime.now()}')
+        start = time.time()
+        update_clients_data('total')
+        print(f'End of update GLOBAL DB, spended time {time.time() - start}')
+        turn_off_clients()
+
+        if work_time():
+            time.sleep(1800)
+        else:
+            time.sleep(10800)
+
+
+def update_name_url_db():
+    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(
+            confidential.NetstoreLoginData.netstore2_url[8:28]):
+        start = time.time()
+        print(f'Start update LOCAL DB at {datetime.now()}')
+        update_clients_data('local')
+        print(f'End of update LOCAL DB, spended time: {time.time() - start}')
+
+        if work_time():
+            time.sleep(180)
+        else:
+            time.sleep(10800)
 
 
 if __name__ == '__main__':

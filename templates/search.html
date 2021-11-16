@@ -52,12 +52,12 @@ NBI-Navigator
         <ul class="dropdown-menu term_window" aria-labelledby="dropdownMenuButton1">
           {% for sus_client in suspended_clients %}
             <li>
-             <div class="container">
+             <div class="align-self-start">
               <div class="row justify-content-between">
-                  <div class="col-10 align-self-start">
+                  <div class="col-9 align-self-start">
                       <a class="dropdown-item" href="/client/{{ sus_client }}">{{ sus_client.upper() }}</a>
                   </div>
-                  <div class="col-2 align-self-end">
+                  <div class="col-3 align-self-end">
                       <a class="btn btn-success btn-sm" href="/client_turn_on/{{ sus_client }}" id="turn_on_btn{{ sus_client }}" onclick="show_spinner('client_turn_on_spinner{{ sus_client }}', 'turn_on_btn{{ sus_client }}')">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner{{ sus_client }}"></div></a>
                   </div>
               </div>

@@ -9,13 +9,16 @@ def parse_zone_data(zones):
     str_num = 0
     ip_gateway_dict = {}
     clients_ip_addresses, gateway_ip, gateway_mask = [], [], []
+    vpn_client_ip_addresses = []
     gateway_pattern = r'; .+ \d+\.\d+\.\d+\.\d+\/\d+'
     client_pattern = r'\d+-\d+-\d+-\d+.+IN.+A.+\d\.\d.+; [\w.]+'
     vpn_pattern = r'vpn\d+-\d+-\d+-\d+.+IN.+A.+\d\.\d.+; [\w.]+'
     while str_num < len_zones:
         string = zones[str_num]
-        vpn = re.match(vpn_pattern,string)
+        vpn = re.findall(vpn_pattern, string)
         if vpn:
+            client_ip = re.findall('\d+\.\d+\.\d+\.\d+', vpn[0])
+            vpn_client_ip_addresses.append(client_ip[0])
             str_num += 1
             continue
 
@@ -39,6 +42,8 @@ def parse_zone_data(zones):
             str_num += 1
             continue
         str_num += 1
+
+    ip_gateway_dict[tuple(vpn_client_ip_addresses)] = ('VPN', 'VPN')
 
     return ip_gateway_dict
 

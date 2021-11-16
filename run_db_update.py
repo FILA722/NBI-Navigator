@@ -1,4 +1,4 @@
-from http_app import start_background_processes
+from http_app import update_dbs
 
 if __name__ == '__main__':
-    start_background_processes()
+    update_dbs()
