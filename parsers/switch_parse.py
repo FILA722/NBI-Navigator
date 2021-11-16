@@ -128,7 +128,7 @@ def parse_huawei(switch_ip_address, client_port):
 
         return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan
 
-    except ConnectionResetError:
+    except (ConnectionResetError, EOFError):
         return False
 
 def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
@@ -216,7 +216,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             current_mac_addresses_colored, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_addresses, current_mac_addresses)
 
         return port_condition, saved_mac_addresses, current_mac_addresses_colored, port_errors, write_mac_address_button_status, saved_vlan
-    except ConnectionResetError:
+    except (ConnectionResetError, EOFError):
         return False
 
 def parse_asotel(ip, password, port):

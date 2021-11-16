@@ -40,7 +40,7 @@ def write_mac_address(saved_mac_addresses, current_mac_addresses, switch_ip, cli
                                                client_ip,
                                                client_vlan)
     time.sleep(3)
-    return True if write_mac_operation else False
+    return write_mac_operation
 
 
 def write_mac_huawei(saved_mac_addresses, current_mac_addresses, switch_ip_address, client_port, client_ip, client_vlan):

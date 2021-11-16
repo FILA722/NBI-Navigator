@@ -5,6 +5,19 @@ NBI-Navigator
 {% endblock %}
 
 {% block body %}
+{% if toast_alert != ' ' %}
+    <div id="toastNotice" class="toast align-items-center text-white bg-success border-0" style="z-index: 11" role="alert" aria-live="assertive" aria-atomic="true" data-delay=3000>
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ toast_alert }}
+        </div>
+      </div>
+    </div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
+
 <script>
     function search_spinner(client_name) {
         document.getElementById(client_name).classList.remove("d-none");

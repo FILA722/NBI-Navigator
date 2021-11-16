@@ -279,7 +279,7 @@ function copy(text) {
                       <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control disabled">Прописать</button></td>
                   {% else %}
                       <form action="/write_mac" method="post">
-                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" id="write_mac_btn_{{ ip }}" onclick="show_spinner('write_mac_spinner_{{ ip }}', 'write_mac_btn_{{ ip }}')" name="write_mac_address" value="{{ client_connection_data[ip][7] }}+{{ client_connection_data[ip][10] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][13] }}">Прописать<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="write_mac_spinner_{{ ip }}"></div></button></td>
+                          <td class="align-middle center col-2"><button type="submit" class="btn btn-warning form-control" id="write_mac_btn_{{ ip }}" onclick="show_spinner('write_mac_spinner_{{ ip }}', 'write_mac_btn_{{ ip }}')" name="write_mac_address" value="{{ client_connection_data[ip][9] }}+{{ client_connection_data[ip][10] }}+{{ client_connection_data[ip][1] }}+{{ client_connection_data[ip][2] }}+{{ client_connection_data[ip][5] }}+{{ ip }}+{{ client_name }}+{{ client_connection_data[ip][13] }}">Прописать<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="write_mac_spinner_{{ ip }}"></div></button></td>
                       </form>
                   {% endif %}
               </td>

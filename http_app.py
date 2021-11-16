@@ -71,10 +71,10 @@ def update_dbs():
 
         if datetime_now >= next_time_total_update:
             datetime_now = datetime.now()
-            print(f'Start update TOTAL DB at {datetime_now}')
+            print(f'Start update -=TOTAL=- DB at {datetime_now}')
             update_clients_data('total')
             end_time = datetime.now()
-            print(f'End of update TOTAL DB, spended time: {end_time - datetime_now}')
+            print(f'End of update -=TOTAL=- DB, spended time: {end_time - datetime_now}')
             next_time_total_update = end_time + timedelta(minutes=total_db_timedelta_minutes)
 
         time.sleep(sleeptime_seconds)
@@ -129,8 +129,9 @@ def port_reboot():
 @app.route('/write_mac', methods=['POST'])
 def write_mac():
     write_mac_data = request.form['write_mac_address']
+    print(write_mac_data)
     write_mac_data_list = write_mac_data.split('+')
-
+    print(write_mac_data_list)
     if write_mac_data_list[4] == 'zyxel':
         mac_address_pattern = r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w'
     else:
@@ -138,7 +139,8 @@ def write_mac():
 
     saved_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[0])
     current_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[1])
-
+    print(saved_mac_addresses)
+    print(current_mac_addresses)
     switch_ip = write_mac_data_list[2]
     client_port = write_mac_data_list[3][1:]
     switch_model = write_mac_data_list[4]
@@ -197,7 +199,8 @@ def client_turn_on():
                                client_notes=client_notes,
                                client_connection_data=client_connection_data,
                                client_debt=client_debt,
-                               client_url=client_url)
+                               client_url=client_url,
+                               toast_alert=f'Клиент {client_name} включен')
     else:
         #вывести тоаст сообщение что не удалось включить клиента
         return redirect('/')
@@ -207,31 +210,30 @@ def client_turn_on():
 def client_turn_on_from_search_page(client_name):
     client_url = edit_client_status_parameter_in_db(client_name, "Активний")
     turn_on_operation = turn_on(client_url)
+
     if turn_on_operation:
         migrate_client_from_terminated_to_active(client_name)
         remove_client_from_check_client_balance_data(client_name)
         add_client_to_check_client_balance_data(client_name, client_url)
         return redirect('/')
     else:
-        #вывести тоаст-сообщение Включить не удалось
-        pass
+        return redirect('/')
 
 
 @app.route('/', methods=['POST', 'GET'])
 def search():
     suspended_clients = get_suspended_clients()
-
     if request.method == 'POST':
         clients = search_engine.get_coincidence_names(request.form['client'])
 
         if clients == False:
-            return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients)
+            return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
         elif len(clients) == 1:
             return redirect(f'/client/{clients[0]}')
         else:
-            return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
+            return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
     else:
-        return render_template('search.html', suspended_clients=suspended_clients)
+        return render_template('search.html', suspended_clients=suspended_clients, toast_alert=' ')
 
 
 @app.route('/client/<client_name>', methods=['POST', 'GET'])
@@ -252,7 +254,6 @@ def show_client_page(client_name):
         client_url = client_data[9]
         client_debt = check_client_debt_status(client_name)
         toast_alert = ' '
-
         client_data += [client_debt]
         add_client_data_to_cash(client_name, client_data)
 
@@ -277,11 +278,11 @@ def show_client_page(client_name):
         suspended_clients = get_suspended_clients()
         clients = search_engine.get_coincidence_names(request.form['client'])
         if clients == False:
-            return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients)
+            return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
         elif len(clients) == 1:
             return redirect(f'/client/{clients[0]}')
         else:
-            return render_template('search.html', clients=clients, suspended_clients=suspended_clients)
+            return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
 
 
 def update_main_db():
