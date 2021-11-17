@@ -25,10 +25,7 @@
       var bsAlert = new bootstrap.Toast(myAlert);//inizialize it
       bsAlert.show();//show it
   }
-
 </script>
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" xmlns="http://www.w3.org/1999/html"></script>
 
 <script>
     function show_spinner(spinner_id, btn_id) {
@@ -126,31 +123,25 @@ function copy(text) {
                 {% else %}
                     <td class="center">
                         <div class="row">
-<!--                        <div class="row justify-content-center">-->
-<!--                            <div class="col-2 align-self-center">-->
-<!--                                <font color="red">{{ client_is_active }}</font>-->
-<!--                            </div>-->
-                                <div class="col-3"></div>
-                                <div class="col-2">
-                                    <div class="alert align-self-center alert-danger is_active" role="alert">
-                                        {{ client_is_active }}
-                                    </div>
+                            <div class="col-3"></div>
+                            <div class="col-2">
+                                <div class="alert align-self-center alert-danger is_active" role="alert">
+                                    {{ client_is_active }}
                                 </div>
-<!--                            <div class="col-2 align-self-center">-->
-                                <div class="col-2">
-                                    <form action="/client_turn_on" method="post">
-                                        <button type="submit" class="btn btn-success is_active_btn" id="turn_on_btn" name="client_turn_on" onclick="show_spinner('client_turn_on_spinner', 'turn_on_btn')" value="{{ client_name }}+{{ client_url }}">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner"></div></button>
-                                    </form>
-                                </div>
-                                {% if client_debt != "False" %}
-                                    <div class="col-2">
-                                        <div class="alert align-self-center alert-danger is_active_alert" role="alert">
-                                            <font color="red">{{ client_debt }}</font>
-                                        </div>
-                                    </div>
-                                {% endif %}
-
                             </div>
+                            <div class="col-2">
+                                <form action="/client_turn_on" method="post">
+                                    <button type="submit" class="btn btn-success is_active_btn" id="turn_on_btn" name="client_turn_on" onclick="show_spinner('client_turn_on_spinner', 'turn_on_btn')" value="{{ client_name }}+{{ client_url }}">Включить<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner"></div></button>
+                                </form>
+                            </div>
+                            {% if client_debt != "False" %}
+                                <div class="col-2">
+                                    <div class="alert align-self-center alert-danger is_active_alert" role="alert">
+                                        <font color="red">{{ client_debt }}</font>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
                     </td>
                 {% endif %}
             </tr>
@@ -219,16 +210,13 @@ function copy(text) {
                         </td>
                     {% else %}
                         <td class="align-middle center col-4 align-self-center">
-                            <a class="align-middle center btn btn-outline-success btn-sm" target="_blank" href="http://{{ client_connection_data[ip][1] }}">
-                                {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
+                            <a class="align-middle center btn btn-outline-success btn-sm" target="_blank" href="http://{{ client_connection_data[ip][1] }}">{{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
                         </td>
                     {% endif %}
               {% else %}
                 <td class="align-middle center col-4 align-self-center">
                     <a class="align-middle center btn btn-outline-danger btn-sm disabled" role="button" aria-disabled="true">
                         {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}</a>
-<!--                    <br>-->
-<!--                    (no ping to {{ client_connection_data[ip][1] }} {{ client_connection_data[ip][5] }})-->
                 </td>
               {% endif %}
 

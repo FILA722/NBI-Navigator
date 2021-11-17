@@ -76,7 +76,7 @@ def remove_client_from_check_client_balance_data(client_name):
 
 def add_client_to_check_client_balance_data(client_name, client_url):
     date_now = datetime.now()
-    check_client_balance_date = str(datetime.fromisoformat(f'{date_now.year}-{date_now.month}-{date_now.day} 14:00:00') + timedelta(days=3))
+    check_client_balance_date = str(datetime.fromisoformat(f'{date_now.year}-{date_now.month}-{date_now.day} 12:00:00') + timedelta(days=3))
 
     with open('search_engine/check_client_balance.json', 'r') as check_client_balance_data:
         check_client_balance_dict = json.load(check_client_balance_data)
@@ -176,7 +176,7 @@ def set_client_balance_check_date():
     if check_date.weekday() in (5, 6, 0):
         check_date = date_now + timedelta(days=5)
 
-    client_balance_check_date = str(datetime.fromisoformat(f'{check_date.year}-{check_date.month}-{check_date.day} 14:00:00'))
+    client_balance_check_date = str(datetime.fromisoformat(f'{check_date.year}-{check_date.month}-{check_date.day} 12:00:00'))
     return client_balance_check_date
 
 

@@ -1,7 +1,6 @@
 import time
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, redirect
-from multiprocessing import Process
+from flask import Flask, render_template, request, redirect, url_for
 from search_engine import search_engine
 from switch_operations import write_mac_address, reboot_client_port
 from client_managment.client_turn_on import turn_on
@@ -129,9 +128,8 @@ def port_reboot():
 @app.route('/write_mac', methods=['POST'])
 def write_mac():
     write_mac_data = request.form['write_mac_address']
-    print(write_mac_data)
     write_mac_data_list = write_mac_data.split('+')
-    print(write_mac_data_list)
+
     if write_mac_data_list[4] == 'zyxel':
         mac_address_pattern = r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w'
     else:
@@ -139,8 +137,7 @@ def write_mac():
 
     saved_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[0])
     current_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[1])
-    print(saved_mac_addresses)
-    print(current_mac_addresses)
+
     switch_ip = write_mac_data_list[2]
     client_port = write_mac_data_list[3][1:]
     switch_model = write_mac_data_list[4]
@@ -206,32 +203,47 @@ def client_turn_on():
         return redirect('/')
 
 
-@app.route('/client_turn_on/<client_name>')
-def client_turn_on_from_search_page(client_name):
-    client_url = edit_client_status_parameter_in_db(client_name, "Активний")
-    turn_on_operation = turn_on(client_url)
-
-    if turn_on_operation:
-        migrate_client_from_terminated_to_active(client_name)
-        remove_client_from_check_client_balance_data(client_name)
-        add_client_to_check_client_balance_data(client_name, client_url)
-        return redirect('/')
-    else:
-        return redirect('/')
+# @app.route('/client_turn_on/<client_name>')
+# @app.route('/сlient_turn_on_from_search_page', methods=['POST'])
+# def client_turn_on_from_search_page():
+#     client_name = request.form['client_turn_on']
+#     client_url = edit_client_status_parameter_in_db(client_name, "Активний")
+#     turn_on_operation = turn_on(client_url)
+#     if turn_on_operation:
+#         migrate_client_from_terminated_to_active(client_name)
+#         remove_client_from_check_client_balance_data(client_name)
+#         add_client_to_check_client_balance_data(client_name, client_url)
+#         # return redirect('/')
+#         return redirect(url_for('search', client_name=client_name))
+#     else:
+#         return redirect('/')
 
 
 @app.route('/', methods=['POST', 'GET'])
 def search():
     suspended_clients = get_suspended_clients()
-    if request.method == 'POST':
-        clients = search_engine.get_coincidence_names(request.form['client'])
 
-        if clients == False:
-            return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
-        elif len(clients) == 1:
-            return redirect(f'/client/{clients[0]}')
-        else:
-            return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
+    if request.method == 'POST':
+        if request.form['client_turn_on']:
+            client_name = request.form['client_turn_on']
+            client_url = edit_client_status_parameter_in_db(client_name, "Активний")
+            turn_on_operation = turn_on(client_url)
+            if turn_on_operation:
+                migrate_client_from_terminated_to_active(client_name)
+                remove_client_from_check_client_balance_data(client_name)
+                add_client_to_check_client_balance_data(client_name, client_url)
+                return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Клиент {client_name} включен')
+            else:
+                return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Ошибка')
+
+        elif request.form['client']:
+            clients = search_engine.get_coincidence_names(request.form['client'])
+            if clients == False:
+                return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
+            elif len(clients) == 1:
+                return redirect(f'/client/{clients[0]}')
+            else:
+                return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
     else:
         return render_template('search.html', suspended_clients=suspended_clients, toast_alert=' ')
 

@@ -1,4 +1,5 @@
 {% extends 'search_base.html' %}
+@import "../node_modules/bootstrap/scss/bootstrap";
 
 {% block title %}
 NBI-Navigator
@@ -19,9 +20,11 @@ NBI-Navigator
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
 
 <script>
-    function search_spinner(client_name) {
-        document.getElementById(client_name).classList.remove("d-none");
-    }
+  {
+    var myAlert =document.getElementById('toastNotice');//select id of toast
+      var bsAlert = new bootstrap.Toast(myAlert);//inizialize it
+      bsAlert.show();//show it
+  }
 </script>
 
 <script>
@@ -33,7 +36,6 @@ NBI-Navigator
 
 <br>
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-
       <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
         <h5>NBI-Navigator</h5>
       </ul>
@@ -71,7 +73,9 @@ NBI-Navigator
                       <a class="dropdown-item" href="/client/{{ sus_client }}">{{ sus_client.upper() }}</a>
                   </div>
                   <div class="col-3 align-self-end">
-                      <a class="btn btn-success btn-sm" href="/client_turn_on/{{ sus_client }}" id="turn_on_btn{{ sus_client }}" onclick="show_spinner('client_turn_on_spinner{{ sus_client }}', 'turn_on_btn{{ sus_client }}')">Включить <div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner{{ sus_client }}"></div></a>
+                    <form action="/" method="post">
+                      <button type="submit" class="btn btn-success btn-sm" id="client_turn_on_btn{{ sus_client }}" name="client_turn_on" onclick="show_spinner('client_turn_on_spinner{{ sus_client }}', 'client_turn_on_btn{{ sus_client }}')" value="{{ sus_client }}">Включить<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner{{ sus_client }}"></div></button>
+                    </form>
                   </div>
               </div>
              </div>
@@ -83,14 +87,4 @@ NBI-Navigator
   </div>
 </form>
 <br>
-
-
 {% endblock%}
-
-<!--<tr>-->
-<!--   <td>-->
-<!--     <a href="/client/{{ client }}">-->
-<!--      {{ client.upper() }}-->
-<!--     </a>-->
-<!--   </td>-->
-<!--</tr>-->
