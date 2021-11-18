@@ -2,12 +2,18 @@ from start_browser import driver
 from parsers.confidential import CactiLoginData
 from parsers.locators import CactiLocators
 from selenium.common.exceptions import StaleElementReferenceException
+from debugers.check_ping_status import ping_status
 import json
 import re
 import time
 
 
 def get_to_the_switches_page():
+
+    cacti_accesible = ping_status(CactiLoginData.cacti_url)
+    if not cacti_accesible:
+        return False
+
     browser = driver(CactiLoginData.cacti_url)
 
     login = browser.find_element(*CactiLocators.LOGIN)
@@ -46,6 +52,8 @@ def get_to_the_switches_page():
 def main():
     try:
         cacti_browser = get_to_the_switches_page()
+        if not cacti_browser:
+            return False
 
         switches = cacti_browser.find_elements(*CactiLocators.SWITCH_NAME_AND_IP)
 
@@ -59,7 +67,11 @@ def main():
                 switch_ip_name_dict[switch_name] = switch_ip[0]
 
     finally:
-        cacti_browser.quit()
+        if not cacti_browser:
+            return False
+        else:
+            cacti_browser.quit()
+
     return switch_ip_name_dict
 
 
@@ -68,6 +80,8 @@ def update_clients_cacti_image_db(update_times=0):
         return
     try:
         cacti_browser = get_to_the_switches_page()
+        if not cacti_browser:
+            return False
 
         switches = cacti_browser.find_elements(*CactiLocators.SWITCH_NAME_AND_IP)
         switch_ip_port_id_dict = {}

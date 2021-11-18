@@ -203,29 +203,14 @@ def client_turn_on():
         return redirect('/')
 
 
-# @app.route('/client_turn_on/<client_name>')
-# @app.route('/сlient_turn_on_from_search_page', methods=['POST'])
-# def client_turn_on_from_search_page():
-#     client_name = request.form['client_turn_on']
-#     client_url = edit_client_status_parameter_in_db(client_name, "Активний")
-#     turn_on_operation = turn_on(client_url)
-#     if turn_on_operation:
-#         migrate_client_from_terminated_to_active(client_name)
-#         remove_client_from_check_client_balance_data(client_name)
-#         add_client_to_check_client_balance_data(client_name, client_url)
-#         # return redirect('/')
-#         return redirect(url_for('search', client_name=client_name))
-#     else:
-#         return redirect('/')
-
-
 @app.route('/', methods=['POST', 'GET'])
 def search():
     suspended_clients = get_suspended_clients()
 
     if request.method == 'POST':
-        if request.form['client_turn_on']:
-            client_name = request.form['client_turn_on']
+        search = request.form['client']
+        if search[:3] == '===':
+            client_name = search[3:]
             client_url = edit_client_status_parameter_in_db(client_name, "Активний")
             turn_on_operation = turn_on(client_url)
             if turn_on_operation:
@@ -235,9 +220,8 @@ def search():
                 return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Клиент {client_name} включен')
             else:
                 return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Ошибка')
-
-        elif request.form['client']:
-            clients = search_engine.get_coincidence_names(request.form['client'])
+        else:
+            clients = search_engine.get_coincidence_names(search)
             if clients == False:
                 return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
             elif len(clients) == 1:

@@ -11,6 +11,9 @@ import re
 
 def update_switch_name_ip_file():
     switch_name_ip_dict = parse_cacti.main()
+    if not switch_name_ip_dict:
+        return False
+
     with open('search_engine/switch_name_ip_dict.json', 'r') as switch_name_ip_data_old:
         switch_name_ip_dict_old = json.load(switch_name_ip_data_old)
 
@@ -19,6 +22,7 @@ def update_switch_name_ip_file():
         with open('search_engine/switch_name_ip_dict.json', 'w') as switch_name_ip_data:
             json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
 
+    return True
 
 def update_clients_ip_gateway_mask_file():
     clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
