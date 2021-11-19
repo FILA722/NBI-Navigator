@@ -1,7 +1,7 @@
 from search_engine.transliterations import Transliterations
 from debugers.check_ping_status import ping_status
 from parsers import switch_parse
-from parsers.update_clients_database import get_client_data, remake_client_port_for_cacti_urls_dict
+from parsers.update_clients_database import get_client_data
 from client_managment.login_into_netstore import netstore_authorisation
 import json
 import re
@@ -73,8 +73,13 @@ def get_coincidence_names(client):
             pattern = f'{search_name.lower()}[  \-\'\w]*'
             client_name_parts = client_name.split(' ')
             for client_name_part in client_name_parts:
-                if re.match(pattern, client_name_part):
-                    coincidence_names.append(client_name)
+                try:
+                    if re.match(pattern, client_name_part):
+                        coincidence_names.append(client_name)
+                except re.error:
+                    pass
+
+    coincidence_names += find_client_name_by_ip(client)
 
     if not coincidence_names:
         return False
@@ -141,6 +146,28 @@ def get_full_client_data(client_name):
     return client_name, client_data
 
 
+def get_client_ip_name_dict():
+    with open('search_engine/client_ip_name_dict.json', 'r') as client_ip_name_data:
+        client_ip_name_dict_var = json.load(client_ip_name_data)
+
+    client_ip_name_dict = {}
+    for client_ips in client_ip_name_dict_var.keys():
+        client_ips_tuple = tuple(client_ips.split('+'))
+        client_name = client_ip_name_dict_var[client_ips]
+        client_ip_name_dict[client_ips_tuple] = client_name
+
+    return client_ip_name_dict
 
 
+def find_client_name_by_ip(search_ip):
+    search_ip_pattern = re.sub(r'\W', '.', search_ip).strip('.')
+    search_ip_pattern = re.sub(r'\.+', '.', search_ip_pattern)
+    client_ip_name_dict = get_client_ip_name_dict()
+    coincidence_names = []
+    for client_ips in client_ip_name_dict:
+        for ip_from_dict in client_ips:
+            if search_ip_pattern in ip_from_dict:
+                coincidence_names.append(client_ip_name_dict[client_ips])
+
+    return coincidence_names
 

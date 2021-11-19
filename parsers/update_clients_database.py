@@ -1,4 +1,6 @@
 from start_browser import driver
+from debugers.check_ping_status import ping_status
+from parsers.confidential import CactiLoginData
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
 from parsers import parse_cacti, parse_zones, confidential
 from parsers.parse_cacti import update_clients_cacti_image_db
@@ -11,8 +13,6 @@ import re
 
 def update_switch_name_ip_file():
     switch_name_ip_dict = parse_cacti.main()
-    if not switch_name_ip_dict:
-        return False
 
     with open('search_engine/switch_name_ip_dict.json', 'r') as switch_name_ip_data_old:
         switch_name_ip_dict_old = json.load(switch_name_ip_data_old)
@@ -23,6 +23,26 @@ def update_switch_name_ip_file():
             json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
 
     return True
+
+
+def update_client_ip_name_dict():
+    with open('search_engine/clients.json', 'r') as clients_data:
+        clients_dict = json.load(clients_data)
+
+    client_ip_name_dict = {}
+    for client_name in clients_dict.keys():
+        client_ip_addresses = clients_dict[client_name][8].keys()
+        if len(client_ip_addresses) == 1:
+            client_ips = list(client_ip_addresses)[0]
+        else:
+            client_ips = ''
+            for client_ip in client_ip_addresses:
+                client_ips += f'{client_ip}+'
+        client_ip_name_dict[client_ips.strip('+')] = client_name
+
+    with open('search_engine/client_ip_name_dict.json', 'w') as client_ip_name_data:
+        json.dump(client_ip_name_dict, client_ip_name_data, indent=2, ensure_ascii=False)
+
 
 def update_clients_ip_gateway_mask_file():
     clients_ip_gateway_mask_dict = parse_zones.get_zone_data()
@@ -205,6 +225,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 browser = netstore_authorisation(client_url)
                 client_data = get_client_data(browser, client_url)
                 add_client_into_global_db(client_name, client_url, client_data)
+                update_client_ip_name_dict()
             else:
                 edit_client_status_parameter_in_db(client_name, 'Активний')
                 check_client_balance_date = set_client_balance_check_date()
@@ -471,7 +492,9 @@ def update_clients_data(parse_level):
         process_turned_on_clients(active_client_name_url_dict, terminated_client_name_url_dict)
 
     elif parse_level == 'total':
-        update_switch_name_ip_file()
+
+        if ping_status(CactiLoginData.cacti_url[7:23]):
+            update_switch_name_ip_file()
 
         clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,

@@ -46,8 +46,7 @@ def work_time():
 
 
 def update_dbs():
-    next_time_local_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
-    next_time_total_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
+    next_time_local_update = next_time_total_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
 
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
         datetime_now = datetime.now()
@@ -106,7 +105,6 @@ def port_reboot():
     client_connection_data = client_data[8]
     client_url = client_data[9]
     client_debt = client_data[10]
-
     toast_alert = 'Порт передёрнут'
 
     return render_template('client.html',
@@ -160,47 +158,50 @@ def write_mac():
 @app.route('/client_turn_on', methods=['POST'])
 def client_turn_on():
     client_name, client_url = request.form['client_turn_on'].split('+')
+
+    with open('search_engine/clients_cash.json', 'r') as clients_cash:
+        clients = json.loads(clients_cash.read())
+        try:
+            client_data = clients[client_name]
+        except KeyError:
+            return redirect(f'/client/{client_name}')
+
+    client_tel = client_data[0]
+    client_email = client_data[1]
+    client_address = client_data[2]
+    client_address_notes = client_data[3].split('\n')
+    client_is_active = client_data[4]
+    client_converter = client_data[5]
+    client_manager = client_data[6]
+    client_notes = client_data[7].split('\n')
+    client_connection_data = client_data[8]
+    client_debt = client_data[10]
+
     turn_on_operation = turn_on(client_url)
     if turn_on_operation:
+        client_is_active = 'Активний'
         edit_client_status_parameter_in_db(client_name, "Активний")
         migrate_client_from_terminated_to_active(client_name)
         remove_client_from_check_client_balance_data(client_name)
         add_client_to_check_client_balance_data(client_name, client_url)
-        with open('search_engine/clients_cash.json', 'r') as clients_cash:
-            clients = json.loads(clients_cash.read())
-            try:
-                client_data = clients[client_name]
-            except KeyError:
-                return redirect(f'/client/{client_name}')
-
-        client_tel = client_data[0]
-        client_email = client_data[1]
-        client_address = client_data[2]
-        client_address_notes = client_data[3].split('\n')
-        client_is_active = 'Активний'
-        client_converter = client_data[5]
-        client_manager = client_data[6]
-        client_notes = client_data[7].split('\n')
-        client_connection_data = client_data[8]
-        client_debt = client_data[10]
-
-        return render_template('client.html',
-                               client_name=client_name,
-                               client_tel=client_tel,
-                               client_email=client_email,
-                               client_address=client_address,
-                               client_address_notes=client_address_notes,
-                               client_is_active=client_is_active,
-                               client_converter=client_converter,
-                               client_manager=client_manager,
-                               client_notes=client_notes,
-                               client_connection_data=client_connection_data,
-                               client_debt=client_debt,
-                               client_url=client_url,
-                               toast_alert=f'Клиент {client_name} включен')
+        toast_alert = 'Клиент включен'
     else:
-        #вывести тоаст сообщение что не удалось включить клиента
-        return redirect('/')
+        toast_alert = 'Operation Error'
+
+    return render_template('client.html',
+                           client_name=client_name,
+                           client_tel=client_tel,
+                           client_email=client_email,
+                           client_address=client_address,
+                           client_address_notes=client_address_notes,
+                           client_is_active=client_is_active,
+                           client_converter=client_converter,
+                           client_manager=client_manager,
+                           client_notes=client_notes,
+                           client_connection_data=client_connection_data,
+                           client_debt=client_debt,
+                           client_url=client_url,
+                           toast_alert=toast_alert)
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -219,13 +220,13 @@ def search():
                 add_client_to_check_client_balance_data(client_name, client_url)
                 return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Клиент {client_name} включен')
             else:
-                return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Ошибка')
+                return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Operation Error')
         else:
             clients = search_engine.get_coincidence_names(search)
             if clients == False:
                 return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
-            elif len(clients) == 1:
-                return redirect(f'/client/{clients[0]}')
+            # elif len(clients) == 1:
+            #     return redirect(f'/client/{clients[0]}')
             else:
                 return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
     else:

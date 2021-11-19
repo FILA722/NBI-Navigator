@@ -6,6 +6,7 @@ NBI-Navigator
 {% endblock %}
 
 {% block body %}
+
 {% if toast_alert != ' ' %}
     <div id="toastNotice" class="toast align-items-center text-white bg-success border-0" style="z-index: 11" role="alert" aria-live="assertive" aria-atomic="true" data-delay=3000>
       <div class="d-flex">
@@ -19,12 +20,26 @@ NBI-Navigator
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
 
+<script type="text/javascript">// <![CDATA[
+        function loading(){
+            $("#loading").show();
+            $("#content").hide();
+        }
+// ]]>
+</script>
+
 <script>
   {
     var myAlert =document.getElementById('toastNotice');//select id of toast
       var bsAlert = new bootstrap.Toast(myAlert);//inizialize it
       bsAlert.show();//show it
   }
+</script>
+
+<script>
+    function search_spinner(client_name) {
+        document.getElementById(client_name).classList.remove("d-none");
+    }
 </script>
 
 <script>
@@ -37,24 +52,28 @@ NBI-Navigator
 <br>
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
       <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-        <h5>NBI-Navigator</h5>
+        <a class="btn btn-outline-secondary" href="/">NBI-Navigator</a>
       </ul>
     </header>
 <br>
-<form method="post">
-  <div class="input-group mb-3">
-    <input type="text" name="client" class="form-control" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
-    <input type="submit" class="btn btn-outline-primary" value="Найти">
-  </div>
+<div>
+    <form method="post">
+      <div class="input-group mb-3">
+            <input type="text" name="client" class="form-control" placeholder="Введите Имя клиента или Ip адрес" aria-label="Имя клиента" aria-describedby="button-addon2">
+            <input type="submit" class="btn btn-outline-primary" value="Найти">
+      </div>
+    </form>
+</div>
 <br>
-  <div class="row">
+
+<div class="row">
     <div class="col-6">
         <div class="list-group">
           {% for client in clients %}
             {% if client == 'Клиент не найден' %}
               <a class="list-group-item list-group-item-action list-group-item-light disabled">{{ client.upper() }}</a>
             {% else %}
-              <a href="/client/{{ client }}" class="list-group-item list-group-item-action list-group-item-light" onclick="search_spinner('{{ client }}')">{{ client.upper() }} <div class="spinner-grow text-secondary spinner-grow-sm d-none" role="status" id="{{ client }}"></div></a>
+              <a href="/client/{{ client }}" class="list-group-item list-group-item-action list-group-item-light" onclick="search_spinner('{{ client }}')">{{ client.upper() }}  <div class="spinner-grow text-secondary spinner-grow-sm d-none" role="status" id="{{ client }}"></div></a>
             {% endif %}
           {% endfor %}
         </div>
@@ -74,7 +93,7 @@ NBI-Navigator
                   </div>
                   <div class="col-3 align-self-end">
                     <form action="/" method="post">
-                      <button type="submit" class="btn btn-success btn-sm" id="client_turn_on_btn{{ sus_client }}" name="client" onclick="show_spinner('client_turn_on_spinner{{ sus_client }}', 'client_turn_on_btn{{ sus_client }}')" value="==={{ sus_client }}">Включить<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="client_turn_on_spinner{{ sus_client }}"></div></button>
+                      <button type="submit" class="btn btn-success form-control btn-sm" name="client" onclick="search_spinner('{{ sus_client }}')" value="==={{ sus_client }}">Включить<div class="spinner-border text-secondary spinner-border-sm d-none" role="status" id="{{ sus_client }}"></div></button>
                     </form>
                   </div>
               </div>
@@ -84,7 +103,6 @@ NBI-Navigator
         </ul>
       </div>
     </div>
-  </div>
-</form>
+</div>
 <br>
-{% endblock%}
+{% endblock %}

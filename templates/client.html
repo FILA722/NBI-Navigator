@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block body %}
+
 {% if toast_alert != ' ' %}
     <div id="toastNotice" class="toast align-items-center text-white bg-success border-0" style="z-index: 11" role="alert" aria-live="assertive" aria-atomic="true" data-delay=3000>
       <div class="d-flex">
@@ -79,10 +80,11 @@ function copy(text) {
       <div class="col-10">
           <form method="post">
               <div class="input-group">
-                <input type="text" name="client" class="form-control" value="{{ request.form['client'] }}" placeholder="Имя клиента" aria-label="Имя клиента" aria-describedby="button-addon2">
+                <input type="text" name="client" class="form-control" value="{{ request.form['client'] }}" placeholder="Введите Имя клиента или Ip адрес" aria-label="Имя клиента" aria-describedby="button-addon2">
                 <input type="submit" class="btn btn-outline-primary" value="Найти">
               </div>
-            </form>
+          </form>
+      </div>
     </header>
 </div>
 <br>
@@ -315,5 +317,4 @@ function copy(text) {
   </div>
 </div>
 <br>
-
 {% endblock %}
