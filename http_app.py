@@ -71,6 +71,7 @@ def update_dbs():
             datetime_now = datetime.now()
             print(f'Start update -=TOTAL=- DB at {datetime_now}')
             update_clients_data('total')
+            turn_off_clients()
             end_time = datetime.now()
             print(f'End of update -=TOTAL=- DB, spended time: {end_time - datetime_now}')
             next_time_total_update = end_time + timedelta(minutes=total_db_timedelta_minutes)

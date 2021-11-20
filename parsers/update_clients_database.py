@@ -25,6 +25,24 @@ def update_switch_name_ip_file():
     return True
 
 
+def update_client_contract_name_dict():
+    with open('search_engine/clients.json', 'r') as clients_data:
+        clients_dict = json.load(clients_data)
+
+    client_contract_name_dict = {}
+    for client_name in clients_dict.keys():
+        client_contracts = clients_dict[client_name][10]
+        if len(client_contracts) == 1:
+            client_contracts_key = client_contracts[0]
+        else:
+            client_contracts_key = ''
+            for client_contract in client_contracts:
+                client_contracts_key += f'{client_contract}+'
+        client_contract_name_dict[client_contracts_key.strip('+')] = client_name
+
+    with open('search_engine/client_contract_name_dict.json', 'w') as client_contract_name_data:
+        json.dump(client_contract_name_dict, client_contract_name_data, sort_keys=True, indent=2, ensure_ascii=False)
+
 def update_client_ip_name_dict():
     with open('search_engine/clients.json', 'r') as clients_data:
         clients_dict = json.load(clients_data)
@@ -121,6 +139,7 @@ def add_client_into_global_db(client_name, client_url, client_data):
     client_manager = client_data[6]
     client_notes = client_data[7]
     client_connection_data = client_data[8]
+    client_contracts = client_data[10]
 
     with open('search_engine/clients.json', 'r') as clients:
         clients_dict = json.load(clients)
@@ -134,7 +153,8 @@ def add_client_into_global_db(client_name, client_url, client_data):
             client_manager,
             client_notes,
             client_connection_data,
-            client_url)
+            client_url,
+            client_contracts)
 
     with open('search_engine/clients.json', 'w') as clients_data:
         json.dump(clients_dict, clients_data, indent=2, sort_keys=True, ensure_ascii=False)
@@ -192,6 +212,26 @@ def get_switch_name(client_switch_ip):
     return 'None'
 
 
+def get_client_contracts(browser, client_netstore_url):
+    client_netstore_contract_page = client_netstore_url.replace('client', 'contract', 1)
+
+    browser.get(client_netstore_contract_page)
+
+    client_contracts_objects = browser.find_elements(*NetstoreClientPageLocators.CLIENT_CONTRACTS)
+    client_contracts = []
+    i = 0
+    while i < len(client_contracts_objects):
+        record = client_contracts_objects[i].get_attribute("value")
+        if record in ('АУ', 'НБ', 'Ау', 'ау', 'аУ', 'Нб', 'нб', 'нБ'):
+            client_contract = f'{record}{client_contracts_objects[i + 1].get_attribute("value")}'
+            client_contracts.append(client_contract.lower())
+            i += 2
+        else:
+            i += 1
+
+    return client_contracts
+
+
 def set_client_balance_check_date():
     #исключаем выходные дни
     date_now = datetime.now()
@@ -226,6 +266,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 client_data = get_client_data(browser, client_url)
                 add_client_into_global_db(client_name, client_url, client_data)
                 update_client_ip_name_dict()
+                update_client_contract_name_dict()
             else:
                 edit_client_status_parameter_in_db(client_name, 'Активний')
                 check_client_balance_date = set_client_balance_check_date()
@@ -406,6 +447,7 @@ def collect_clients_data(url, login_, password, parse_level):
                 client_notes = client_data[7]
                 client_connection_data = client_data[8]
                 client_netstore_url = client[1]
+                client_contracts = client_data[10]
 
                 clients_database[client_name] = (
                     client_tel,
@@ -417,7 +459,8 @@ def collect_clients_data(url, login_, password, parse_level):
                     client_manager,
                     client_notes,
                     client_connection_data,
-                    client_netstore_url
+                    client_netstore_url,
+                    client_contracts
                 )
 
             return clients_database
@@ -455,6 +498,8 @@ def get_client_data(browser, client_netstore_url):
 
     client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes)
 
+    client_contracts = get_client_contracts(browser, client_netstore_url)
+
     client_data = (
             client_tel,
             client_email,
@@ -465,8 +510,8 @@ def get_client_data(browser, client_netstore_url):
             client_manager,
             client_notes,
             client_connection_data,
-            client_netstore_url)
-
+            client_netstore_url,
+            client_contracts)
 
     return client_data
 
@@ -509,3 +554,5 @@ def update_clients_data(parse_level):
         with open('search_engine/clients.json', 'w') as dict_with_clients:
             json.dump(clients_data, dict_with_clients, indent=2, sort_keys=True, ensure_ascii=False)
 
+        update_client_ip_name_dict()
+        update_client_contract_name_dict()

@@ -80,6 +80,8 @@ def get_coincidence_names(client):
                     pass
 
     coincidence_names += find_client_name_by_ip(client)
+    if not coincidence_names:
+        coincidence_names += find_client_name_by_contract(client)
 
     if not coincidence_names:
         return False
@@ -169,5 +171,36 @@ def find_client_name_by_ip(search_ip):
             if search_ip_pattern in ip_from_dict:
                 coincidence_names.append(client_ip_name_dict[client_ips])
 
+    return coincidence_names
+
+
+def get_client_contract_name_dict():
+    with open('search_engine/client_contract_name_dict.json', 'r') as client_contract_name_data:
+        client_contract_name_dict_var = json.load(client_contract_name_data)
+
+    client_contract_name_dict = {}
+    for client_contracts in client_contract_name_dict_var.keys():
+        client_contracts_tuple = tuple(client_contracts.split('+'))
+        client_name = client_contract_name_dict_var[client_contracts]
+        client_contract_name_dict[client_contracts_tuple] = client_name
+
+    return client_contract_name_dict
+
+
+def find_client_name_by_contract(search_contract):
+
+    search_contract = search_contract.strip()
+    if 'fe' in search_contract:
+        search_contract = search_contract.replace('fe', 'ау')
+    elif 'y,' in search_contract:
+        search_contract = search_contract.replace('y,', 'нб')
+
+    search_contract_pattern = re.sub(r'\W', '', search_contract)
+    client_contract_name_dict = get_client_contract_name_dict()
+
+    coincidence_names = []
+    for contracts in client_contract_name_dict.keys():
+        if search_contract_pattern in contracts:
+            coincidence_names.append(client_contract_name_dict[contracts])
     return coincidence_names
 
