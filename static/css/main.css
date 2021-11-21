@@ -68,6 +68,17 @@ body {
     right: 100px;
 }
 
+.email{
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1px;
+}
+
+.email_block{
+    display: flex;
+    align-items: center;
+}
+
 .is_active{
     display: block;
     margin: 0 auto;
