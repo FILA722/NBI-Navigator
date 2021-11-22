@@ -58,6 +58,7 @@ def get_zone_data():
 
     if not ping_status(ZonesLoginData.zones_ip):
         print('!!!ЕНЦЕЛАДУС НЕ ДОСТУПЕН!!!')
+        return False
 
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

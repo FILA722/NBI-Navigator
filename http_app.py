@@ -10,11 +10,14 @@ from parsers.confidential import KEYS
 from parsers.update_clients_database import update_clients_data, edit_client_status_parameter_in_db, migrate_client_from_terminated_to_active, remove_client_from_check_client_balance_data,  add_client_to_check_client_balance_data
 from debugers.check_ping_status import ping_status
 from parsers import confidential
+import logging
 import json
 import re
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = KEYS.flask_key
+
+logging.basicConfig(format='%(asctime)s %(message)s', filename='logs/nbi-navi.log', level=logging.INFO)
 
 
 def get_suspended_clients():
@@ -212,19 +215,26 @@ def search():
 
     if request.method == 'POST':
         search = request.form['client']
+
         if search[:3] == '===':
             client_name = search[3:]
+            logging.info(f'Request for turn on client from search page: {client_name}')
             client_url = edit_client_status_parameter_in_db(client_name, "Активний")
             turn_on_operation = turn_on(client_url)
             if turn_on_operation:
                 migrate_client_from_terminated_to_active(client_name)
                 remove_client_from_check_client_balance_data(client_name)
                 add_client_to_check_client_balance_data(client_name, client_url)
+                logging.info(f'{client_name} turned on successful')
                 return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Клиент {client_name} включен')
             else:
+                logging.info(f'{client_name} turned on successful')
                 return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Operation Error')
         else:
+            logging.info(f'Searching request: {search}')
             clients = search_engine.get_coincidence_names(search)
+            logging.info(f'Finded coincidence names: {clients}')
+
             if clients == False:
                 return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
             # elif len(clients) == 1:
@@ -238,6 +248,7 @@ def search():
 @app.route('/client/<client_name>', methods=['POST', 'GET'])
 def show_client_page(client_name):
     if request.method == 'GET':
+
         start = time.time()
         client_name, client_data = search_engine.get_full_client_data(client_name)
 
@@ -258,7 +269,7 @@ def show_client_page(client_name):
 
         end = time.time()
         print(f'search time = {end - start}')
-
+        logging.info(f'{client_name} data viewed on http page')
         return render_template('client.html',
                                client_name=client_name,
                                client_tel=client_tel,
@@ -277,6 +288,7 @@ def show_client_page(client_name):
         action_request = request.form['client_page']
 
         if action_request[:3] == '===':
+            logging.info(f'{client_name} requested to turn on from client page')
             turn_on_client_data = action_request[3:]
             client_name, client_url = turn_on_client_data.split('+')
 
@@ -299,7 +311,9 @@ def show_client_page(client_name):
             client_debt = client_data[11]
 
             turn_on_operation = turn_on(client_url)
+
             if turn_on_operation:
+                logging.info(f'{client_name} turn on successful')
                 client_is_active = 'Активний'
                 edit_client_status_parameter_in_db(client_name, "Активний")
                 migrate_client_from_terminated_to_active(client_name)
@@ -307,6 +321,7 @@ def show_client_page(client_name):
                 add_client_to_check_client_balance_data(client_name, client_url)
                 toast_alert = 'Клиент включен'
             else:
+                logging.info(f'{client_name} turn on ERROR')
                 toast_alert = 'Operation Error'
 
             return render_template('client.html',
@@ -325,10 +340,11 @@ def show_client_page(client_name):
                                    toast_alert=toast_alert)
 
         elif action_request[:3] == '***':
+            logging.info(f'{client_name} requested to port reboot')
             port_reboot_client_data = action_request[3:]
             switch_ip, switch_port, switch_model, client_name = port_reboot_client_data.split('+')
             reboot_client_port(switch_ip, switch_port[1:], switch_model)
-
+            logging.info(f'{client_name} port reboot successful')
             client_dict = get_client_data_from_cash()
 
             client_name = tuple(client_dict.keys())[0]
@@ -363,6 +379,7 @@ def show_client_page(client_name):
                                    toast_alert=toast_alert)
 
         elif action_request[:3] == '+++':
+            logging.info(f'{client_name} requested to write mac')
             client_write_mac_data = action_request[3:]
             write_mac_data_list = client_write_mac_data.split('+')
 
@@ -389,10 +406,11 @@ def show_client_page(client_name):
                                     client_ip,
                                     client_vlan,
                                     client_name)
-
+            logging.info(f'{client_name} write mac successful')
             return redirect(f'/client/{client_name}')
 
         elif action_request[:3] == '@@@':
+            logging.info(f'{client_name} requested to send bill via email')
             client_url = action_request[3:]
             operation = send_bill_via_email(client_url)
             client_dict = get_client_data_from_cash()
@@ -412,8 +430,10 @@ def show_client_page(client_name):
             client_url = client_data[9]
             client_debt = client_data[11]
             if operation:
+                logging.info(f'{client_name} bill was sent via email')
                 toast_alert = 'Счёт выслан'
             else:
+                logging.info(f'{client_name} error while sending email')
                 toast_alert = 'Operation Error'
 
             return render_template('client.html',
@@ -433,6 +453,7 @@ def show_client_page(client_name):
         else:
             suspended_clients = get_suspended_clients()
             clients = search_engine.get_coincidence_names(request.form['client'])
+            logging.info(f'Search request from client page {clients}')
             if clients == False:
                 return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
             # elif len(clients) == 1:
