@@ -1,12 +1,15 @@
 from parsers.confidential import SwitchLoginData
 import telnetlib
 import re
+from datetime import datetime, timedelta
 import time
 
 
 def to_bytes(line):
     return f"{line}\n".encode("utf-8")
 
+def time_marker_for_huawei_logs():
+    pass
 
 def current_mac_address_color_marker(saved_mac_addresses, current_mac_address):
     current_mac_address_colored = []
@@ -118,15 +121,42 @@ def parse_huawei(switch_ip_address, client_port):
             else:
                 port_condition = 'up'
 
+            telnet.write(to_bytes('display log'))
+            logs = str(telnet.read_until(b"More"))
+            telnet.write(to_bytes('c'))
+
+            logs = logs.split(r'\r\n')
+            port_time = False
+            for string in logs:
+                find = re.findall(f'{interface_name} has turned into', string)
+                if find:
+                    event_time_str = string[:17]
+                    if event_time_str[4] == ' ':
+                        event_time_str = f'{event_time_str[:4]}0{event_time_str[5:]}'
+                    event_time_obj = datetime.strptime(event_time_str, '%b %d %Y %H:%M')
+                    event_time = datetime.now() - event_time_obj
+                    port_time = str(event_time)[:-7]
+                    break
+
+            if not port_time:
+                last_event = logs[-2]
+                event_time_str = last_event[:17]
+                if event_time_str[4] == ' ':
+                    event_time_str = f'{event_time_str[:4]}0{event_time_str[5:]}'
+                event_time_obj = datetime.strptime(event_time_str, '%b %d %Y %H:%M')
+                event_time = datetime.now() - event_time_obj
+                if port_condition == 'up':
+                    port_time = f'>{str(event_time)[:-7]}'
+                else:
+                    port_time = f'>{str(event_time)[:-7]}'
+
             telnet.write(to_bytes('q'))
             telnet.read_until(b">")
             telnet.write(to_bytes('q'))
 
             current_mac_addresses, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_address, current_mac_address)
 
-            telnet.close()
-
-        return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan
+        return port_condition, saved_mac_address, current_mac_addresses, port_errors, write_mac_address_button_status, saved_vlan, port_time
 
     except (ConnectionResetError, EOFError):
         return False
@@ -149,6 +179,12 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
 
             show_interfaces_config = re.findall(r'\\t\\tLink\\t\\t\\t:\w+', show_interfaces_answer)
             port_condition = 'up' if show_interfaces_config[0].split(':')[1].strip() in ('1000M', '100M') else 'down'
+
+            try:
+                port_uptime_data = re.findall(r'\\t\\tUp Time\\t\\t\\t:\w+:\w+:\w+', show_interfaces_answer)
+                port_uptime = re.findall(r'\d+:\d+:\d+', port_uptime_data[0])[0]
+            except IndexError:
+                port_uptime = None
 
         with telnetlib.Telnet(switch_ip_address) as telnet:
 
@@ -215,7 +251,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
                 port_errors = '0'
             current_mac_addresses_colored, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_addresses, current_mac_addresses)
 
-        return port_condition, saved_mac_addresses, current_mac_addresses_colored, port_errors, write_mac_address_button_status, saved_vlan
+        return port_condition, saved_mac_addresses, current_mac_addresses_colored, port_errors, write_mac_address_button_status, saved_vlan, port_uptime
     except (ConnectionResetError, EOFError):
         return False
 

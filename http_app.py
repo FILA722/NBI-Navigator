@@ -237,8 +237,6 @@ def search():
 
             if clients == False:
                 return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
-            # elif len(clients) == 1:
-            #     return redirect(f'/client/{clients[0]}')
             else:
                 return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
     else:
@@ -456,8 +454,6 @@ def show_client_page(client_name):
             logging.info(f'Search request from client page {clients}')
             if clients == False:
                 return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
-            # elif len(clients) == 1:
-            #     return redirect(f'/client/{clients[0]}')
             else:
                 return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
 
