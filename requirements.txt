@@ -16,6 +16,7 @@ MarkupSafe==2.0.1
 netmiko==3.4.0
 ntc-templates==2.2.0
 paramiko==2.7.2
+Pillow==8.4.0
 ply==3.11
 pyasn1==0.4.8
 pycparser==2.20

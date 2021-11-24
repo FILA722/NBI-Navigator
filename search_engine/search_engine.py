@@ -90,12 +90,12 @@ def get_coincidence_names(client):
 
 
 def create_empty_client_connection_card():
-    client_data = {"IP не указан": ["None", "None", "None", "None", "None", "None", "None", "None", "None", ["None"], [["None", 'red']], "None", False, "None", False, False]}
+    client_data = {"IP не указан": ["None", "None", "None", "None", "None", "None", "None", "None", "None", ["None"], [["None", 'red']], "None", False, "None", "None", False, False]}
     return client_data
 
 
 def return_none_switch_data():
-    return 'None', ['None'], [('None', 'red')], 'None', False, 'None'
+    return 'None', ['None'], [('None', 'red')], 'None', False, 'None', 'None'
 
 
 def get_full_client_data(client_name):
@@ -144,7 +144,7 @@ def get_full_client_data(client_name):
 
             client_connection_data[client_ip_address] += data_from_switch
 
-        client_connection_data[client_ip_address] += (ping_status(client_ip_address), True)
+        client_connection_data[client_ip_address] += (ping_status(client_ip_address), ping_status(switch_ip_address))
     return client_name, client_data
 
 

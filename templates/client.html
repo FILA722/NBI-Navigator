@@ -8,16 +8,12 @@
 {% block body %}
 
 {% if toast_alert != ' ' %}
-{{ toast_alert }}
-
-    <div id="toastNotice">
-        <div class="toast align-items-center text-white bg-success border-0" style="z-index: 11" role="alert" aria-live="assertive" aria-atomic="true" data-delay=3000>
-          <div class="d-flex">
-            <div class="toast-body">
-              {{ toast_alert }}
-            </div>
-          </div>
+    <div id="toastNotice" class="toast align-items-center text-white bg-success border-0" style="z-index: 11" role="alert" aria-live="assertive" aria-atomic="true" data-delay=3000>
+      <div class="d-flex">
+        <div class="toast-body">
+          {{ toast_alert }}
         </div>
+      </div>
     </div>
 {% endif %}
 

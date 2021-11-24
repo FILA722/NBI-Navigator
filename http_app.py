@@ -55,7 +55,7 @@ def update_dbs():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
         datetime_now = datetime.now()
 
-        if ((0 <= datetime_now.weekday() <= 5) and (9 <= datetime_now.hour <= 17)):
+        if ((0 <= datetime_now.weekday() <= 5) and (8 <= datetime_now.hour <= 17)):
             sleeptime_seconds = 10
             local_db_timedelta_minutes = 3
             total_db_timedelta_minutes = 30
@@ -86,127 +86,6 @@ def update_dbs():
 @app.route('/test')
 def test():
     return render_template('test.html')
-
-
-# @app.route('/port_reboot', methods=['POST'])
-# def port_reboot():
-#     port_reboot_data = request.form['port_reboot']
-#     switch_ip, switch_port, switch_model, client_name = port_reboot_data.split('+')
-#     reboot_client_port(switch_ip, switch_port[1:], switch_model)
-#
-#     client_dict = get_client_data_from_cash()
-#
-#     client_name = tuple(client_dict.keys())[0]
-#     client_data = client_dict[client_name]
-#
-#     client_tel = client_data[0]
-#     client_email = client_data[1]
-#     client_address = client_data[2]
-#     client_address_notes = client_data[3].split('\n')
-#     client_is_active = client_data[4]
-#     client_converter = client_data[5]
-#     client_manager = client_data[6]
-#     client_notes = client_data[7].split('\n')
-#     client_connection_data = client_data[8]
-#     client_url = client_data[9]
-#     client_debt = client_data[10]
-#     toast_alert = 'Порт передёрнут'
-#
-#     return render_template('client.html',
-#                            client_name=client_name,
-#                            client_tel=client_tel,
-#                            client_email=client_email,
-#                            client_address=client_address,
-#                            client_address_notes=client_address_notes,
-#                            client_is_active=client_is_active,
-#                            client_converter=client_converter,
-#                            client_manager=client_manager,
-#                            client_notes=client_notes,
-#                            client_connection_data=client_connection_data,
-#                            client_url=client_url,
-#                            client_debt=client_debt,
-#                            toast_alert=toast_alert)
-
-
-# @app.route('/write_mac', methods=['POST'])
-# def write_mac():
-#     write_mac_data = request.form['write_mac_address']
-#     write_mac_data_list = write_mac_data.split('+')
-#
-#     if write_mac_data_list[4] == 'zyxel':
-#         mac_address_pattern = r'\w\w:\w\w:\w\w:\w\w:\w\w:\w\w'
-#     else:
-#         mac_address_pattern = r'\w{4}-\w{4}-\w{4}'
-#
-#     saved_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[0])
-#     current_mac_addresses = re.findall(mac_address_pattern, write_mac_data_list[1])
-#
-#     switch_ip = write_mac_data_list[2]
-#     client_port = write_mac_data_list[3][1:]
-#     switch_model = write_mac_data_list[4]
-#     client_ip = write_mac_data_list[5]
-#     client_name = write_mac_data_list[6]
-#     client_vlan = write_mac_data_list[7]
-#
-#     ans = write_mac_address(saved_mac_addresses,
-#                             current_mac_addresses,
-#                             switch_ip,
-#                             client_port,
-#                             switch_model,
-#                             client_ip,
-#                             client_vlan,
-#                             client_name)
-#
-#     return redirect(f'/client/{client_name}')
-
-
-# @app.route('/client_turn_on', methods=['POST'])
-# def client_turn_on():
-#     client_name, client_url = request.form['client_turn_on'].split('+')
-#
-#     with open('search_engine/clients_cash.json', 'r') as clients_cash:
-#         clients = json.loads(clients_cash.read())
-#         try:
-#             client_data = clients[client_name]
-#         except KeyError:
-#             return redirect(f'/client/{client_name}')
-#
-#     client_tel = client_data[0]
-#     client_email = client_data[1]
-#     client_address = client_data[2]
-#     client_address_notes = client_data[3].split('\n')
-#     client_is_active = client_data[4]
-#     client_converter = client_data[5]
-#     client_manager = client_data[6]
-#     client_notes = client_data[7].split('\n')
-#     client_connection_data = client_data[8]
-#     client_debt = client_data[10]
-#
-#     turn_on_operation = turn_on(client_url)
-#     if turn_on_operation:
-#         client_is_active = 'Активний'
-#         edit_client_status_parameter_in_db(client_name, "Активний")
-#         migrate_client_from_terminated_to_active(client_name)
-#         remove_client_from_check_client_balance_data(client_name)
-#         add_client_to_check_client_balance_data(client_name, client_url)
-#         toast_alert = 'Клиент включен'
-#     else:
-#         toast_alert = 'Operation Error'
-#
-#     return render_template('client.html',
-#                            client_name=client_name,
-#                            client_tel=client_tel,
-#                            client_email=client_email,
-#                            client_address=client_address,
-#                            client_address_notes=client_address_notes,
-#                            client_is_active=client_is_active,
-#                            client_converter=client_converter,
-#                            client_manager=client_manager,
-#                            client_notes=client_notes,
-#                            client_connection_data=client_connection_data,
-#                            client_debt=client_debt,
-#                            client_url=client_url,
-#                            toast_alert=toast_alert)
 
 
 @app.route('/', methods=['POST', 'GET'])
