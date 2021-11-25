@@ -2,6 +2,7 @@ from start_browser import driver
 from debugers.check_ping_status import ping_status
 from parsers.confidential import CactiLoginData
 from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
+from debugers.find_switch_model import find_sw_model
 from parsers import parse_cacti, parse_zones, confidential
 from parsers.parse_cacti import update_clients_cacti_image_db
 from selenium.common.exceptions import NoSuchElementException
@@ -202,6 +203,7 @@ def get_client_connection_preferences(ip_addresses, ip_mask_dictionary):
         for ip_zone in ip_mask_dictionary.keys():
             if ip_addr in ip_zone:
                 client_connection_preferences[ip_addr] = ip_mask_dictionary[ip_zone]
+
     return client_connection_preferences
 
 
@@ -209,7 +211,9 @@ def get_switch_name(client_switch_ip):
     for switch_model_ips in confidential.SwitchModels.switches:
         if client_switch_ip in switch_model_ips:
             return switch_model_ips[0]
-    return 'None'
+
+    sw_model = find_sw_model(client_switch_ip)
+    return sw_model
 
 
 def get_client_contracts(browser, client_netstore_url):
@@ -241,6 +245,7 @@ def set_client_balance_check_date():
         check_date = date_now + timedelta(days=5)
 
     client_balance_check_date = str(datetime.fromisoformat(f'{check_date.year}-{check_date.month}-{check_date.day} 12:00:00'))
+
     return client_balance_check_date
 
 

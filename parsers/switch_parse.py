@@ -1,7 +1,7 @@
 from parsers.confidential import SwitchLoginData
 import telnetlib
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 
 
