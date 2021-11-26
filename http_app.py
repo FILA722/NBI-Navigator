@@ -83,11 +83,6 @@ def update_dbs():
         time.sleep(sleeptime_seconds)
 
 
-@app.route('/test')
-def test():
-    return render_template('test.html')
-
-
 @app.route('/', methods=['POST', 'GET'])
 def search():
     suspended_clients = get_suspended_clients()
@@ -337,34 +332,34 @@ def show_client_page(client_name):
                 return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
 
 
-# def update_main_db():
-#     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(
-#             confidential.NetstoreLoginData.netstore2_url[8:28]):
-#
-#         print(f'Start update GLOBAL DB at {datetime.now()}')
-#         start = time.time()
-#         update_clients_data('total')
-#         print(f'End of update GLOBAL DB, spended time {time.time() - start}')
-#         turn_off_clients()
-#
-#         if work_time():
-#             time.sleep(1800)
-#         else:
-#             time.sleep(10800)
-#
-#
-# def update_name_url_db():
-#     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(
-#             confidential.NetstoreLoginData.netstore2_url[8:28]):
-#         start = time.time()
-#         print(f'Start update LOCAL DB at {datetime.now()}')
-#         update_clients_data('local')
-#         print(f'End of update LOCAL DB, spended time: {time.time() - start}')
-#
-#         if work_time():
-#             time.sleep(180)
-#         else:
-#             time.sleep(10800)
+def update_main_db():
+    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(
+            confidential.NetstoreLoginData.netstore2_url[8:28]):
+
+        print(f'Start update GLOBAL DB at {datetime.now()}')
+        start = time.time()
+        update_clients_data('total')
+        print(f'End of update GLOBAL DB, spended time {time.time() - start}')
+        turn_off_clients()
+
+        if work_time():
+            time.sleep(1800)
+        else:
+            time.sleep(10800)
+
+
+def update_name_url_db():
+    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(
+            confidential.NetstoreLoginData.netstore2_url[8:28]):
+        start = time.time()
+        print(f'Start update LOCAL DB at {datetime.now()}')
+        update_clients_data('local')
+        print(f'End of update LOCAL DB, spended time: {time.time() - start}')
+
+        if work_time():
+            time.sleep(180)
+        else:
+            time.sleep(10800)
 
 
 if __name__ == '__main__':

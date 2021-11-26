@@ -2,6 +2,8 @@ from parsers.confidential import SwitchModels
 import telnetlib
 
 def find_sw_model(switch_ip_address):
+    if switch_ip_address == 'None':
+        return 'None'
     try:
         with telnetlib.Telnet(switch_ip_address) as telnet:
             greeting = telnet.read_until(b":")
@@ -16,7 +18,6 @@ def find_sw_model(switch_ip_address):
                 new_huawei = (switch_ip_address,)
                 SwitchModels.huawei += new_huawei
                 return 'huawei'
-
             else:
                 return 'None'
 
