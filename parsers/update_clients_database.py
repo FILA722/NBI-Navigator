@@ -389,8 +389,9 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
 
 
 def collect_clients_data(url, login_, password, parse_level):
+    browser = driver(url)
     try:
-        browser = driver(url)
+
 
         login = browser.find_element(*NetstoreLocators.LOGIN)
         login.send_keys(login_)
