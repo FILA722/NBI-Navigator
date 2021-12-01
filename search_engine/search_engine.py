@@ -164,12 +164,21 @@ def get_client_ip_name_dict():
 def find_client_name_by_ip(search_ip):
     search_ip_pattern = re.sub(r'\W', '.', search_ip).strip('.')
     search_ip_pattern = re.sub(r'\.+', '.', search_ip_pattern)
+    nums = len(search_ip_pattern)
     client_ip_name_dict = get_client_ip_name_dict()
     coincidence_names = []
+
     for client_ips in client_ip_name_dict:
         for ip_from_dict in client_ips:
             if search_ip_pattern in ip_from_dict:
-                coincidence_names.append(client_ip_name_dict[client_ips])
+                if ip_from_dict[-nums:] == search_ip_pattern:
+                    coincidence_names.append(client_ip_name_dict[client_ips])
+
+    if not coincidence_names:
+        for client_ips in client_ip_name_dict:
+            for ip_from_dict in client_ips:
+                if search_ip_pattern in ip_from_dict:
+                    coincidence_names.append(client_ip_name_dict[client_ips])
 
     return coincidence_names
 
@@ -201,6 +210,7 @@ def find_client_name_by_contract(search_contract):
     coincidence_names = []
     for contracts in client_contract_name_dict.keys():
         if search_contract_pattern in contracts:
+            print(contracts)
             coincidence_names.append(client_contract_name_dict[contracts])
     return coincidence_names
 
