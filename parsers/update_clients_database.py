@@ -244,7 +244,12 @@ def set_client_balance_check_date():
     if check_date.weekday() in (5, 6, 0):
         check_date = date_now + timedelta(days=5)
 
-    client_balance_check_date = str(datetime.fromisoformat(f'{check_date.year}-{check_date.month}-{check_date.day} 12:00:00'))
+    if int(check_date.day) < 10:
+        check_day = f'0{check_date.day}'
+    else:
+        check_day = check_date.day
+
+    client_balance_check_date = str(datetime.fromisoformat(f'{check_date.year}-{check_date.month}-{check_day} 12:00:00'))
 
     return client_balance_check_date
 
