@@ -26,6 +26,26 @@ def update_switch_name_ip_file():
     return True
 
 
+def add_client_into_contract_name_dict(client_name, client_url):
+    with open('search_engine/client_contract_name_dict.json', 'r') as client_contract_name_data:
+        client_contract_name_dict = json.load(client_contract_name_data)
+
+    browser = netstore_authorisation(client_url)
+    client_contracts = get_client_contracts(browser, client_url)
+
+    if len(client_contracts) == 1:
+        client_contracts_for_dict = client_contracts[0]
+    else:
+        client_contracts_for_dict = ''
+        for client_contract in client_contracts:
+            client_contracts_for_dict += f'{client_contract}+'
+
+    client_contract_name_dict[client_contracts_for_dict.strip('+')] = client_name
+
+    with open('search_engine/client_contract_name_dict.json', 'w') as client_contract_name_data:
+        json.dump(client_contract_name_dict, client_contract_name_data, sort_keys=True, indent=2, ensure_ascii=False)
+
+
 def update_client_contract_name_dict():
     with open('search_engine/clients.json', 'r') as clients_data:
         clients_dict = json.load(clients_data)
@@ -43,6 +63,24 @@ def update_client_contract_name_dict():
 
     with open('search_engine/client_contract_name_dict.json', 'w') as client_contract_name_data:
         json.dump(client_contract_name_dict, client_contract_name_data, sort_keys=True, indent=2, ensure_ascii=False)
+
+
+def add_client_into_ip_name_dict(client_name, client_ips):
+    with open('search_engine/client_ip_name_dict.json', 'r') as client_ip_name_data:
+        client_ip_name_dict = json.load(client_ip_name_data)
+
+    if len(client_ips) == 1:
+        client_ips_for_dict = client_ips[0]
+    else:
+        client_ips_for_dict = ''
+        for client_ip in client_ips:
+            client_ips_for_dict += f'{client_ip}+'
+
+    client_ip_name_dict[client_ips.strip('+')] = client_name
+
+    with open('search_engine/client_ip_name_dict.json', 'w') as client_ip_name_data:
+        json.dump(client_ip_name_dict, client_ip_name_data, indent=2, ensure_ascii=False)
+
 
 def update_client_ip_name_dict():
     with open('search_engine/clients.json', 'r') as clients_data:
@@ -75,6 +113,20 @@ def update_clients_ip_gateway_mask_file():
 
         with open('search_engine/clients_ip_gateway_mask_dict.json', 'w') as clients_ip_gateway_mask_data:
             json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
+
+def update_closed_clinents_name_url_dict(url, closed_clients_netstore_url):
+    closed_clients_name_url_dict = {}
+    for closed_client_object in closed_clients_netstore_url:
+        closed_clients_name_url_dict[closed_client_object[0]] = closed_client_object[1]
+
+    if 'netstore2' in url:
+        with open('search_engine/closed_clients_name_url_data.json', 'r') as closed_clients_name_url_data_from_netst1:
+            closed_clients_name_url_dict_from_netst1 = json.load(closed_clients_name_url_data_from_netst1)
+
+        closed_clients_name_url_dict.update(closed_clients_name_url_dict_from_netst1)
+
+    with open('search_engine/closed_clients_name_url_data.json', 'w') as closed_clients_name_url_data:
+        json.dump(closed_clients_name_url_dict, closed_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def edit_client_status_parameter_in_db(client_name, client_status):
@@ -275,8 +327,8 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 browser = netstore_authorisation(client_url)
                 client_data = get_client_data(browser, client_url)
                 add_client_into_global_db(client_name, client_url, client_data)
-                update_client_ip_name_dict()
-                update_client_contract_name_dict()
+                add_client_into_ip_name_dict(client_name, tuple(client_data[8].keys()))
+                add_client_into_contract_name_dict(client_name, client_url)
             else:
                 edit_client_status_parameter_in_db(client_name, 'Активний')
                 check_client_balance_date = set_client_balance_check_date()
@@ -396,8 +448,6 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
 def collect_clients_data(url, login_, password, parse_level):
     browser = driver(url)
     try:
-
-
         login = browser.find_element(*NetstoreLocators.LOGIN)
         login.send_keys(login_)
 
@@ -412,6 +462,7 @@ def collect_clients_data(url, login_, password, parse_level):
 
         active_clients = browser.find_elements(*NetstoreLocators.GET_ALL_ACTIVE_CLIENTS_LIST)
         terminated_clients = browser.find_elements(*NetstoreLocators.GET_ALL_TERMINATED_CLIENTS_LIST)
+
         client_objects = active_clients + terminated_clients
 
         if parse_level == 'local':
@@ -432,10 +483,8 @@ def collect_clients_data(url, login_, password, parse_level):
             return active_client_name_url_dict, terminated_client_name_url_dict
 
         elif parse_level == 'total':
-
             clients_netstore_name_url_list = []
             for client in client_objects:
-                #Если объеденить этот цикл со следующим, то не работает client.find_element_by_tag_name('a')
                 client_object = client.find_element_by_tag_name('a')
 
                 client_name = strip_symbols_from_client_name(client_object.text)
@@ -443,38 +492,44 @@ def collect_clients_data(url, login_, password, parse_level):
 
                 clients_netstore_name_url_list.append((client_name, client_netstore_url))
 
-            clients_database = {}
-            for client in clients_netstore_name_url_list:
-                client_data = get_client_data(browser, client[1])
 
-                client_name = client[0]
-                client_tel = client_data[0]
-                client_email = client_data[1]
-                client_physical_address = client_data[2]
-                client_physical_address_notes = client_data[3]
+        clients_database = {}
+        for client in clients_netstore_name_url_list:
+            client_data = get_client_data(browser, client[1])
+
+            client_name = client[0]
+            client_tel = client_data[0]
+            client_email = client_data[1]
+            client_physical_address = client_data[2]
+            client_physical_address_notes = client_data[3]
+
+            if parse_level == 'closed':
+                client_is_active = 'Выбывший'
+            else:
                 client_is_active = client_data[4]
-                client_is_converter = client_data[5]
-                client_manager = client_data[6]
-                client_notes = client_data[7]
-                client_connection_data = client_data[8]
-                client_netstore_url = client[1]
-                client_contracts = client_data[10]
 
-                clients_database[client_name] = (
-                    client_tel,
-                    client_email,
-                    client_physical_address,
-                    client_physical_address_notes,
-                    client_is_active,
-                    client_is_converter,
-                    client_manager,
-                    client_notes,
-                    client_connection_data,
-                    client_netstore_url,
-                    client_contracts
-                )
+            client_is_converter = client_data[5]
+            client_manager = client_data[6]
+            client_notes = client_data[7]
+            client_connection_data = client_data[8]
+            client_netstore_url = client[1]
+            client_contracts = client_data[10]
 
-            return clients_database
+            clients_database[client_name] = (
+                client_tel,
+                client_email,
+                client_physical_address,
+                client_physical_address_notes,
+                client_is_active,
+                client_is_converter,
+                client_manager,
+                client_notes,
+                client_connection_data,
+                client_netstore_url,
+                client_contracts
+            )
+
+        return clients_database
 
     finally:
         browser.quit()
@@ -567,3 +622,22 @@ def update_clients_data(parse_level):
 
         update_client_ip_name_dict()
         update_client_contract_name_dict()
+
+    elif parse_level == 'closed':
+        closed_clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
+                                            confidential.NetstoreLoginData.netstore1_login,
+                                            confidential.NetstoreLoginData.netstore_passwd,
+                                            parse_level)
+
+        closed_clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
+                                                 confidential.NetstoreLoginData.netstore2_login,
+                                                 confidential.NetstoreLoginData.netstore_passwd,
+                                                 parse_level))
+
+        with open('search_engine/clients.json', 'r') as dict_with_clients_data:
+            dict_with_clients = json.load(dict_with_clients_data)
+
+        dict_with_clients.update(closed_clients_data)
+
+        with open('search_engine/clients.json', 'w') as clients_data:
+            json.dump(dict_with_clients, clients_data, indent=2, sort_keys=True, ensure_ascii=False)

@@ -50,11 +50,11 @@ def work_time():
 
 
 def update_dbs():
-    next_time_local_update = next_time_total_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
+    next_time_local_update = next_time_total_update = next_time_closed_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
+
     while True:
         while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
             datetime_now = datetime.now()
-
             if ((0 <= datetime_now.weekday() <= 5) and (8 <= datetime_now.hour <= 17)):
                 sleeptime_seconds = 10
                 local_db_timedelta_minutes = 3
@@ -79,6 +79,20 @@ def update_dbs():
                 end_time = datetime.now()
                 print(f'End of update -=TOTAL=- DB, spended time: {end_time - datetime_now}')
                 next_time_total_update = end_time + timedelta(minutes=total_db_timedelta_minutes)
+
+            if datetime_now >= next_time_closed_update:
+                datetime_now = datetime.now()
+                print(f'Start update -=CLOSED=- DB at {datetime_now}')
+                update_clients_data('closed')
+                end_time = datetime.now()
+                print(f'End of update -=CLOSED=- DB, spended time: {end_time - datetime_now}')
+                datetime_tomorrow = datetime.now() + timedelta(days=1)
+
+                if int(datetime_tomorrow.day) < 10:
+                    check_day = f'0{datetime_tomorrow.day}'
+                else:
+                    check_day = datetime_tomorrow.day
+                next_time_closed_update = str(datetime.fromisoformat(f'{datetime_tomorrow.year}-{datetime_tomorrow.month}-{check_day} 03:00:00'))
 
             time.sleep(sleeptime_seconds)
 
@@ -124,9 +138,7 @@ def search():
 def show_client_page(client_name):
     if request.method == 'GET':
 
-        start = time.time()
         client_name, client_data = search_engine.get_full_client_data(client_name)
-
         client_tel = client_data[0]
         client_email = client_data[1]
         client_address = client_data[2]
@@ -142,8 +154,6 @@ def show_client_page(client_name):
         client_data += [client_debt]
         add_client_data_to_cash(client_name, client_data)
 
-        end = time.time()
-        print(f'search time = {end - start}')
         logging.info(f'{client_name} data viewed on http page')
         return render_template('client.html',
                                client_name=client_name,
@@ -352,8 +362,7 @@ def update_main_db():
 
 
 def update_name_url_db():
-    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(
-            confidential.NetstoreLoginData.netstore2_url[8:28]):
+    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
         start = time.time()
         print(f'Start update LOCAL DB at {datetime.now()}')
         update_clients_data('local')
@@ -365,7 +374,22 @@ def update_name_url_db():
             time.sleep(10800)
 
 
+def update_closed_name_url_db():
+    while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
+        start = time.time()
+        print(f'Start update CLOSED DB at {datetime.now()}')
+        update_clients_data('closed')
+        print(f'End of update CLOSED DB, spended time: {time.time() - start}')
+
+        if work_time():
+            time.sleep(180)
+        else:
+            time.sleep(10800)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    # app.run('10.20.31.101')
     # update_name_url_db()
     # update_main_db()
+    # update_closed_name_url_db()
+    update_dbs()

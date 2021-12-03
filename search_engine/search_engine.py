@@ -10,14 +10,18 @@ import time
 
 def concatenate_local_db():
     with open('search_engine/active_clients_name_url_data.json') as active_clients:
-        active_clients_dict = json.loads(active_clients.read())
+        active_clients_list = list(json.loads(active_clients.read()).keys())
 
     with open('search_engine/terminated_clients_name_url_data.json') as terminated_clients:
-        terminated_clients_dict = json.loads(terminated_clients.read())
+        terminated_clients_list = list(json.loads(terminated_clients.read()).keys())
 
-    active_clients_dict.update(terminated_clients_dict)
+    with open('search_engine/closed_clients_name_url_data.json') as closed_clients:
+        closed_clients_list = list(json.loads(closed_clients.read()).keys())
 
-    return active_clients_dict.keys()
+    active_clients_list.extend(terminated_clients_list)
+    active_clients_list.extend(closed_clients_list)
+
+    return active_clients_list
 
 
 def get_cacti_links(switch_client_cacti_id, switch_client_uplink_id):
@@ -113,7 +117,6 @@ def get_full_client_data(client_name):
         if client_ip_address == 'IP не указан' or client_connection_data[client_ip_address][0] == 'Пожалуйста пропишите имя свича и порт клиента в Нетсторе' :
             client_data[8] = create_empty_client_connection_card()
             return client_name, client_data
-
         else:
             cacti_client_id = client_connection_data[client_ip_address][6]
             cacti_uplink_id = client_connection_data[client_ip_address][7]
@@ -138,7 +141,6 @@ def get_full_client_data(client_name):
                     data_from_switch = switch_parse.parse_zyxel(switch_ip_address, client_ip_address, switch_port)
                 else:
                     data_from_switch = return_none_switch_data()
-
                 if not data_from_switch:
                     data_from_switch = return_none_switch_data()
 
@@ -210,7 +212,7 @@ def find_client_name_by_contract(search_contract):
     coincidence_names = []
     for contracts in client_contract_name_dict.keys():
         if search_contract_pattern in contracts:
-            print(contracts)
             coincidence_names.append(client_contract_name_dict[contracts])
+
     return coincidence_names
 

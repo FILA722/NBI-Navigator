@@ -127,9 +127,17 @@ function copy(text) {
                                 </div>
                             {% else %}
                                 <div class="alert align-self-center alert-success is_active" role="alert">
-                                    <font color="green">{{ client_is_active }}</font>
+                                    <font color="green">Активный</font>
                                 </div>
                             {% endif %}
+                        </div>
+                    </td>
+                {% elif client_is_active == "Выбывший" %}
+                    <td class="center">
+                        <div class="row">
+                            <div class="alert align-self-center alert-dark is_active" role="alert">
+                                Выбывший
+                            </div>
                         </div>
                     </td>
                 {% else %}
