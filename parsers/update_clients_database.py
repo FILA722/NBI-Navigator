@@ -492,6 +492,17 @@ def collect_clients_data(url, login_, password, parse_level):
 
                 clients_netstore_name_url_list.append((client_name, client_netstore_url))
 
+        elif parse_level == 'closed':
+            clients_netstore_name_url_list = []
+            closed_clients = browser.find_elements(*NetstoreLocators.GET_ALL_CLOSED_CLIENTS_LIST)
+            for closed_client in closed_clients:
+                closed_client_object = closed_client.find_element_by_tag_name('a')
+
+                closed_client_name = strip_symbols_from_client_name(closed_client_object.text)
+                closed_client_netstore_url = closed_client_object.get_attribute("href").replace('_properties', '_client')
+                clients_netstore_name_url_list.append((closed_client_name, closed_client_netstore_url))
+
+            update_closed_clinents_name_url_dict(url, clients_netstore_name_url_list)
 
         clients_database = {}
         for client in clients_netstore_name_url_list:
