@@ -86,13 +86,13 @@ def update_dbs():
                 update_clients_data('closed')
                 end_time = datetime.now()
                 print(f'End of update -=CLOSED=- DB, spended time: {end_time - datetime_now}')
-                datetime_tomorrow = datetime.now() + timedelta(days=1)
+                datetime_tomorrow = end_time + timedelta(days=1)
 
                 if int(datetime_tomorrow.day) < 10:
                     check_day = f'0{datetime_tomorrow.day}'
                 else:
                     check_day = datetime_tomorrow.day
-                next_time_closed_update = str(datetime.fromisoformat(f'{datetime_tomorrow.year}-{datetime_tomorrow.month}-{check_day} 03:00:00'))
+                next_time_closed_update = datetime.fromisoformat(f'{datetime_tomorrow.year}-{datetime_tomorrow.month}-{check_day} 03:00:00')
 
             time.sleep(sleeptime_seconds)
 
@@ -283,7 +283,7 @@ def show_client_page(client_name):
             client_name = write_mac_data_list[6]
             client_vlan = write_mac_data_list[7]
 
-            ans = write_mac_address(saved_mac_addresses,
+            write_mac_address(saved_mac_addresses,
                                     current_mac_addresses,
                                     switch_ip,
                                     client_port,
@@ -354,11 +354,8 @@ def update_main_db():
         update_clients_data('total')
         print(f'End of update GLOBAL DB, spended time {time.time() - start}')
         turn_off_clients()
+        time.sleep(120)
 
-        if work_time():
-            time.sleep(1800)
-        else:
-            time.sleep(10800)
 
 
 def update_name_url_db():
@@ -367,11 +364,8 @@ def update_name_url_db():
         print(f'Start update LOCAL DB at {datetime.now()}')
         update_clients_data('local')
         print(f'End of update LOCAL DB, spended time: {time.time() - start}')
+        time.sleep(180)
 
-        if work_time():
-            time.sleep(180)
-        else:
-            time.sleep(10800)
 
 
 def update_closed_name_url_db():
@@ -380,16 +374,13 @@ def update_closed_name_url_db():
         print(f'Start update CLOSED DB at {datetime.now()}')
         update_clients_data('closed')
         print(f'End of update CLOSED DB, spended time: {time.time() - start}')
+        time.sleep(120)
 
-        if work_time():
-            time.sleep(180)
-        else:
-            time.sleep(10800)
 
 if __name__ == '__main__':
-    # app.run(debug=True)
+    app.run(debug=True)
     # app.run('10.20.31.101')
     # update_name_url_db()
     # update_main_db()
     # update_closed_name_url_db()
-    update_dbs()
+    # update_dbs()

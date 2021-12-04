@@ -76,7 +76,7 @@ def add_client_into_ip_name_dict(client_name, client_ips):
         for client_ip in client_ips:
             client_ips_for_dict += f'{client_ip}+'
 
-    client_ip_name_dict[client_ips.strip('+')] = client_name
+    client_ip_name_dict[client_ips_for_dict.strip('+')] = client_name
 
     with open('search_engine/client_ip_name_dict.json', 'w') as client_ip_name_data:
         json.dump(client_ip_name_dict, client_ip_name_data, indent=2, ensure_ascii=False)
@@ -244,7 +244,7 @@ def strip_symbols_from_client_name(name):
     client_name = name.lower()
     replace_symbols = ('(', ')', '/', '.', ',', '\\')
     for symbol in replace_symbols:
-        client_name = client_name.replace(symbol, '')
+        client_name = client_name.replace(symbol, ' ')
 
     return client_name.strip()
 
@@ -315,47 +315,47 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
 
     if active_client_name_url_dict_old != active_client_name_url_dict:
         with open('search_engine/clients.json', 'r') as clients_data:
-            clients_names = json.load(clients_data).keys()
+            clients_names = list(json.load(clients_data).keys())
 
         new_clients = active_client_name_url_dict.keys() - active_client_name_url_dict_old.keys()
 
         credit_clients = {}
         for new_client in new_clients:
-            client_name, client_url = new_client, active_client_name_url_dict[new_client]
 
+            client_name, client_url = new_client, active_client_name_url_dict[new_client]
             if client_name not in terminated_client_name_url_dict_old.keys() and client_name not in clients_names:
                 browser = netstore_authorisation(client_url)
                 client_data = get_client_data(browser, client_url)
+                browser.quit()
                 add_client_into_global_db(client_name, client_url, client_data)
                 add_client_into_ip_name_dict(client_name, tuple(client_data[8].keys()))
                 add_client_into_contract_name_dict(client_name, client_url)
+
             else:
                 edit_client_status_parameter_in_db(client_name, 'Активний')
                 check_client_balance_date = set_client_balance_check_date()
                 credit_clients[client_name] = [check_client_balance_date, client_url]
 
         if credit_clients:
+
             with open('search_engine/check_client_balance.json', 'r') as check_clients:
                 check_clients_dict = json.load(check_clients)
+
             with open('search_engine/check_client_balance.json', 'w') as check_clients_to_write:
                 check_clients_dict.update(credit_clients)
                 json.dump(check_clients_dict, check_clients_to_write, indent=2, sort_keys=True, ensure_ascii=False)
 
-
         with open('search_engine/active_clients_name_url_data.json', 'w') as active_client_name_url_data:
             json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
-
     if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
         turned_off_clients = terminated_client_name_url_dict.keys() - terminated_client_name_url_dict_old.keys()
-
         if turned_off_clients:
             for client_name in turned_off_clients:
                 edit_client_status_parameter_in_db(client_name, 'Неактивний')
 
         with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
             json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
-
 
 def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
     client_ip_addresses = tuple(ip_address.text for ip_address in browser.find_elements(*NetstoreClientPageLocators.IP_ADDRESSES))
@@ -628,6 +628,11 @@ def update_clients_data(parse_level):
                                                  confidential.NetstoreLoginData.netstore_passwd,
                                                  parse_level))
 
+        with open('search_engine/closed_clients.json', 'r') as closed_clients_data:
+            closed_clients_dict = json.load(closed_clients_data)
+
+        clients_data.update(closed_clients_dict)
+
         with open('search_engine/clients.json', 'w') as dict_with_clients:
             json.dump(clients_data, dict_with_clients, indent=2, sort_keys=True, ensure_ascii=False)
 
@@ -635,20 +640,20 @@ def update_clients_data(parse_level):
         update_client_contract_name_dict()
 
     elif parse_level == 'closed':
-        closed_clients_data = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
+        closed_clients_dict = collect_clients_data(confidential.NetstoreLoginData.netstore1_url,
                                             confidential.NetstoreLoginData.netstore1_login,
                                             confidential.NetstoreLoginData.netstore_passwd,
                                             parse_level)
 
-        closed_clients_data.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
+        closed_clients_dict.update(collect_clients_data(confidential.NetstoreLoginData.netstore2_url,
                                                  confidential.NetstoreLoginData.netstore2_login,
                                                  confidential.NetstoreLoginData.netstore_passwd,
                                                  parse_level))
 
-        with open('search_engine/clients.json', 'r') as dict_with_clients_data:
-            dict_with_clients = json.load(dict_with_clients_data)
+        # with open('search_engine/clients.json', 'r') as dict_with_clients_data:
+        #     dict_with_clients = json.load(dict_with_clients_data)
+        #
+        # dict_with_clients.update(closed_clients_data)
 
-        dict_with_clients.update(closed_clients_data)
-
-        with open('search_engine/clients.json', 'w') as clients_data:
-            json.dump(dict_with_clients, clients_data, indent=2, sort_keys=True, ensure_ascii=False)
+        with open('search_engine/closed_clients.json', 'w') as closed_clients_data:
+            json.dump(closed_clients_dict, closed_clients_data, indent=2, sort_keys=True, ensure_ascii=False)

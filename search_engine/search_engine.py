@@ -10,18 +10,18 @@ import time
 
 def concatenate_local_db():
     with open('search_engine/active_clients_name_url_data.json') as active_clients:
-        active_clients_list = list(json.loads(active_clients.read()).keys())
+        active_clients_list = set(json.loads(active_clients.read()).keys())
 
     with open('search_engine/terminated_clients_name_url_data.json') as terminated_clients:
-        terminated_clients_list = list(json.loads(terminated_clients.read()).keys())
+        terminated_clients_list = set(json.loads(terminated_clients.read()).keys())
 
     with open('search_engine/closed_clients_name_url_data.json') as closed_clients:
-        closed_clients_list = list(json.loads(closed_clients.read()).keys())
+        closed_clients_list = set(json.loads(closed_clients.read()).keys())
 
-    active_clients_list.extend(terminated_clients_list)
-    active_clients_list.extend(closed_clients_list)
+    active_clients_list.update(terminated_clients_list)
+    active_clients_list.update(closed_clients_list)
 
-    return active_clients_list
+    return tuple(active_clients_list)
 
 
 def get_cacti_links(switch_client_cacti_id, switch_client_uplink_id):
@@ -77,6 +77,7 @@ def get_coincidence_names(client):
             pattern = f'{search_name.lower()}[  \-\'\w]*'
             client_name_parts = client_name.split(' ')
             for client_name_part in client_name_parts:
+                client_name_part = client_name_part.strip(' ')
                 try:
                     if re.match(pattern, client_name_part):
                         coincidence_names.append(client_name)
