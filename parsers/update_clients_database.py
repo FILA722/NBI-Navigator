@@ -1,3 +1,5 @@
+import time
+
 from start_browser import driver
 from debugers.check_ping_status import ping_status
 from parsers.confidential import CactiLoginData
@@ -5,7 +7,7 @@ from parsers.locators import NetstoreLocators, NetstoreClientPageLocators
 from debugers.find_switch_model import find_sw_model
 from parsers import parse_cacti, parse_zones, confidential
 from parsers.parse_cacti import update_clients_cacti_image_db
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from client_managment.login_into_netstore import netstore_authorisation
 from datetime import datetime, timedelta
 import json
@@ -547,8 +549,12 @@ def collect_clients_data(url, login_, password, parse_level):
 
 
 def get_client_data(browser, client_netstore_url):
-
-    browser.get(client_netstore_url)
+    try:
+        browser.get(client_netstore_url)
+    except TimeoutException:
+        browser.quit()
+        time.sleep(300)
+        browser = netstore_authorisation(client_netstore_url)
 
     try:
         client_physical_address = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS).text
@@ -556,10 +562,6 @@ def get_client_data(browser, client_netstore_url):
     except NoSuchElementException:
         client_physical_address = None
         client_physical_address_notes = None
-
-    if client_physical_address in confidential.UnprocessedNames.not_processed_bussines_centres:
-        # Обработать этот сценарий
-        pass
 
     client_tel = browser.find_element(*NetstoreClientPageLocators.TEL).get_attribute("value")
     client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
