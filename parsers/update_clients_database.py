@@ -1,5 +1,4 @@
 import time
-
 from start_browser import driver
 from debugers.check_ping_status import ping_status
 from parsers.confidential import CactiLoginData
@@ -273,7 +272,12 @@ def get_switch_name(client_switch_ip):
 def get_client_contracts(browser, client_netstore_url):
     client_netstore_contract_page = client_netstore_url.replace('client', 'contract', 1)
 
-    browser.get(client_netstore_contract_page)
+    try:
+        browser.get(client_netstore_contract_page)
+    except TimeoutException:
+        browser.quit()
+        time.sleep(300)
+        browser = netstore_authorisation(client_netstore_contract_page)
 
     client_contracts_objects = browser.find_elements(*NetstoreClientPageLocators.CLIENT_CONTRACTS)
     client_contracts = []
@@ -651,11 +655,6 @@ def update_clients_data(parse_level):
                                                  confidential.NetstoreLoginData.netstore2_login,
                                                  confidential.NetstoreLoginData.netstore_passwd,
                                                  parse_level))
-
-        # with open('search_engine/clients.json', 'r') as dict_with_clients_data:
-        #     dict_with_clients = json.load(dict_with_clients_data)
-        #
-        # dict_with_clients.update(closed_clients_data)
 
         with open('search_engine/closed_clients.json', 'w') as closed_clients_data:
             json.dump(closed_clients_dict, closed_clients_data, indent=2, sort_keys=True, ensure_ascii=False)
