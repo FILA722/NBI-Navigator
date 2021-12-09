@@ -567,17 +567,35 @@ def get_client_data(browser, client_netstore_url):
         client_physical_address = None
         client_physical_address_notes = None
 
-    client_tel = browser.find_element(*NetstoreClientPageLocators.TEL).get_attribute("value")
-    client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
-    client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
-    client_is_converter = 'НЕТ' if browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked") == None else 'ЕСТЬ'
+    try:
+        client_tel = browser.find_element(*NetstoreClientPageLocators.TEL).get_attribute("value")
+    except NoSuchElementException:
+        client_tel = None
+
+    try:
+        client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
+    except NoSuchElementException:
+        client_email = None
+
+    try:
+        client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
+    except NoSuchElementException:
+        client_is_active = None
+
+    try:
+        client_is_converter = 'НЕТ' if browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked") == None else 'ЕСТЬ'
+    except NoSuchElementException:
+        client_is_converter = None
 
     try:
         client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER).get_attribute("value"))
     except NoSuchElementException:
         client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER_2).get_attribute("value"))
 
-    client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
+    try:
+        client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
+    except NoSuchElementException:
+        client_notes = 'None'
 
     client_connection_data = get_ipaddr_and_switch_name_and_port_from_client_note(browser, client_notes)
 
