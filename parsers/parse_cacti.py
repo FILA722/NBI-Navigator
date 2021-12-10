@@ -2,6 +2,7 @@ from start_browser import driver
 from parsers.locators import CactiLocators
 from parsers.confidential import CactiLoginData
 from selenium.common.exceptions import StaleElementReferenceException
+from parsers.pathes import Pathes
 import json
 import re
 import time
@@ -103,7 +104,7 @@ def update_clients_cacti_image_db(update_times=0):
 
                 switch_ip_port_id_dict[switch_ip] = port_url_dict
 
-        with open('search_engine/cacti_urls.json', 'w') as cacti_urls:
+        with open(Pathes.cacti_urls_path, 'w') as cacti_urls:
             json.dump(switch_ip_port_id_dict, cacti_urls, indent=2, sort_keys=True, ensure_ascii=False)
 
     except StaleElementReferenceException:

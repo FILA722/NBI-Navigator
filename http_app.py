@@ -1,4 +1,5 @@
 import time
+from parsers.pathes import Pathes
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect
 from search_engine import search_engine
@@ -17,25 +18,25 @@ import re
 app = Flask(__name__)
 app.config['SECRET_KEY'] = KEYS.flask_key
 
-logging.basicConfig(format='%(asctime)s %(message)s', filename='logs/nbi-navi.log', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s', filename=Pathes.logs_path, level=logging.INFO)
 
 
 def get_suspended_clients():
-    with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_clients:
+    with open(Pathes.terminated_clients_name_url_data_path, 'r') as terminated_clients:
         clients = json.loads(terminated_clients.read())
         suspended_clients = clients.keys()
     return suspended_clients
 
 
 def add_client_data_to_cash(client_name, client_data):
-    with open('search_engine/clients_cash.json', 'w') as client_cash:
+    with open(Pathes.clients_cash_path, 'w') as client_cash:
         clients = dict()
         clients[client_name] = client_data
         json.dump(clients, client_cash, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def get_client_data_from_cash():
-    with open('search_engine/clients_cash.json', 'r') as client_cash:
+    with open(Pathes.clients_cash_path, 'r') as client_cash:
         client_data = json.load(client_cash)
     return client_data
 

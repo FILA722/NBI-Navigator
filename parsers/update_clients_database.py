@@ -9,6 +9,7 @@ from parsers.parse_cacti import update_clients_cacti_image_db
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from client_managment.login_into_netstore import netstore_authorisation
 from datetime import datetime, timedelta
+from parsers.pathes import Pathes
 import json
 import re
 
@@ -16,19 +17,19 @@ import re
 def update_switch_name_ip_file():
     switch_name_ip_dict = parse_cacti.main()
 
-    with open('search_engine/switch_name_ip_dict.json', 'r') as switch_name_ip_data_old:
+    with open(Pathes.switch_name_ip_dict_path, 'r') as switch_name_ip_data_old:
         switch_name_ip_dict_old = json.load(switch_name_ip_data_old)
 
     if switch_name_ip_dict != switch_name_ip_dict_old:
         update_clients_cacti_image_db()
-        with open('search_engine/switch_name_ip_dict.json', 'w') as switch_name_ip_data:
+        with open(Pathes.switch_name_ip_dict_path, 'w') as switch_name_ip_data:
             json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
 
     return True
 
 
 def add_client_into_contract_name_dict(client_name, client_url):
-    with open('search_engine/client_contract_name_dict.json', 'r') as client_contract_name_data:
+    with open(Pathes.client_contract_name_dict_path, 'r') as client_contract_name_data:
         client_contract_name_dict = json.load(client_contract_name_data)
 
     browser = netstore_authorisation(client_url)
@@ -43,12 +44,12 @@ def add_client_into_contract_name_dict(client_name, client_url):
 
     client_contract_name_dict[client_contracts_for_dict.strip('+')] = client_name
 
-    with open('search_engine/client_contract_name_dict.json', 'w') as client_contract_name_data:
+    with open(Pathes.client_contract_name_dict_path, 'w') as client_contract_name_data:
         json.dump(client_contract_name_dict, client_contract_name_data, sort_keys=True, indent=2, ensure_ascii=False)
 
 
 def update_client_contract_name_dict():
-    with open('search_engine/clients.json', 'r') as clients_data:
+    with open(Pathes.clients_path, 'r') as clients_data:
         clients_dict = json.load(clients_data)
 
     client_contract_name_dict = {}
@@ -62,12 +63,12 @@ def update_client_contract_name_dict():
                 client_contracts_key += f'{client_contract}+'
         client_contract_name_dict[client_contracts_key.strip('+')] = client_name
 
-    with open('search_engine/client_contract_name_dict.json', 'w') as client_contract_name_data:
+    with open(Pathes.client_contract_name_dict_path, 'w') as client_contract_name_data:
         json.dump(client_contract_name_dict, client_contract_name_data, sort_keys=True, indent=2, ensure_ascii=False)
 
 
 def add_client_into_ip_name_dict(client_name, client_ips):
-    with open('search_engine/client_ip_name_dict.json', 'r') as client_ip_name_data:
+    with open(Pathes.client_ip_name_dict_path, 'r') as client_ip_name_data:
         client_ip_name_dict = json.load(client_ip_name_data)
 
     if len(client_ips) == 1:
@@ -79,12 +80,12 @@ def add_client_into_ip_name_dict(client_name, client_ips):
 
     client_ip_name_dict[client_ips_for_dict.strip('+')] = client_name
 
-    with open('search_engine/client_ip_name_dict.json', 'w') as client_ip_name_data:
+    with open(Pathes.client_ip_name_dict_path, 'w') as client_ip_name_data:
         json.dump(client_ip_name_dict, client_ip_name_data, indent=2, ensure_ascii=False)
 
 
 def update_client_ip_name_dict():
-    with open('search_engine/clients.json', 'r') as clients_data:
+    with open(Pathes.clients_path, 'r') as clients_data:
         clients_dict = json.load(clients_data)
 
     client_ip_name_dict = {}
@@ -98,7 +99,7 @@ def update_client_ip_name_dict():
                 client_ips += f'{client_ip}+'
         client_ip_name_dict[client_ips.strip('+')] = client_name
 
-    with open('search_engine/client_ip_name_dict.json', 'w') as client_ip_name_data:
+    with open(Pathes.client_ip_name_dict_path, 'w') as client_ip_name_data:
         json.dump(client_ip_name_dict, client_ip_name_data, indent=2, ensure_ascii=False)
 
 
@@ -112,7 +113,7 @@ def update_clients_ip_gateway_mask_file():
             key_json = str(key).replace(r"'", '').strip('()')
             clients_ip_gateway_mask_dict_json[key_json.replace(' ', '')] = value
 
-        with open('search_engine/clients_ip_gateway_mask_dict.json', 'w') as clients_ip_gateway_mask_data:
+        with open(Pathes.clients_ip_gateway_mask_dict_path, 'w') as clients_ip_gateway_mask_data:
             json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 def update_closed_clinents_name_url_dict(url, closed_clients_netstore_url):
@@ -121,52 +122,52 @@ def update_closed_clinents_name_url_dict(url, closed_clients_netstore_url):
         closed_clients_name_url_dict[closed_client_object[0]] = closed_client_object[1]
 
     if 'netstore2' in url:
-        with open('search_engine/closed_clients_name_url_data.json', 'r') as closed_clients_name_url_data_from_netst1:
+        with open(Pathes.closed_clients_name_url_data_path, 'r') as closed_clients_name_url_data_from_netst1:
             closed_clients_name_url_dict_from_netst1 = json.load(closed_clients_name_url_data_from_netst1)
 
         closed_clients_name_url_dict.update(closed_clients_name_url_dict_from_netst1)
 
-    with open('search_engine/closed_clients_name_url_data.json', 'w') as closed_clients_name_url_data:
+    with open(Pathes.closed_clients_name_url_data_path, 'w') as closed_clients_name_url_data:
         json.dump(closed_clients_name_url_dict, closed_clients_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def edit_client_status_parameter_in_db(client_name, client_status):
-    with open('search_engine/clients.json', 'r') as open_clients_db:
+    with open(Pathes.clients_path, 'r') as open_clients_db:
         clients = json.loads(open_clients_db.read())
         clients[client_name][4] = client_status
         client_url = clients[client_name][9]
 
-    with open('search_engine/clients.json', 'w') as save_clients_db:
+    with open(Pathes.clients_path, 'w') as save_clients_db:
         json.dump(clients, save_clients_db, indent=2, sort_keys=True, ensure_ascii=False)
 
     return client_url
 
 
 def migrate_client_from_terminated_to_active(client_name):
-    with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_clients_name_url_data:
+    with open(Pathes.terminated_clients_name_url_data_path, 'r') as terminated_clients_name_url_data:
         terminated_clients_name_url_dict = json.load(terminated_clients_name_url_data)
         if client_name in terminated_clients_name_url_dict.keys():
             client_url = terminated_clients_name_url_dict[client_name]
             del terminated_clients_name_url_dict[client_name]
 
-            with open('search_engine/active_clients_name_url_data.json', 'r') as active_clients_name_url_data:
+            with open(Pathes.active_clients_name_url_data_path, 'r') as active_clients_name_url_data:
                 active_clients_name_url_dict = json.load(active_clients_name_url_data)
                 active_clients_name_url_dict[client_name] = client_url
 
-            with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_clients_name_url_data_write:
+            with open(Pathes.terminated_clients_name_url_data_path, 'w') as terminated_clients_name_url_data_write:
                 json.dump(terminated_clients_name_url_dict, terminated_clients_name_url_data_write, indent=2, sort_keys=True, ensure_ascii=False)
 
-            with open('search_engine/active_clients_name_url_data.json', 'w') as active_clients_name_url_data_write:
+            with open(Pathes.active_clients_name_url_data_path, 'w') as active_clients_name_url_data_write:
                 json.dump(active_clients_name_url_dict, active_clients_name_url_data_write, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def remove_client_from_check_client_balance_data(client_name):
-    with open('search_engine/check_client_balance.json', 'r') as check_client_balance_data:
+    with open(Pathes.check_client_balance_path, 'r') as check_client_balance_data:
         check_client_balance_dict = json.load(check_client_balance_data)
         if client_name in check_client_balance_dict.keys():
             del check_client_balance_dict[client_name]
 
-            with open('search_engine/check_client_balance.json', 'w') as check_client_balance_data_write:
+            with open(Pathes.check_client_balance_path, 'w') as check_client_balance_data_write:
                 json.dump(check_client_balance_dict, check_client_balance_data_write, indent=2, sort_keys=True, ensure_ascii=False)
 
 
@@ -174,12 +175,12 @@ def add_client_to_check_client_balance_data(client_name, client_url):
     date_now = datetime.now()
     check_client_balance_date = str(datetime.fromisoformat(f'{date_now.year}-{date_now.month}-{date_now.day} 12:00:00') + timedelta(days=3))
 
-    with open('search_engine/check_client_balance.json', 'r') as check_client_balance_data:
+    with open(Pathes.check_client_balance_path, 'r') as check_client_balance_data:
         check_client_balance_dict = json.load(check_client_balance_data)
         if client_name not in check_client_balance_dict.keys():
             check_client_balance_dict[client_name] = [check_client_balance_date, client_url]
 
-            with open('search_engine/check_client_balance.json', 'w') as check_client_balance_data_write:
+            with open(Pathes.check_client_balance_path, 'w') as check_client_balance_data_write:
                 json.dump(check_client_balance_dict, check_client_balance_data_write, indent=2, sort_keys=True, ensure_ascii=False)
 
 
@@ -195,7 +196,7 @@ def add_client_into_global_db(client_name, client_url, client_data):
     client_connection_data = client_data[8]
     client_contracts = client_data[10]
 
-    with open('search_engine/clients.json', 'r') as clients:
+    with open(Pathes.clients_path, 'r') as clients:
         clients_dict = json.load(clients)
         clients_dict[client_name] = (
             client_tel,
@@ -210,12 +211,12 @@ def add_client_into_global_db(client_name, client_url, client_data):
             client_url,
             client_contracts)
 
-    with open('search_engine/clients.json', 'w') as clients_data:
+    with open(Pathes.clients_path, 'w') as clients_data:
         json.dump(clients_dict, clients_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def load_clients_ip_gateway_mask_file():
-    with open('search_engine/clients_ip_gateway_mask_dict.json', 'r') as clients_ip_gateway_mask_str_dict_json:
+    with open(Pathes.clients_ip_gateway_mask_dict_path, 'r') as clients_ip_gateway_mask_str_dict_json:
         clients_ip_gateway_mask_str_dict = json.load(clients_ip_gateway_mask_str_dict_json)
 
         clients_ip_gateway_mask_dict = {}
@@ -313,14 +314,14 @@ def set_client_balance_check_date():
 
 
 def process_turned_on_clients(active_client_name_url_dict, terminated_client_name_url_dict):
-    with open('search_engine/active_clients_name_url_data.json', 'r') as active_client_name_url_data:
+    with open(Pathes.active_clients_name_url_data_path, 'r') as active_client_name_url_data:
         active_client_name_url_dict_old = json.load(active_client_name_url_data)
 
-    with open('search_engine/terminated_clients_name_url_data.json', 'r') as terminated_client_name_url_data:
+    with open(Pathes.terminated_clients_name_url_data_path, 'r') as terminated_client_name_url_data:
         terminated_client_name_url_dict_old = json.load(terminated_client_name_url_data)
 
     if active_client_name_url_dict_old != active_client_name_url_dict:
-        with open('search_engine/clients.json', 'r') as clients_data:
+        with open(Pathes.clients_path, 'r') as clients_data:
             clients_names = list(json.load(clients_data).keys())
 
         new_clients = active_client_name_url_dict.keys() - active_client_name_url_dict_old.keys()
@@ -344,14 +345,14 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
 
         if credit_clients:
 
-            with open('search_engine/check_client_balance.json', 'r') as check_clients:
+            with open(Pathes.check_client_balance_path, 'r') as check_clients:
                 check_clients_dict = json.load(check_clients)
 
-            with open('search_engine/check_client_balance.json', 'w') as check_clients_to_write:
+            with open(Pathes.check_client_balance_path, 'w') as check_clients_to_write:
                 check_clients_dict.update(credit_clients)
                 json.dump(check_clients_dict, check_clients_to_write, indent=2, sort_keys=True, ensure_ascii=False)
 
-        with open('search_engine/active_clients_name_url_data.json', 'w') as active_client_name_url_data:
+        with open(Pathes.active_clients_name_url_data_path, 'w') as active_client_name_url_data:
             json.dump(active_client_name_url_dict, active_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
     if terminated_client_name_url_dict_old != terminated_client_name_url_dict:
@@ -360,7 +361,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
             for client_name in turned_off_clients:
                 edit_client_status_parameter_in_db(client_name, 'Неактивний')
 
-        with open('search_engine/terminated_clients_name_url_data.json', 'w') as terminated_client_name_url_data:
+        with open(Pathes.terminated_clients_name_url_data_path, 'w') as terminated_client_name_url_data:
             json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
 
 def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
@@ -373,7 +374,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
         client_connection_data['IP не указан'] = 'Пожалуйста заполните анкету клиента в нетсторе'
         return client_connection_data
 
-    with open('search_engine/switch_name_ip_dict.json', 'r') as switch_name_ip_data:
+    with open(Pathes.switch_name_ip_dict_path, 'r') as switch_name_ip_data:
         switch_name_ip_dict = json.load(switch_name_ip_data)
 
     ip_mask_dictionary = load_clients_ip_gateway_mask_file()
@@ -425,7 +426,7 @@ def get_ipaddr_and_switch_name_and_port_from_client_note(browser, note):
         client_switch_model = get_switch_name(client_switch_ip)
 
         cacti_client_port = remake_client_port_for_cacti_urls_dict(client_port[0])
-        with open('search_engine/cacti_urls.json', 'r') as cacti_urls:
+        with open(Pathes.cacti_urls_path, 'r') as cacti_urls:
             cacti_urls_dict = json.load(cacti_urls)
 
         try:
@@ -652,12 +653,12 @@ def update_clients_data(parse_level):
                                                  confidential.NetstoreLoginData.netstore_passwd,
                                                  parse_level))
 
-        with open('search_engine/closed_clients.json', 'r') as closed_clients_data:
+        with open(Pathes.closed_clients_path, 'r') as closed_clients_data:
             closed_clients_dict = json.load(closed_clients_data)
 
         clients_data.update(closed_clients_dict)
 
-        with open('search_engine/clients.json', 'w') as dict_with_clients:
+        with open(Pathes.clients_path, 'w') as dict_with_clients:
             json.dump(clients_data, dict_with_clients, indent=2, sort_keys=True, ensure_ascii=False)
 
         update_client_ip_name_dict()
@@ -674,5 +675,5 @@ def update_clients_data(parse_level):
                                                  confidential.NetstoreLoginData.netstore_passwd,
                                                  parse_level))
 
-        with open('search_engine/closed_clients.json', 'w') as closed_clients_data:
+        with open(Pathes.closed_clients_path, 'w') as closed_clients_data:
             json.dump(closed_clients_dict, closed_clients_data, indent=2, sort_keys=True, ensure_ascii=False)

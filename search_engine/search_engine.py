@@ -3,19 +3,20 @@ from debugers.check_ping_status import ping_status
 from parsers import switch_parse
 from parsers.update_clients_database import get_client_data
 from client_managment.login_into_netstore import netstore_authorisation
+from parsers.pathes import Pathes
 import json
 import re
 import time
 
 
 def concatenate_local_db():
-    with open('search_engine/active_clients_name_url_data.json') as active_clients:
+    with open(Pathes.active_clients_name_url_data_path) as active_clients:
         active_clients_list = set(json.loads(active_clients.read()).keys())
 
-    with open('search_engine/terminated_clients_name_url_data.json') as terminated_clients:
+    with open(Pathes.terminated_clients_name_url_data_path) as terminated_clients:
         terminated_clients_list = set(json.loads(terminated_clients.read()).keys())
 
-    with open('search_engine/closed_clients_name_url_data.json') as closed_clients:
+    with open(Pathes.closed_clients_name_url_data_path) as closed_clients:
         closed_clients_list = set(json.loads(closed_clients.read()).keys())
 
     active_clients_list.update(terminated_clients_list)
@@ -42,7 +43,7 @@ def request_to_db(request):
         clients_names = concatenate_local_db()
         return clients_names
     else:
-        with open('search_engine/clients.json', 'r') as dict_with_clients:
+        with open(Pathes.clients_path, 'r') as dict_with_clients:
             clients = json.loads(dict_with_clients.read())
             try:
                 return clients[request]
@@ -152,7 +153,7 @@ def get_full_client_data(client_name):
 
 
 def get_client_ip_name_dict():
-    with open('search_engine/client_ip_name_dict.json', 'r') as client_ip_name_data:
+    with open(Pathes.client_ip_name_dict_path, 'r') as client_ip_name_data:
         client_ip_name_dict_var = json.load(client_ip_name_data)
 
     client_ip_name_dict = {}
@@ -187,7 +188,7 @@ def find_client_name_by_ip(search_ip):
 
 
 def get_client_contract_name_dict():
-    with open('search_engine/client_contract_name_dict.json', 'r') as client_contract_name_data:
+    with open(Pathes.client_contract_name_dict_path, 'r') as client_contract_name_data:
         client_contract_name_dict_var = json.load(client_contract_name_data)
 
     client_contract_name_dict = {}

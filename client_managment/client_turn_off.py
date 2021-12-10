@@ -1,4 +1,5 @@
 import json
+from parsers.pathes import Pathes
 from datetime import datetime
 from client_managment.login_into_netstore import netstore_authorisation
 from parsers.locators import NetstoreClientPageLocators
@@ -26,7 +27,7 @@ def client_have_debt(browser):
 
 def turn_off_clients():
     date_time_now = datetime.now()
-    with open('search_engine/check_client_balance.json', 'r') as check_clients_data:
+    with open(Pathes.check_client_balance_path, 'r') as check_clients_data:
         check_clients_dict = json.load(check_clients_data)
         new_check_clients_dict = {}
         for client_name in check_clients_dict.keys():
@@ -44,12 +45,12 @@ def turn_off_clients():
             else:
                 new_check_clients_dict[client_name] = client_object
 
-    with open('search_engine/check_client_balance.json', 'w') as check_clients_list:
+    with open(Pathes.check_client_balance_path, 'w') as check_clients_list:
         json.dump(new_check_clients_dict, check_clients_list, indent=2, sort_keys=True, ensure_ascii=False)
 
 
 def check_client_debt_status(client_name):
-    with open('search_engine/check_client_balance.json', 'r') as check_clients_data:
+    with open(Pathes.check_client_balance_path, 'r') as check_clients_data:
         check_clients_dict = json.load(check_clients_data)
     if client_name in check_clients_dict.keys():
         client_object = check_clients_dict[client_name]

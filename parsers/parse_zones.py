@@ -1,5 +1,6 @@
 from parsers.confidential import ZonesLoginData, IPMASK
 from debugers.check_ping_status import ping_status
+from parsers.pathes import Pathes
 import paramiko
 import re
 
@@ -68,11 +69,11 @@ def get_zone_data():
     zones = list(stdout)
     zones_code_new = zones[2].strip()
 
-    with open('search_engine/zones_code.txt', 'r') as zones_code_data_to_read:
+    with open(Pathes.zones_code_path, 'r') as zones_code_data_to_read:
         zones_code_old = zones_code_data_to_read.read()
 
     if zones_code_old != zones_code_new:
-        with open('search_engine/zones_code.txt', 'w') as zones_code_data_to_write:
+        with open(Pathes.zones_code_path, 'w') as zones_code_data_to_write:
             zones_code_data_to_write.write(zones_code_new)
         return parse_zone_data(zones)
     else:

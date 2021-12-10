@@ -1,8 +1,8 @@
 import json
-
+from parsers.pathes import Pathes
 
 def check():
-    with open('search_engine/clients.json', 'r') as dict_with_clients:
+    with open(Pathes.clients_path, 'r') as dict_with_clients:
         clients = json.loads(dict_with_clients.read())
         clients_names = clients.keys()
         for client_name in clients_names:
