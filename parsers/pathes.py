@@ -9,7 +9,7 @@ class Pathes():
     cacti_urls_path = global_path + 'cacti_urls.json'
     check_client_balance_path = global_path + 'check_client_balance.json'
     client_contract_name_dict_path = global_path + 'client_contract_name_dict.json'
-    client_ip_name_dict_path = global_path + 'clien_ip_name_dict.json'
+    client_ip_name_dict_path = global_path + 'client_ip_name_dict.json'
     clients_path = global_path + 'clients.json'
     clients_cash_path = global_path + 'clients_cash.json'
     clients_ip_gateway_mask_dict_path = global_path + 'clients_ip_gateway_mask_dict.json'
