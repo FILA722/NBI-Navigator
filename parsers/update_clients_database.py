@@ -591,8 +591,13 @@ def get_client_data(browser, client_netstore_url):
     try:
         client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER).get_attribute("value"))
     except NoSuchElementException:
-        client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER_2).get_attribute("value"))
+        client_manager = None
 
+    if client_manager == None:
+        try:
+            client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER_2).get_attribute("value"))
+        except NoSuchElementException:
+            client_manager = None
     try:
         client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
     except NoSuchElementException:
