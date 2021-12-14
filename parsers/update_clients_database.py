@@ -7,6 +7,7 @@ from debugers.find_switch_model import find_sw_model
 from parsers import parse_cacti, parse_zones, confidential
 from parsers.parse_cacti import update_clients_cacti_image_db
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from urllib3.exceptions import MaxRetryError
 from client_managment.login_into_netstore import netstore_authorisation
 from datetime import datetime, timedelta
 from parsers.pathes import Pathes
@@ -277,6 +278,9 @@ def get_client_contracts(browser, client_netstore_url):
         browser.get(client_netstore_contract_page)
     except TimeoutException:
         browser.quit()
+        time.sleep(300)
+        browser = netstore_authorisation(client_netstore_contract_page)
+    except MaxRetryError:
         time.sleep(300)
         browser = netstore_authorisation(client_netstore_contract_page)
 
@@ -558,6 +562,9 @@ def get_client_data(browser, client_netstore_url):
         browser.get(client_netstore_url)
     except TimeoutException:
         browser.quit()
+        time.sleep(300)
+        browser = netstore_authorisation(client_netstore_url)
+    except MaxRetryError:
         time.sleep(300)
         browser = netstore_authorisation(client_netstore_url)
 

@@ -11,7 +11,7 @@ def driver(url):
     try:
         browser = webdriver.Firefox(options=options)
         # browser = webdriver.Firefox(options=options, executable_path='/usr/local/bin/geckodriver')
-        # browser.get(url)
+        browser.get(url)
     except WebDriverException:
         logging.info(f'WebDriverException with request to the {url}')
         time.sleep(15)

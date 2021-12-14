@@ -41,21 +41,17 @@ def get_client_data_from_cash():
     return client_data
 
 
-def work_time():
-    time_now = time.localtime(time.time())
-
-    if ((0 <= time_now.tm_wday < 5) and (9 <= time_now.tm_hour <= 17)):
-        return True
-    else:
-        return False
-
-
 def update_dbs():
-    next_time_local_update = next_time_total_update = next_time_closed_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
-
+    next_time_local_update = next_time_total_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
+    flag = 1
     while True:
         while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
             datetime_now = datetime.now()
+
+            if datetime_now.hour == 5:
+                logging.info('Quiting updater')
+                quit()
+
             if ((0 <= datetime_now.weekday() <= 5) and (8 <= datetime_now.hour <= 17)):
                 sleeptime_seconds = 10
                 local_db_timedelta_minutes = 3
@@ -67,39 +63,36 @@ def update_dbs():
 
             if datetime_now >= next_time_local_update:
                 print(f'Start update LOCAL DB at {datetime_now}')
+                start_time = datetime.now()
                 update_clients_data('local')
                 end_time = datetime.now()
-                print(f'End of update LOCAL DB, spended time: {end_time - datetime_now}')
+                print(f'End of update LOCAL DB, spended time: {end_time - start_time}')
                 next_time_local_update = end_time + timedelta(minutes=local_db_timedelta_minutes)
 
             if datetime_now >= next_time_total_update:
                 datetime_now = datetime.now()
                 print(f'Start update -=TOTAL=- DB at {datetime_now}')
+                start_time = datetime.now()
                 update_clients_data('total')
                 turn_off_clients()
                 end_time = datetime.now()
-                print(f'End of update -=TOTAL=- DB, spended time: {end_time - datetime_now}')
+                print(f'End of update -=TOTAL=- DB, spended time: {end_time - start_time}')
                 next_time_total_update = end_time + timedelta(minutes=total_db_timedelta_minutes)
 
-            if datetime_now >= next_time_closed_update:
-                datetime_now = datetime.now()
+            if flag == 1:
                 print(f'Start update -=CLOSED=- DB at {datetime_now}')
+                start_time = datetime.now()
                 update_clients_data('closed')
                 end_time = datetime.now()
-                print(f'End of update -=CLOSED=- DB, spended time: {end_time - datetime_now}')
-                datetime_tomorrow = end_time + timedelta(days=1)
-
-                if int(datetime_tomorrow.day) < 10:
-                    check_day = f'0{datetime_tomorrow.day}'
-                else:
-                    check_day = datetime_tomorrow.day
-                next_time_closed_update = datetime.fromisoformat(f'{datetime_tomorrow.year}-{datetime_tomorrow.month}-{check_day} 03:00:00')
+                print(f'End of update -=CLOSED=- DB, spended time: {end_time - start_time}')
+                flag = 0
 
             time.sleep(sleeptime_seconds)
 
-        logging.info(f'NO ping to the Netstore')
+        logging.info('NO ping to the Netstore')
         print('NO ping to the Netstore')
         time.sleep(60)
+
 
 @app.route('/', methods=['POST', 'GET'])
 def search():
