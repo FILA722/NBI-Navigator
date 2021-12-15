@@ -1,3 +1,4 @@
+import logging
 import time
 from start_browser import driver
 from debugers.check_ping_status import ping_status
@@ -345,10 +346,10 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
             else:
                 edit_client_status_parameter_in_db(client_name, 'Активний')
                 check_client_balance_date = set_client_balance_check_date()
+                logging.info(f'{client_name} added to check_client_balance')
                 credit_clients[client_name] = [check_client_balance_date, client_url]
 
         if credit_clients:
-
             with open(Pathes.check_client_balance_path, 'r') as check_clients:
                 check_clients_dict = json.load(check_clients)
 

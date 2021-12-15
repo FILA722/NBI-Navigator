@@ -50,7 +50,7 @@ def update_dbs():
 
             if datetime_now.hour == 5:
                 logging.info('Quiting updater')
-                quit()
+                time.sleep(3600)
 
             if ((0 <= datetime_now.weekday() <= 5) and (8 <= datetime_now.hour <= 17)):
                 sleeptime_seconds = 10
