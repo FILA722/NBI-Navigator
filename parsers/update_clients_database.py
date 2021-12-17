@@ -335,19 +335,18 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
         for new_client in new_clients:
 
             client_name, client_url = new_client, active_client_name_url_dict[new_client]
-            if client_name not in terminated_client_name_url_dict_old.keys() and client_name not in clients_names:
+            if client_name in terminated_client_name_url_dict_old.keys():
+                edit_client_status_parameter_in_db(client_name, 'Активний')
+                check_client_balance_date = set_client_balance_check_date()
+                credit_clients[client_name] = [check_client_balance_date, client_url]
+
+            elif client_name not in terminated_client_name_url_dict_old.keys() and client_name not in clients_names:
                 browser = netstore_authorisation(client_url)
                 client_data = get_client_data(browser, client_url)
                 browser.quit()
                 add_client_into_global_db(client_name, client_url, client_data)
                 add_client_into_ip_name_dict(client_name, tuple(client_data[8].keys()))
                 add_client_into_contract_name_dict(client_name, client_url)
-
-            else:
-                edit_client_status_parameter_in_db(client_name, 'Активний')
-                check_client_balance_date = set_client_balance_check_date()
-                logging.info(f'{client_name} added to check_client_balance')
-                credit_clients[client_name] = [check_client_balance_date, client_url]
 
         if credit_clients:
             with open(Pathes.check_client_balance_path, 'r') as check_clients:

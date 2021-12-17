@@ -48,9 +48,8 @@ def update_dbs():
         while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
             datetime_now = datetime.now()
 
-            if datetime_now.hour == 5:
-                logging.info('Quiting updater')
-                time.sleep(3600)
+            if datetime.strptime('5:00', '%H:%M') <= datetime.strptime(f'{datetime.now().hour}:{datetime.now().minute:02d}', '%H:%M') <= datetime.strptime('5:15', '%H:%M'):
+                continue
 
             if ((0 <= datetime_now.weekday() <= 5) and (8 <= datetime_now.hour <= 17)):
                 sleeptime_seconds = 10
@@ -89,7 +88,6 @@ def update_dbs():
 
             time.sleep(sleeptime_seconds)
 
-        logging.info('NO ping to the Netstore')
         print('NO ping to the Netstore')
         time.sleep(60)
 
@@ -351,7 +349,6 @@ def update_main_db():
         time.sleep(120)
 
 
-
 def update_name_url_db():
     while ping_status(confidential.NetstoreLoginData.netstore1_url[8:27]) and ping_status(confidential.NetstoreLoginData.netstore2_url[8:28]):
         start = time.time()
@@ -359,7 +356,6 @@ def update_name_url_db():
         update_clients_data('local')
         print(f'End of update LOCAL DB, spended time: {time.time() - start}')
         time.sleep(180)
-
 
 
 def update_closed_name_url_db():
