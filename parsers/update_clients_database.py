@@ -174,9 +174,7 @@ def remove_client_from_check_client_balance_data(client_name):
 
 
 def add_client_to_check_client_balance_data(client_name, client_url):
-    date_now = datetime.now()
-    check_client_balance_date = str(datetime.fromisoformat(f'{date_now.year}-{date_now.month}-{date_now.day} 12:00:00') + timedelta(days=3))
-
+    check_client_balance_date = set_client_balance_check_date()
     with open(Pathes.check_client_balance_path, 'r') as check_client_balance_data:
         check_client_balance_dict = json.load(check_client_balance_data)
         if client_name not in check_client_balance_dict.keys():
