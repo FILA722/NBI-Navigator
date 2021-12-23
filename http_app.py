@@ -1,5 +1,4 @@
 import time
-from parsers.pathes import Pathes
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect
 from search_engine import search_engine
@@ -11,6 +10,7 @@ from parsers.confidential import KEYS
 from parsers.update_clients_database import update_clients_data, edit_client_status_parameter_in_db, migrate_client_from_terminated_to_active, remove_client_from_check_client_balance_data,  add_client_to_check_client_balance_data
 from debugers.check_ping_status import ping_status
 from parsers import confidential
+from parsers.pathes import Pathes
 import logging
 import json
 import re
@@ -169,7 +169,7 @@ def show_client_page(client_name):
             turn_on_client_data = action_request[3:]
             client_name, client_url = turn_on_client_data.split('+')
 
-            with open('search_engine/clients_cash.json', 'r') as clients_cash:
+            with open(Pathes.clients_cash_path) as clients_cash:
                 clients = json.loads(clients_cash.read())
                 try:
                     client_data = clients[client_name]
