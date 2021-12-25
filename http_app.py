@@ -11,6 +11,7 @@ from parsers.update_clients_database import update_clients_data, edit_client_sta
 from debugers.check_ping_status import ping_status
 from parsers import confidential
 from parsers.pathes import Pathes
+from selenium.common.exceptions import NoSuchElementException
 import logging
 import json
 import re
@@ -60,28 +61,39 @@ def update_dbs():
                 local_db_timedelta_minutes = 30
                 total_db_timedelta_minutes = 120
 
-            if datetime_now >= next_time_local_update:
-                print(f'Start update LOCAL DB at {datetime_now}')
+            if datetime.now() >= next_time_local_update:
+                print(f'Start update LOCAL DB at {datetime.now()}')
                 start_time = datetime.now()
-                update_clients_data('local')
+                try:
+                    update_clients_data('local')
+                except NoSuchElementException:
+                    time.sleep(60)
+                    update_clients_data('local')
                 end_time = datetime.now()
                 print(f'End of update LOCAL DB, spended time: {end_time - start_time}')
                 next_time_local_update = end_time + timedelta(minutes=local_db_timedelta_minutes)
 
-            if datetime_now >= next_time_total_update:
-                datetime_now = datetime.now()
-                print(f'Start update -=TOTAL=- DB at {datetime_now}')
+            if datetime.now() >= next_time_total_update:
+                print(f'Start update -=TOTAL=- DB at {datetime.now()}')
                 start_time = datetime.now()
-                update_clients_data('total')
+                try:
+                    update_clients_data('total')
+                except NoSuchElementException:
+                    time.sleep(60)
+                    update_clients_data('total')
                 turn_off_clients()
                 end_time = datetime.now()
                 print(f'End of update -=TOTAL=- DB, spended time: {end_time - start_time}')
                 next_time_total_update = end_time + timedelta(minutes=total_db_timedelta_minutes)
 
             if flag == 1:
-                print(f'Start update -=CLOSED=- DB at {datetime_now}')
+                print(f'Start update -=CLOSED=- DB at {datetime.now()}')
                 start_time = datetime.now()
-                update_clients_data('closed')
+                try:
+                    update_clients_data('closed')
+                except NoSuchElementException:
+                    time.sleep(60)
+                    update_clients_data('closed')
                 end_time = datetime.now()
                 print(f'End of update -=CLOSED=- DB, spended time: {end_time - start_time}')
                 flag = 0
