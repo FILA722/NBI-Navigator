@@ -120,10 +120,11 @@ def search():
                 migrate_client_from_terminated_to_active(client_name)
                 remove_client_from_check_client_balance_data(client_name)
                 add_client_to_check_client_balance_data(client_name, client_url)
+                del suspended_clients[suspended_clients.index(client_name)]
                 logging.info(f'{client_name} turned on successful')
                 return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Клиент {client_name} включен')
             else:
-                logging.info(f'{client_name} turned on successful')
+                logging.info(f'{client_name} turned on failed')
                 return render_template('search.html', suspended_clients=suspended_clients, toast_alert=f'Operation Error')
         else:
             logging.info(f'Searching request: {search}')
@@ -347,6 +348,10 @@ def show_client_page(client_name):
                 return render_template('search.html', clients=['Клиент не найден'], suspended_clients=suspended_clients, toast_alert=' ')
             else:
                 return render_template('search.html', clients=clients, suspended_clients=suspended_clients, toast_alert=' ')
+
+# @app.route('/neo')
+# def neo():
+#     return render_template('knock-knock-neo.html')
 
 
 def update_main_db():

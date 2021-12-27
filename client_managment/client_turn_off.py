@@ -38,9 +38,10 @@ def turn_off_clients():
                 browser = netstore_authorisation(client_url)
                 browser.get(client_url)
                 if client_have_debt(browser):
-                    close_client(browser, client_url)
-                    edit_client_status_parameter_in_db(client_name, 'Неактивний')
-                    client_object += ['Только после оплаты!']
+                    if client_object[-1] != 'Только после оплаты!':
+                        close_client(browser, client_url)
+                        edit_client_status_parameter_in_db(client_name, 'Неактивний')
+                        client_object += ['Только после оплаты!']
                     new_check_clients_dict[client_name] = client_object
             else:
                 new_check_clients_dict[client_name] = client_object
