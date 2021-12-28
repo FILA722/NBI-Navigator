@@ -23,9 +23,18 @@ logging.basicConfig(format='%(asctime)s %(message)s', filename=Pathes.logs_path,
 
 
 def get_suspended_clients():
-    with open(Pathes.terminated_clients_name_url_data_path, 'r') as terminated_clients:
-        clients = json.loads(terminated_clients.read())
-        suspended_clients = clients.keys()
+    with open(Pathes.terminated_clients_name_url_data_path, 'r') as terminated_data:
+        terminated_clients = json.loads(terminated_data.read())
+    with open(Pathes.check_client_balance_path) as credit_data:
+        credit_clients = json.loads(credit_data.read())
+    terminated_clients_list = terminated_clients.keys()
+    credit_clients_list = credit_clients.keys()
+
+    suspended_clients = []
+    for client in terminated_clients_list:
+        if client not in credit_clients_list:
+            suspended_clients.append(client)
+
     return suspended_clients
 
 
