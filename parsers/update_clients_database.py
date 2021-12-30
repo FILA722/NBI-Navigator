@@ -311,7 +311,12 @@ def set_client_balance_check_date():
     else:
         check_day = check_date.day
 
-    client_balance_check_date = str(datetime.fromisoformat(f'{check_date.year}-{check_date.month}-{check_day} 12:00:00'))
+    if int(check_date.month) < 10:
+        check_month = f'0{check_date.month}'
+    else:
+        check_month = check_date.month
+
+    client_balance_check_date = str(datetime.fromisoformat(f'{check_date.year}-{check_month}-{check_day} 12:00:00'))
 
     return client_balance_check_date
 

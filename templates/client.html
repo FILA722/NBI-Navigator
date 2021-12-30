@@ -219,7 +219,7 @@ function copy(text) {
               {% if client_connection_data[ip][16] == True %}
                     {% if client_connection_data[ip][5] == "huawei" %}
                         <td class="align-middle center col-4 align-self-center">
-                            <button class="align-middle center btn btn-outline-success btn-sm" onclick="copy('{{ client_connection_data[ip][1] }}')">
+                            <button class="align-middle center btn btn-outline-success btn-sm" onclick="copy('telnet {{ client_connection_data[ip][1] }}')">
                                 {{ client_connection_data[ip][0] }}{{ client_connection_data[ip][2] }}
                             </button>
                         </td>
