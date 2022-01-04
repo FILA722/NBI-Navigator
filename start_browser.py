@@ -13,7 +13,7 @@ def driver(url):
         # browser = webdriver.Firefox(options=options, executable_path='/usr/local/bin/geckodriver')
         browser.get(url)
     except WebDriverException:
-        time.sleep(15)
+        time.sleep(60)
         browser = webdriver.Firefox(options=options)
         # browser = webdriver.Firefox(options=options, executable_path='/usr/local/bin/geckodriver')
 

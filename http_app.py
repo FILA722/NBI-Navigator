@@ -70,18 +70,6 @@ def update_dbs():
                 local_db_timedelta_minutes = 30
                 total_db_timedelta_minutes = 120
 
-            if datetime.now() >= next_time_local_update:
-                print(f'Start update LOCAL DB at {datetime.now()}')
-                start_time = datetime.now()
-                try:
-                    update_clients_data('local')
-                except NoSuchElementException:
-                    time.sleep(60)
-                    update_clients_data('local')
-                end_time = datetime.now()
-                print(f'End of update LOCAL DB, spended time: {end_time - start_time}')
-                next_time_local_update = end_time + timedelta(minutes=local_db_timedelta_minutes)
-
             if datetime.now() >= next_time_total_update:
                 print(f'Start update -=TOTAL=- DB at {datetime.now()}')
                 start_time = datetime.now()
@@ -94,6 +82,18 @@ def update_dbs():
                 end_time = datetime.now()
                 print(f'End of update -=TOTAL=- DB, spended time: {end_time - start_time}')
                 next_time_total_update = end_time + timedelta(minutes=total_db_timedelta_minutes)
+
+            if datetime.now() >= next_time_local_update:
+                print(f'Start update LOCAL DB at {datetime.now()}')
+                start_time = datetime.now()
+                try:
+                    update_clients_data('local')
+                except NoSuchElementException:
+                    time.sleep(60)
+                    update_clients_data('local')
+                end_time = datetime.now()
+                print(f'End of update LOCAL DB, spended time: {end_time - start_time}')
+                next_time_local_update = end_time + timedelta(minutes=local_db_timedelta_minutes)
 
             if flag == 1:
                 print(f'Start update -=CLOSED=- DB at {datetime.now()}')
