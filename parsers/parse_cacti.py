@@ -1,7 +1,7 @@
 from start_browser import driver
 from parsers.locators import CactiLocators
 from parsers.confidential import CactiLoginData
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, WebDriverException
 from parsers.pathes import Pathes
 import json
 import re
@@ -59,10 +59,17 @@ def main():
                 switch_name = switch_text[6:(switch_text.index(switch_ip[0]) - 2)]
                 switch_ip_name_dict[switch_name] = switch_ip[0]
 
-    finally:
-        cacti_browser.quit()
+        return switch_ip_name_dict
 
-    return switch_ip_name_dict
+    except WebDriverException:
+        print('Cant update switch_ip_name_dict')
+        return False
+
+    finally:
+        try:
+            cacti_browser.quit()
+        except UnboundLocalError:
+            pass
 
 
 def update_clients_cacti_image_db(update_times=0):

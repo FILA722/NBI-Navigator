@@ -19,15 +19,18 @@ import re
 def update_switch_name_ip_file():
     switch_name_ip_dict = parse_cacti.main()
 
-    with open(Pathes.switch_name_ip_dict_path, 'r') as switch_name_ip_data_old:
-        switch_name_ip_dict_old = json.load(switch_name_ip_data_old)
+    if switch_name_ip_dict:
+        with open(Pathes.switch_name_ip_dict_path, 'r') as switch_name_ip_data_old:
+            switch_name_ip_dict_old = json.load(switch_name_ip_data_old)
 
-    if switch_name_ip_dict != switch_name_ip_dict_old:
-        update_clients_cacti_image_db()
-        with open(Pathes.switch_name_ip_dict_path, 'w') as switch_name_ip_data:
-            json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
+        if switch_name_ip_dict != switch_name_ip_dict_old:
+            update_clients_cacti_image_db()
+            with open(Pathes.switch_name_ip_dict_path, 'w') as switch_name_ip_data:
+                json.dump(switch_name_ip_dict, switch_name_ip_data, indent=2, sort_keys=True, ensure_ascii=False)
+        return True
 
-    return True
+    else:
+        return False
 
 
 def add_client_into_contract_name_dict(client_name, client_url):
