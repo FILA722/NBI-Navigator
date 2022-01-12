@@ -15,6 +15,8 @@ from parsers.pathes import Pathes
 import json
 import re
 
+logging.basicConfig(format='%(asctime)s %(message)s', filename=Pathes.logs_path, level=logging.INFO)
+
 
 def update_switch_name_ip_file():
     switch_name_ip_dict = parse_cacti.main()
@@ -345,6 +347,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 edit_client_status_parameter_in_db(client_name, 'Активний')
                 check_client_balance_date = set_client_balance_check_date()
                 credit_clients[client_name] = [check_client_balance_date, client_url]
+                logging.info(f'client {client_name} have been turned on in Netstore')
 
             elif client_name not in terminated_client_name_url_dict_old.keys() and client_name not in clients_names:
                 browser = netstore_authorisation(client_url)
@@ -353,6 +356,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 add_client_into_global_db(client_name, client_url, client_data)
                 add_client_into_ip_name_dict(client_name, tuple(client_data[8].keys()))
                 add_client_into_contract_name_dict(client_name, client_url)
+                logging.info(f'new client {client_name} added')
 
         if credit_clients:
             with open(Pathes.check_client_balance_path, 'r') as check_clients:
@@ -370,6 +374,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
         if turned_off_clients:
             for client_name in turned_off_clients:
                 edit_client_status_parameter_in_db(client_name, 'Неактивний')
+                logging.info(f'client {client_name} have been turned off')
 
         with open(Pathes.terminated_clients_name_url_data_path, 'w') as terminated_client_name_url_data:
             json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
@@ -578,39 +583,39 @@ def get_client_data(browser, client_netstore_url):
         client_physical_address = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS).text
         client_physical_address_notes = browser.find_element(*NetstoreClientPageLocators.PHYSICAL_ADDRESS_NOTES).text
     except NoSuchElementException:
-        client_physical_address = None
-        client_physical_address_notes = None
+        client_physical_address = 'None'
+        client_physical_address_notes = 'None'
 
     try:
         client_tel = browser.find_element(*NetstoreClientPageLocators.TEL).get_attribute("value")
     except NoSuchElementException:
-        client_tel = None
+        client_tel = 'None'
 
     try:
         client_email = browser.find_element(*NetstoreClientPageLocators.EMAIL).get_attribute("value")
     except NoSuchElementException:
-        client_email = None
+        client_email = 'None'
 
     try:
         client_is_active = browser.find_element(*NetstoreClientPageLocators.IS_ACTIVE).text
     except NoSuchElementException:
-        client_is_active = None
+        client_is_active = 'None'
 
     try:
         client_is_converter = 'НЕТ' if browser.find_element(*NetstoreClientPageLocators.IS_CONVERTER).get_attribute("checked") == None else 'ЕСТЬ'
     except NoSuchElementException:
-        client_is_converter = None
+        client_is_converter = 'None'
 
     try:
         client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER).get_attribute("value"))
     except NoSuchElementException:
-        client_manager = None
+        client_manager = 'None'
 
-    if client_manager == None:
+    if client_manager == 'None':
         try:
             client_manager = get_manager_info(browser.find_element(*NetstoreClientPageLocators.MANAGER_2).get_attribute("value"))
         except NoSuchElementException:
-            client_manager = None
+            client_manager = 'None'
     try:
         client_notes = browser.find_element(*NetstoreClientPageLocators.NOTES).text
     except NoSuchElementException:
