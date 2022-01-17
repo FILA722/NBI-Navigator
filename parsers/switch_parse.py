@@ -200,10 +200,23 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             telnet.write(to_bytes(f'show mac address-table port {switch_port}'))
             current_mac_addresses = re.findall('\w+:\w+:\w+:\w+:\w+:\w+', str(telnet.read_until(b'#')))
 
+            saved_vlan = ''
             if not current_mac_addresses:
-                current_mac_addresses = ['Не приходит']
-            else:
-                port_condition = 'up'
+                telnet.write(to_bytes(f'show mac address-table port {switch_port}'))
+                filtered_mac_addresses = re.findall('\w+:\w+:\w+:\w+:\w+:\w+ *\d* *\d*', str(telnet.expect([b"#"])))
+                current_mac_addresses = []
+                for mac_address in filtered_mac_addresses:
+                    mac_address_list = mac_address.split(' ')
+                    if mac_address_list[-1] == str(switch_port):
+                        current_mac_addresses.append(mac_address_list[0])
+                        for vlan in mac_address_list[1:-1]:
+                            if vlan:
+                                saved_vlan = vlan
+                                break
+                if not current_mac_addresses:
+                    current_mac_addresses = ['Не приходит']
+                else:
+                    port_condition = 'up'
 
         time.sleep(2)
 
@@ -226,18 +239,18 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             show_ip_source_binding = re.findall(show_ip_source_binding_pattern,  show_ip_source_binding_return)
 
             if not show_ip_source_binding:
-                vlan_list = re.findall('static +\d+', show_ip_source_binding_return)
-                vlan_nums = [i.strip('static ') for i in vlan_list]
-                saved_vlan = find_real_net_vlan(vlan_nums)
+                if not saved_vlan:
+                    vlan_list = re.findall('static +\d+', show_ip_source_binding_return)
+                    vlan_nums = [i.strip('static ') for i in vlan_list]
+                    saved_vlan = find_real_net_vlan(vlan_nums)
                 saved_mac_addresses = ['None']
-
             else:
-                saved_vlan = re.findall(r'static +\d+', show_ip_source_binding[0])[0].strip('static ')
+                if not saved_vlan:
+                    saved_vlan = re.findall(r'static +\d+', show_ip_source_binding[0])[0].strip('static ')
                 saved_mac_addresses = []
                 for bind in show_ip_source_binding:
                     saved_mac_address = re.findall('\w+:\w+:\w+:\w+:\w+:\w+', bind)[0]
                     saved_mac_addresses.append(saved_mac_address)
-
 
             telnet.write(to_bytes('show loopguard'))
             output_1 = telnet.expect([b"continue", b"#"], timeout=2)
@@ -251,9 +264,12 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
                 port_errors = '0'
             current_mac_addresses_colored, write_mac_address_button_status = current_mac_address_color_marker(saved_mac_addresses, current_mac_addresses)
 
+            telnet.write(to_bytes('write memory'))
+
         return port_condition, saved_mac_addresses, current_mac_addresses_colored, port_errors, write_mac_address_button_status, saved_vlan, port_uptime
     except (ConnectionResetError, EOFError):
         return False
+
 
 def parse_asotel(ip, password, port):
     pass
