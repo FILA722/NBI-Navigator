@@ -123,6 +123,7 @@ def update_clients_ip_gateway_mask_file():
         with open(Pathes.clients_ip_gateway_mask_dict_path, 'w') as clients_ip_gateway_mask_data:
             json.dump(clients_ip_gateway_mask_dict_json, clients_ip_gateway_mask_data, indent=2, sort_keys=True, ensure_ascii=False)
 
+
 def update_closed_clinents_name_url_dict(url, closed_clients_netstore_url):
     closed_clients_name_url_dict = {}
     for closed_client_object in closed_clients_netstore_url:

@@ -1,18 +1,12 @@
-import subprocess, platform
+import subprocess
+
 
 def ping_status(url):
-    if url == '':
-        pass
-
-    os = platform.system().lower()
-    timeout = 2
+    timeout = 3
     try:
-        if os == 'windows':
-            status = subprocess.check_output(f'ping -n 1 {url}', shell=True, timeout=timeout)
-        else:
-            status = subprocess.check_output(f'ping -c 1 {url}', shell=True, timeout=timeout)
+        status = subprocess.check_output(f'ping -c 1 {url}', shell=True, timeout=timeout)
+        if status:
+            return True
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
         return False
-
-    return True
 

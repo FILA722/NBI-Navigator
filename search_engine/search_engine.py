@@ -132,7 +132,8 @@ def get_full_client_data(client_name):
             switch_name = client_connection_data[client_ip_address][0]
             switch_port = client_connection_data[client_ip_address][2]
 
-            if not ping_status(switch_ip_address) or switch_name == 'None' or switch_port == 'None' :
+            switch_ping_status = ping_status(switch_ip_address)
+            if not switch_ping_status or switch_name == 'None' or switch_port == 'None' :
                 data_from_switch = return_none_switch_data()
             else:
                 switch_port = client_connection_data[client_ip_address][2][1:]
@@ -148,7 +149,7 @@ def get_full_client_data(client_name):
 
             client_connection_data[client_ip_address] += data_from_switch
 
-        client_connection_data[client_ip_address] += (ping_status(client_ip_address), ping_status(switch_ip_address))
+        client_connection_data[client_ip_address] += (ping_status(client_ip_address), switch_ping_status)
     return client_name, client_data
 
 
