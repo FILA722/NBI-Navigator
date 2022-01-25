@@ -10,12 +10,12 @@ def driver(url):
     options.add_argument("--headless")
     try:
         browser = webdriver.Firefox(options=options)
-        # browser = webdriver.Firefox(options=options, executable_path='/usr/local/bin/geckodriver')
+    #     browser = webdriver.Firefox(options=options, executable_path='/usr/local/bin/geckodriver')
         browser.get(url)
     except WebDriverException:
         time.sleep(60)
         browser = webdriver.Firefox(options=options)
-        # browser = webdriver.Firefox(options=options, executable_path='/usr/local/bin/geckodriver')
+       # browser = webdriver.Firefox(options=options, executable_path='/usr/local/bin/geckodriver')
 
     browser.get(url)
 

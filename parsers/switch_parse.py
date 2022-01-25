@@ -178,7 +178,11 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             show_interfaces_answer = str(telnet.expect([b"quit"], timeout=2))
 
             show_interfaces_config = re.findall(r'\\t\\tLink\\t\\t\\t:\w+', show_interfaces_answer)
-            port_condition = 'up' if show_interfaces_config[0].split(':')[1].strip() in ('1000M', '100M') else 'down'
+
+            try:
+                port_condition = 'up' if show_interfaces_config[0].split(':')[1].strip() in ('1000M', '100M') else 'down'
+            except IndexError:
+                port_condition = 'None'
 
             try:
                 port_uptime_data = re.findall(r'\\t\\tUp Time\\t\\t\\t:\w+:\w+:\w+', show_interfaces_answer)

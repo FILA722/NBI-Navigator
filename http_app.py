@@ -51,6 +51,16 @@ def get_client_data_from_cash():
     return client_data
 
 
+def log_cleaner():
+    clean_log = []
+    with open(Pathes.logs_path) as log:
+        logs = (string for string in log if 'Authentication' not in string and 'Connected' not in string and '\n' != string)
+        for i in logs:
+            clean_log.append(i)
+    with open(Pathes.logs_path, 'w') as cleaned_log_data:
+        cleaned_log_data.writelines(clean_log)
+
+
 def update_dbs():
     next_time_local_update = next_time_total_update = datetime.fromisoformat(f'2021-10-10 14:00:00')
     flag = 1
@@ -96,6 +106,7 @@ def update_dbs():
                 next_time_local_update = end_time + timedelta(minutes=local_db_timedelta_minutes)
 
             if flag == 1:
+                log_cleaner()
                 print(f'Start update -=CLOSED=- DB at {datetime.now()}')
                 start_time = datetime.now()
                 try:

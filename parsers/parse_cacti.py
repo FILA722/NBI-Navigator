@@ -53,7 +53,6 @@ def main():
         switch_ip_name_dict = {}
         for switch in switches:
             switch_text = switch.text
-
             if 'Host' in switch_text:
                 switch_ip = re.findall(r'\d+\.\d+\.\d+\.\d+', switch_text)
                 switch_name = switch_text[6:(switch_text.index(switch_ip[0]) - 2)]
