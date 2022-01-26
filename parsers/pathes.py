@@ -4,6 +4,7 @@ class Pathes():
     global_path = 'search_engine/'
     # logs_path = 'NBI-Navigator/logs/nbi-navi.log'
     logs_path = 'logs/nbi-navi.log'
+    logs_client_migrations = 'NBI-Navigator/logs/client_migrations.log'
 
     active_clients_name_url_data_path = global_path + 'active_clients_name_url_data.json'
     cacti_urls_path = global_path + 'cacti_urls.json'

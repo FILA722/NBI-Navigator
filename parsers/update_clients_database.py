@@ -12,6 +12,7 @@ from urllib3.exceptions import MaxRetryError
 from client_managment.login_into_netstore import netstore_authorisation
 from datetime import datetime, timedelta
 from parsers.pathes import Pathes
+from logs.logger import write_log
 import json
 import re
 
@@ -348,7 +349,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 edit_client_status_parameter_in_db(client_name, 'Активний')
                 check_client_balance_date = set_client_balance_check_date()
                 credit_clients[client_name] = [check_client_balance_date, client_url]
-                logging.info(f'client {client_name} have been turned on in Netstore')
+                write_log(f'client {client_name} have been turned ON from Netstore')
 
             elif client_name not in terminated_client_name_url_dict_old.keys() and client_name not in clients_names:
                 browser = netstore_authorisation(client_url)
@@ -357,7 +358,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
                 add_client_into_global_db(client_name, client_url, client_data)
                 add_client_into_ip_name_dict(client_name, tuple(client_data[8].keys()))
                 add_client_into_contract_name_dict(client_name, client_url)
-                logging.info(f'new client {client_name} added')
+                write_log(f'new client {client_name} added')
 
         if credit_clients:
             with open(Pathes.check_client_balance_path, 'r') as check_clients:
@@ -375,7 +376,7 @@ def process_turned_on_clients(active_client_name_url_dict, terminated_client_nam
         if turned_off_clients:
             for client_name in turned_off_clients:
                 edit_client_status_parameter_in_db(client_name, 'Неактивний')
-                logging.info(f'client {client_name} have been turned off')
+                write_log(f'client {client_name} have been turned OFF from Netstore')
 
         with open(Pathes.terminated_clients_name_url_data_path, 'w') as terminated_client_name_url_data:
             json.dump(terminated_client_name_url_dict, terminated_client_name_url_data, indent=2, sort_keys=True, ensure_ascii=False)
