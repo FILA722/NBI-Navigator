@@ -180,7 +180,7 @@ def parse_zyxel(switch_ip_address, client_ip_address, switch_port):
             show_interfaces_config = re.findall(r'\\t\\tLink\\t\\t\\t:\w+', show_interfaces_answer)
 
             try:
-                port_condition = 'up' if show_interfaces_config[0].split(':')[1].strip() in ('1000M', '100M') else 'down'
+                port_condition = 'up' if show_interfaces_config[0].split(':')[1].strip() in ('1000M', '100M', '10M') else 'down'
             except IndexError:
                 port_condition = 'None'
 
